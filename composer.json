@@ -1,0 +1,33 @@
+{
+    "name": "acquia/hmac-request",
+    "type": "library",
+    "description": "Generates an HMAC hash from an HTTP request",
+    "homepage": "https://github.com/acquia/hmac-request",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "See contributors",
+            "homepage": "https://github.com/acquia/hmac-request/graphs/contributors"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/acquia/hmac-request/issues"
+    },
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "guzzle/http": "~3.0",
+        "pdepend/pdepend": "~1.0",
+        "phploc/phploc": "~2.0",
+        "phpmd/phpmd": "~1.0",
+        "phpunit/phpunit": "~3.0",
+        "sebastian/phpcpd": "~2.0",
+        "symfony/http-foundation": "~2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acquia\\Hmac\\": "src/"
+        }
+    }
+}
