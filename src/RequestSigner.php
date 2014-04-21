@@ -15,6 +15,11 @@ class RequestSigner implements RequestSignerInterface
     protected $validAlgorithms;
 
     /**
+     * @var string
+     */
+    protected $provider = 'Acquia';
+
+    /**
      * @var array
      */
     protected $timestampHeaders = array('Date');
@@ -26,7 +31,50 @@ class RequestSigner implements RequestSignerInterface
     public function __construct($defaultAlgorithm = 'sha1', array $validAlgorithms = array('sha1', 'sha256'))
     {
         $this->defaultAlgorithm = $defaultAlgorithm;
-        $this->setValidAlgorithms($validAlgorithms);
+        $this->validAlgorithms  = $validAlgorithms;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     */
+    public function getSignature(Request\RequestInterface $request)
+    {
+        if (!$request->hasHeader('Authorization')) {
+            throw new Exception\InvalidRequest('Authorization header required');
+        }
+
+        $provider = preg_quote($this->provider, '/');
+        $pattern = '/^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$/';
+
+        if (!preg_match($pattern, $request->getHeader('Authorization'), $matches)) {
+            throw new Exception\InvalidRequest('Authorization header not valid');
+        }
+
+        return new Signature($matches[1], $matches[2]);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     */
+    public function signRequest(Request\RequestInterface $request, $secretKey, $algorithm = null)
+    {
+        $algorithm = $algorithm ?: $this->defaultAlgorithm;
+
+        if (!in_array($algorithm, hash_algos())) {
+            throw new \InvalidArgumentException('Algorithm not supported by server: ' . $algorithm);
+        }
+
+        if (!in_array($algorithm, $this->validAlgorithms)) {
+            throw new \InvalidArgumentException('Algorithm not valid: ' . $algorithm);
+        }
+
+        $digest = hash_hmac($algorithm, $this->getMessage($request), $secretKey, true);
+        return base64_encode($digest);
     }
 
     /**
@@ -68,6 +116,25 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
+     * @param string $provider
+     *
+     * @return \Acquia\Hmac\Hash
+     */
+    public function setProvider($provider)
+    {
+        $this->provider = $provider;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getProvider()
+    {
+        return $this->provider;
+    }
+
+    /**
      * Appends a timestap header to the stack.
      *
      * @param string $header
@@ -100,32 +167,13 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @throws \UnexpectedValueException
-     */
-    public function sign(Request\RequestInterface $request, $secretKey, $algorithm = null)
-    {
-        $algorithm = $algorithm ?: $this->defaultAlgorithm;
-
-        if (!in_array($algorithm, hash_algos())) {
-            throw new \UnexpectedValueException('Algorithm not supported by server: ' . $algorithm);
-        }
-
-        if (!in_array($algorithm, $this->validAlgorithms)) {
-            throw new \UnexpectedValueException('Algorithm not valid: ' . $algorithm);
-        }
-
-        $digest = hash_hmac($algorithm, $this->getMessage($request), $secretKey, true);
-        return base64_encode($digest);
-    }
-
-    /**
      * Generates the message to be signed from the HTTP request.
      *
      * @param \Acquia\Hmac\Request\RequestInterface $request
      *
      * @return string
+     *
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
      */
     public function getMessage(Request\RequestInterface $request)
     {
@@ -145,7 +193,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \UnderflowException
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
      */
     public function getTimestamp(Request\RequestInterface $request)
     {
@@ -155,7 +203,13 @@ class RequestSigner implements RequestSignerInterface
             }
         }
 
-        throw new \UnderflowException('Timestamp not found');
+        if (count($this->timestampHeaders) > 1) {
+            $message = 'At least one of the following headers is required: ' . join(', ' . $this->timestampHeaders);
+        } else {
+            $message = $this->timestampHeaders . ' header required';
+        }
+
+        throw new Exception\InvalidRequest($message);
     }
 
     /**
@@ -163,12 +217,12 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \UnderflowException
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
      */
     public function getContentType(Request\RequestInterface $request)
     {
         if (!$request->hasHeader('Content-Type')) {
-            throw new \UnderflowException('Content type not found');
+            throw new Exception\InvalidRequest('Content type header required');
         }
 
         return $request->getHeader('Content-Type');
