@@ -2,7 +2,7 @@
 
 namespace Acquia\Hmac;
 
-class Hash
+class RequestSigner implements RequestSignerInterface
 {
     /**
      * @var string
@@ -23,10 +23,29 @@ class Hash
      * @param string $defaultAlgorithm
      * @param array $validAlgorithms
      */
-    public function __construct($defaultAlgorithm = 'sha256', array $validAlgorithms = array('sha1', 'sha256', 'sha512'))
+    public function __construct($defaultAlgorithm = 'sha1', array $validAlgorithms = array('sha1', 'sha256'))
     {
+        $this->defaultAlgorithm = $defaultAlgorithm;
         $this->setValidAlgorithms($validAlgorithms);
-        $this->setDefaultAlgorithm($defaultAlgorithm);
+    }
+
+    /**
+     * @param string $algorithm
+     *
+     * @return \Acquia\Hmac\Hash
+     */
+    public function setDefaultAlgorithm($algorithm)
+    {
+        $this->defaultAlgorithm = $algorithm;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultAlgorithm()
+    {
+        return $this->defaultAlgorithm;
     }
 
     /**
@@ -46,47 +65,6 @@ class Hash
     public function getValidAlgorithms()
     {
         return $this->validAlgorithms;
-    }
-
-    /**
-     * @param string $algorithm
-     *
-     * @return bool
-     *
-     * @throws \UnexpectedValueException
-     */
-    public function algorithmValid($algorithm)
-    {
-        if (!in_array($algorithm, hash_algos())) {
-            throw new \UnexpectedValueException('Unsupported algorithm: ' . $algorithm);
-        }
-
-        return in_array($algorithm, $this->validAlgorithms());
-    }
-
-    /**
-     * @param string $algorithm
-     *
-     * @return \Acquia\Hmac\Hash
-     *
-     * @throws \UnexpectedValueException
-     */
-    public function setDefaultAlgorithm($algorithm)
-    {
-        if (!$this->algorithmValid($algorithm)) {
-            throw new \UnexpectedValueException('Invalid algorithm: ' . $algorithm);
-        }
-
-        $this->defaultAlgorithm = $algorithm;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultAlgorithm()
-    {
-        return $this->defaultAlgorithm;
     }
 
     /**
@@ -122,17 +100,29 @@ class Hash
     }
 
     /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * {@inheritDoc}
      *
-     * @return string
+     * @throws \UnexpectedValueException
      */
-    public function get(Request\RequestInterface $request)
+    public function sign(Request\RequestInterface $request, $secretKey, $algorithm = null)
     {
-        $hash = hash_hmac($this->algorithm, $this->getMessage($request), $this->key, true);
-        return base64_encode($hash);
+        $algorithm = $algorithm ?: $this->defaultAlgorithm;
+
+        if (!in_array($algorithm, hash_algos())) {
+            throw new \UnexpectedValueException('Algorithm not supported by server: ' . $algorithm);
+        }
+
+        if (!in_array($algorithm, $this->validAlgorithms)) {
+            throw new \UnexpectedValueException('Algorithm not valid: ' . $algorithm);
+        }
+
+        $digest = hash_hmac($algorithm, $this->getMessage($request), $secretKey, true);
+        return base64_encode($digest);
     }
 
     /**
+     * Generates the message to be signed from the HTTP request.
+     *
      * @param \Acquia\Hmac\Request\RequestInterface $request
      *
      * @return string
