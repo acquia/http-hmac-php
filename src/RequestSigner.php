@@ -78,6 +78,17 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     */
+    public function getAuthorization(Request\RequestInterface $request, $id, $secretKey, $algorithm = null)
+    {
+        $signature = $this->signRequest($request, $secretKey, $algorithm);
+        return $this->provider . ' ' . $id . ':' . $signature;
+    }
+
+    /**
      * @param string $algorithm
      *
      * @return \Acquia\Hmac\Hash
@@ -206,7 +217,7 @@ class RequestSigner implements RequestSignerInterface
         if (count($this->timestampHeaders) > 1) {
             $message = 'At least one of the following headers is required: ' . join(', ' . $this->timestampHeaders);
         } else {
-            $message = $this->timestampHeaders . ' header required';
+            $message = $this->timestampHeaders[0] . ' header required';
         }
 
         throw new Exception\InvalidRequest($message);
