@@ -1,7 +1,7 @@
 {
     "name": "acquia/hmac-request",
     "type": "library",
-    "description": "Generates an HMAC hash from an HTTP request",
+    "description": "Signs HTTP requests using a HMAC digest",
     "homepage": "https://github.com/acquia/hmac-request",
     "license": "proprietary",
     "authors": [

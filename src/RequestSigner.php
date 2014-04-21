@@ -132,6 +132,7 @@ class RequestSigner implements RequestSignerInterface
         $parts = array(
             $request->getMethod(),
             md5($request->getBody()),
+            $this->getContentType($request),
             $this->getTimestamp($request),
             $request->getResource(),
         );
@@ -154,7 +155,22 @@ class RequestSigner implements RequestSignerInterface
             }
         }
 
-        // @todo Hash exception
         throw new \UnderflowException('Timestamp not found');
+    }
+
+    /**
+     * @param \Acquia\Hmac\Request\RequestInterface $request
+     *
+     * @return string
+     *
+     * @throws \UnderflowException
+     */
+    public function getContentType(Request\RequestInterface $request)
+    {
+        if (!$request->hasHeader('Content-Type')) {
+            throw new \UnderflowException('Content type not found');
+        }
+
+        return $request->getHeader('Content-Type');
     }
 }

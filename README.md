@@ -1,4 +1,4 @@
-# HMAC Request
+# HMAC Request Signer
 
 A PHP library that signs HTTP requests using a HMAC digest. The algorithm is
 heavily inspired by [Amazon Web Service's](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html)
