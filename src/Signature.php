@@ -17,7 +17,6 @@ class Signature implements SignatureInterface
     /**
      * @param string $id
      * @param string $signature
-     * @param string $provider
      */
     public function __construct($id, $signature)
     {
@@ -26,7 +25,7 @@ class Signature implements SignatureInterface
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
     public function getId()
     {
@@ -34,7 +33,7 @@ class Signature implements SignatureInterface
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
     public function getSignature()
     {
@@ -42,10 +41,10 @@ class Signature implements SignatureInterface
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    public function __toString()
+    public function matches($signature)
     {
-        return $this->signature;
+        return $this->signature === $signature;
     }
 }
