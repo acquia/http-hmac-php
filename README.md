@@ -1,11 +1,6 @@
 # HMAC Request
 
-[![Build Status](https://travis-ci.org/acquia/hmac-request.png)](https://travis-ci.org/acquia/hmac-request)
-[![Coverage Status](https://coveralls.io/repos/acquia/hmac-request/badge.png?branch=master)](https://coveralls.io/r/acquia/hmac-request?branch=master)
-[![Total Downloads](https://poser.pugx.org/acquia/hmac-request/downloads.png)](https://packagist.org/packages/acquia/hmac-request)
-[![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.png)](https://packagist.org/packages/acquia/hmac-request)
-
-@todo
+A library that generates an HMAC hash from an HTTP request.
 
 ## Installation
 
@@ -14,6 +9,12 @@ by adding it as a dependency to your project's composer.json file.
 
 ```json
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/acquia/hmac-request"
+        }
+    ],
     "require": {
         "acquia/hmac-request": "*"
     }
