@@ -31,6 +31,14 @@ class Guzzle3 implements RequestInterface
     /**
      * {@inheritDoc}
      */
+    public function getHeader($header)
+    {
+        return $this->request->getHeader($header);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getMethod()
     {
         return $this->request->getMethod();
@@ -42,14 +50,6 @@ class Guzzle3 implements RequestInterface
     public function getBody()
     {
         return ($this->request instanceof EntityEnclosingRequestInterface) ? $this->request->getBody() : '';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTimestamp($header)
-    {
-        return $this->request->getHeader($header);
     }
 
     /**

@@ -12,6 +12,13 @@ interface RequestInterface
     public function hasHeader($header);
 
     /**
+     * @param string $header
+     *
+     * @return mixed
+     */
+    public function getHeader($header);
+
+    /**
      * Returns the HTTP method.
      *
      * @return string
@@ -24,13 +31,6 @@ interface RequestInterface
      * @return string
      */
     public function getBody();
-
-    /**
-     * @param array $headers
-     *
-     * @return string
-     */
-    public function getTimestamp(array $headers);
 
     /**
      * Returns the resource, which is the path + query string of the request.

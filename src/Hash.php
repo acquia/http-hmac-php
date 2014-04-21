@@ -129,7 +129,7 @@ class Hash
     {
         foreach ($this->timestampHeaders as $header) {
             if ($request->hasHeader($header)) {
-                return $request->getTimestamp($header);
+                return $request->getHeader($header);
             }
         }
 
