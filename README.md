@@ -67,7 +67,7 @@ use Acquia\Hmac\Request as Request;
 $request = new Request\Guzzle3($guzzleRequest);
 
 $signer = new RequestSigner();
-$signature = $signer->signRequest($request, 'secretKey', 'sha265');
+$signature = $signer->signRequest($request, 'secretKey');
 
 ```
 
@@ -86,3 +86,9 @@ $signer = new RequestSigner();
 $signature = $signer->getSignature($request);
 
 ```
+
+## Attribution
+
+The techniques in this library were adapted from the work done by Peter Wolanin,
+Jacob Singh, and Nick Veenhof for the [Acquia Search](https://www.acquia.com/products-services/acquia-network/cloud-services/acquia-search)
+project.
