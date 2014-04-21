@@ -12,25 +12,56 @@ class Hash
     /**
      * @var array
      */
+    protected $validAlgorithms;
+
+    /**
+     * @var array
+     */
     protected $timestampHeaders = array('Date');
 
     /**
-     * @param string $key
-     * @param string $algorithm
+     * @param string $defaultAlgorithm
+     * @param array $validAlgorithms
      */
-    public function __construct($defaultAlgorithm = 'sha256')
+    public function __construct($defaultAlgorithm = 'sha256', array $validAlgorithms = array('sha1', 'sha256', 'sha512'))
     {
+        $this->setValidAlgorithms($validAlgorithms);
         $this->setDefaultAlgorithm($defaultAlgorithm);
+    }
+
+    /**
+     * @param array $algorithms
+     *
+     * @return \Acquia\Hmac\Hash
+     */
+    public function setValidAlgorithms(array $algorithms)
+    {
+        $this->validAlgorithms = $algorithms;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidAlgorithms()
+    {
+        return $this->validAlgorithms;
     }
 
     /**
      * @param string $algorithm
      *
      * @return bool
+     *
+     * @throws \UnexpectedValueException
      */
     public function algorithmValid($algorithm)
     {
-        return in_array($algorithm, hash_algos());
+        if (!in_array($algorithm, hash_algos())) {
+            throw new \UnexpectedValueException('Unsupported algorithm: ' . $algorithm);
+        }
+
+        return in_array($algorithm, $this->validAlgorithms());
     }
 
     /**
