@@ -56,11 +56,6 @@ class Symfony implements RequestInterface
      */
     public function getResource()
     {
-        $queryString = $this->request->getQueryString();
-        if (null !== $queryString) {
-            $queryString = '?' . $queryString;
-        }
-
-        return $this->request->getBasePath() . $this->request->getBasePath() . $queryString;
+        return $this->request->getRequestUri();
     }
 }

@@ -33,6 +33,7 @@ class HmacAuthPlugin implements EventSubscriberInterface
 
     /**
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
+     * @param string $id
      * @param string $secretKey
      */
     public function __construct(RequestSignerInterface $requestSigner, $id, $secretKey)
@@ -87,7 +88,7 @@ class HmacAuthPlugin implements EventSubscriberInterface
 
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
-            $request->setHeader('Date', ClientInterface::HTTP_DATE);
+            $request->setHeader('Date', $time->format(ClientInterface::HTTP_DATE));
         }
 
         if (!$request->hasHeader('Content-Type')) {

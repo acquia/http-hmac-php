@@ -33,7 +33,7 @@ class Guzzle3 implements RequestInterface
      */
     public function getHeader($header)
     {
-        return $this->request->getHeader($header);
+        return (string) $this->request->getHeader($header);
     }
 
     /**
