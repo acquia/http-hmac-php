@@ -20,7 +20,7 @@ class Signature implements SignatureInterface
      */
     public function __construct($id, $signature)
     {
-        $this->apiKeyId  = $id;
+        $this->id        = $id;
         $this->signature = $signature;
     }
 
