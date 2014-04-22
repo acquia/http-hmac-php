@@ -57,18 +57,21 @@ for more detailed installation and usage instructions.
 
 ## Usage
 
-Generate a signature from a Guzzle request.
+Sign an API request sent via Guzzle.
 
 ```php
 
+use Acquia\Hmac\Guzzle3\HmacAuthPlugin;
 use Acquia\Hmac\RequestSigner;
-use Acquia\Hmac\Request as Request;
+use Guzzle\Http\Client;
 
-// $guzzleRequest is a \Guzzle\Http\Message\Request object.
-$request = new Request\Guzzle3($guzzleRequest);
+$requestSigner = new RequestSigner();
+$plugin = new HmacAuthPlugin(requestSigner, 'apiKeyId', 'secretKey');
 
-$signer = new RequestSigner();
-$signature = $signer->signRequest($request, 'secretKey');
+$client = new Client('http://example.com');
+$client->addSubscriber(plugin);
+
+$client->get('/resource')->send();
 
 ```
 
@@ -83,9 +86,17 @@ use Acquia\Hmac\Request as Request;
 // $symfonyRequest is a \Symfony\Component\HttpFoundation\Request object.
 $request = new Request\Symfony($symfonyRequest);
 
-$signer = new RequestSigner();
-$signature = $signer->getSignature($request);
+$requestSigner = new RequestSigner();
+$passedSignature = $requestSigner->getSignature($request);
 
+```
+
+Compare the client-side signature to the server-side signature. If they match,
+the signature is valid.
+
+```php
+$requestSignature = $this->signRequest($requestSigner, $request, $secretKey);
+$valid = $passedSignature->matches($requestSignature);
 ```
 
 ## Attribution
