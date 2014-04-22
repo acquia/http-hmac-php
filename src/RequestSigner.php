@@ -45,8 +45,8 @@ class RequestSigner implements RequestSignerInterface
             throw new Exception\InvalidRequest('Authorization header required');
         }
 
-        $provider = preg_quote($this->provider, '/');
-        $pattern = '/^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$/';
+        $provider = preg_quote($this->provider, '@');
+        $pattern = '@^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$@';
 
         if (!preg_match($pattern, $request->getHeader('Authorization'), $matches)) {
             throw new Exception\InvalidRequest('Authorization header not valid');
