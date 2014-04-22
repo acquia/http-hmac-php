@@ -75,8 +75,7 @@ $client->get('/resource')->send();
 
 ```
 
-Get the signature passed through the HTTP request in a Symfony-powered app e.g.
-[Silex](https://github.com/silexphp/Silex).
+Authenticate the request in a Symfony-powered app e.g. [Silex](https://github.com/silexphp/Silex).
 
 ```php
 
@@ -86,17 +85,14 @@ use Acquia\Hmac\Request\Symfony as RequestWrapper;
 // $request is a \Symfony\Component\HttpFoundation\Request object.
 $requestWrapper = new Request\Symfony($request);
 
+// Get the signature passed by the client
 $requestSigner = new RequestSigner();
 $passedSignature = $requestSigner->getSignature($requestWrapper);
 
-```
+// The request is authenticated if the client and server-side signatures match.
+$requestSignature = $this->signRequest($requestSigner, $requestWrapper, secretKey');
+$authenticated = $passedSignature->matches($requestSignature);
 
-Compare the client-side signature to the server-side signature. If they match,
-the signature is valid.
-
-```php
-$requestSignature = $this->signRequest($requestSigner, $request, $secretKey);
-$valid = $passedSignature->matches($requestSignature);
 ```
 
 ## Attribution
