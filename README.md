@@ -83,7 +83,7 @@ use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Request\Symfony as RequestWrapper;
 
 // $request is a \Symfony\Component\HttpFoundation\Request object.
-$requestWrapper = new Request\Symfony($request);
+$requestWrapper = new RequestWrapper($request);
 
 // Get the signature passed by the client
 $requestSigner = new RequestSigner();
