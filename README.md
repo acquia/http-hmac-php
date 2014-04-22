@@ -81,13 +81,13 @@ Get the signature passed through the HTTP request in a Symfony-powered app e.g.
 ```php
 
 use Acquia\Hmac\RequestSigner;
-use Acquia\Hmac\Request as Request;
+use Acquia\Hmac\Request\Symfony as RequestWrapper;
 
-// $symfonyRequest is a \Symfony\Component\HttpFoundation\Request object.
-$request = new Request\Symfony($symfonyRequest);
+// $request is a \Symfony\Component\HttpFoundation\Request object.
+$requestWrapper = new Request\Symfony($request);
 
 $requestSigner = new RequestSigner();
-$passedSignature = $requestSigner->getSignature($request);
+$passedSignature = $requestSigner->getSignature($requestWrapper);
 
 ```
 
