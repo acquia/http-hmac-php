@@ -37,22 +37,28 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
     public function getSignature(Request\RequestInterface $request)
     {
         if (!$request->hasHeader('Authorization')) {
-            throw new Exception\InvalidRequest('Authorization header required');
+            throw new Exception\MalformedRequest('Authorization header required');
         }
 
         $provider = preg_quote($this->provider, '@');
         $pattern = '@^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$@';
 
         if (!preg_match($pattern, $request->getHeader('Authorization'), $matches)) {
-            throw new Exception\InvalidRequest('Authorization header not valid');
+            throw new Exception\MalformedRequest('Authorization header not valid');
         }
 
-        return new Signature($matches[1], $matches[2]);
+        $time = $this->getTimestamp($request);
+        $timestamp = strtotime($time);
+        if (!$timestamp) {
+            throw new Exception\MalformedRequest('Timestamp not valid');
+        }
+
+        return new Signature($matches[1], $matches[2], $timestamp);
     }
 
     /**
@@ -204,7 +210,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
     public function getTimestamp(Request\RequestInterface $request)
     {
@@ -220,7 +226,7 @@ class RequestSigner implements RequestSignerInterface
             $message = $this->timestampHeaders[0] . ' header required';
         }
 
-        throw new Exception\InvalidRequest($message);
+        throw new Exception\MalformedRequest($message);
     }
 
     /**
@@ -228,12 +234,12 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
     public function getContentType(Request\RequestInterface $request)
     {
         if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\InvalidRequest('Content type header required');
+            throw new Exception\MalformedRequest('Content type header required');
         }
 
         return $request->getHeader('Content-Type');
