@@ -2,12 +2,12 @@
 
 namespace Acquia\Hmac;
 
-interface ApiKeyLoaderInterface
+interface KeyLoaderInterface
 {
     /**
      * @param string $id
      *
-     * @return \Acquia\Hmac\ApiKeyInterface
+     * @return \Acquia\Hmac\KeyInterface
      */
     public function load($id);
 }

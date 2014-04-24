@@ -2,17 +2,17 @@
 
 namespace Acquia\Hmac;
 
-interface ApiKeyInterface
+interface KeyInterface
 {
     /**
-     * Returns the API key's identifier.
+     * Returns the key's identifier.
      *
      * @return string
      */
     public function getId();
 
     /**
-     * Returns the API Key's secret.
+     * Returns the key's secret.
      *
      * @return string
      */

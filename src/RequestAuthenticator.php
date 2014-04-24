@@ -26,19 +26,19 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
 
     /**
      * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param \Acquia\Hmac\KeyLoaderInterface $apiKeyLoader
+     * @param \Acquia\Hmac\KeyLoaderInterface $keyLoader
      *
      * @return true
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequest
      * @throws \Acquia\Hmac\Exception\InvalidSignature
      */
-    public function authenticate(Request\RequestInterface $request, ApiKeyLoaderInterface $apiKeyLoader)
+    public function authenticate(Request\RequestInterface $request, KeyLoaderInterface $keyLoader)
     {
-        // Get the signature passed through the HTTP request
+        // Get the signature passed through the HTTP request.
         $passedSignature = $this->requestSigner->getSignature($request);
 
-        // Check whether the timestamp is valid
+        // Check whether the timestamp is valid.
         $comparison = $passedSignature->compareTimestamp($this->expiry);
         if (-1 == $comparison) {
             throw new Exception\InvalidSignature('Request is too old');
@@ -46,14 +46,14 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
             throw new Exception\InvalidSignature('Request is too far in the future');
         }
 
-        // Load the API Key and sign the request
-        if (!$apiKey = $apiKeyLoader->load($passedSignature->getId())) {
+        // Load the API Key and sign the request.
+        if (!$key = $keyLoader->load($passedSignature->getId())) {
             throw new Exception\InvalidSignature('API key not valid');
         }
 
         // Sign the request and check whether it matches the one that was
         // passed. If it matches, the request is authenticated.
-        $requestSignature = $this->signRequest($this->requestSigner, $request, $apiKey->getSecret());
+        $requestSignature = $this->signRequest($this->requestSigner, $request, $key->getSecret());
         return $passedSignature->matches($requestSignature);
     }
 }
