@@ -28,7 +28,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
      * @param \Acquia\Hmac\Request\RequestInterface $request
      * @param \Acquia\Hmac\KeyLoaderInterface $keyLoader
      *
-     * @return true
+     * @return \Acquia\Hmac\KeyInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
@@ -53,6 +53,10 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
         // Sign the request and check whether it matches the one that was
         // passed. If it matches, the request is authenticated.
         $requestSignature = $this->signRequest($this->requestSigner, $request, $key->getSecret());
-        return $passedSignature->matches($requestSignature);
+        if (!$passedSignature->matches($requestSignature)) {
+            throw new Exception\InvalidSignatureException('Signature not valid');
+        }
+
+        return $key;
     }
 }
