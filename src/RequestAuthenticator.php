@@ -25,12 +25,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     }
 
     /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param \Acquia\Hmac\KeyLoaderInterface $keyLoader
-     *
-     * @return \Acquia\Hmac\KeyInterface
-     *
-     * @throws \Acquia\Hmac\Exception\InvalidRequestException
+     * {inheritDoc}
      */
     public function authenticate(Request\RequestInterface $request, KeyLoaderInterface $keyLoader)
     {
