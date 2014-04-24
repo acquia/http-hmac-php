@@ -30,8 +30,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
      *
      * @return true
      *
-     * @throws \Acquia\Hmac\Exception\MalformedRequest
-     * @throws \Acquia\Hmac\Exception\InvalidSignature
+     * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
     public function authenticate(Request\RequestInterface $request, KeyLoaderInterface $keyLoader)
     {
@@ -41,14 +40,14 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
         // Check whether the timestamp is valid.
         $comparison = $passedSignature->compareTimestamp($this->expiry);
         if (-1 == $comparison) {
-            throw new Exception\InvalidSignature('Request is too old');
+            throw new Exception\TimestampOutOfRangeException('Request is too old');
         } elseif (1 == $comparison) {
-            throw new Exception\InvalidSignature('Request is too far in the future');
+            throw new Exception\TimestampOutOfRangeException('Request is too far in the future');
         }
 
         // Load the API Key and sign the request.
         if (!$key = $keyLoader->load($passedSignature->getId())) {
-            throw new Exception\InvalidSignature('API key not valid');
+            throw new Exception\KeyNotFoundException('API key not found');
         }
 
         // Sign the request and check whether it matches the one that was

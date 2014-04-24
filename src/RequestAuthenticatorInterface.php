@@ -11,7 +11,7 @@ interface RequestAuthenticatorInterface
      *
      * @return true
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
     public function authenticate(Request\RequestInterface $request);
 }

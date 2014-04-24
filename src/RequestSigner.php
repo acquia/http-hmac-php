@@ -42,20 +42,20 @@ class RequestSigner implements RequestSignerInterface
     public function getSignature(Request\RequestInterface $request)
     {
         if (!$request->hasHeader('Authorization')) {
-            throw new Exception\MalformedRequest('Authorization header required');
+            throw new Exception\MalformedRequestException('Authorization header required');
         }
 
         $provider = preg_quote($this->provider, '@');
         $pattern = '@^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$@';
 
         if (!preg_match($pattern, $request->getHeader('Authorization'), $matches)) {
-            throw new Exception\MalformedRequest('Authorization header not valid');
+            throw new Exception\MalformedRequestException('Authorization header not valid');
         }
 
         $time = $this->getTimestamp($request);
         $timestamp = strtotime($time);
         if (!$timestamp) {
-            throw new Exception\MalformedRequest('Timestamp not valid');
+            throw new Exception\MalformedRequestException('Timestamp not valid');
         }
 
         return new Signature($matches[1], $matches[2], $timestamp);
@@ -65,7 +65,7 @@ class RequestSigner implements RequestSignerInterface
      * {@inheritDoc}
      *
      * @throws \InvalidArgumentException
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
     public function signRequest(Request\RequestInterface $request, $secretKey, $algorithm = null)
     {
@@ -86,7 +86,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
     public function getAuthorization(Request\RequestInterface $request, $id, $secretKey, $algorithm = null)
     {
@@ -190,7 +190,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \Acquia\Hmac\Exception\InvalidRequest
+     * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
     public function getMessage(Request\RequestInterface $request)
     {
@@ -210,7 +210,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \Acquia\Hmac\Exception\MalformedRequest
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
      */
     public function getTimestamp(Request\RequestInterface $request)
     {
@@ -226,7 +226,7 @@ class RequestSigner implements RequestSignerInterface
             $message = $this->timestampHeaders[0] . ' header required';
         }
 
-        throw new Exception\MalformedRequest($message);
+        throw new Exception\MalformedRequestException($message);
     }
 
     /**
@@ -234,12 +234,12 @@ class RequestSigner implements RequestSignerInterface
      *
      * @return string
      *
-     * @throws \Acquia\Hmac\Exception\MalformedRequest
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
      */
     public function getContentType(Request\RequestInterface $request)
     {
         if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequest('Content type header required');
+            throw new Exception\MalformedRequestException('Content type header required');
         }
 
         return $request->getHeader('Content-Type');
