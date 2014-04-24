@@ -18,7 +18,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
      * @param int|string $expiry
      */
-    public function __construct(RequestSignerInterface $requestSigner, $expiry = '+15 minutes')
+    public function __construct(RequestSignerInterface $requestSigner, $expiry)
     {
         $this->requestSigner = $requestSigner;
         $this->expiry        = $expiry;
