@@ -79,19 +79,17 @@ Authenticate the request in a Symfony-powered app e.g. [Silex](https://github.co
 
 ```php
 
+use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Request\Symfony as RequestWrapper;
 
 // $request is a \Symfony\Component\HttpFoundation\Request object.
 $requestWrapper = new RequestWrapper($request);
 
-// Get the signature passed by the client
-$requestSigner = new RequestSigner();
-$passedSignature = $requestSigner->getSignature($requestWrapper);
+// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
 
-// The request is authenticated if the client and server-side signatures match.
-$requestSignature = $this->signRequest($requestSigner, $requestWrapper, secretKey');
-$authenticated = $passedSignature->matches($requestSignature);
+$authenticator = new RequestAuthenticator(new RequestSigner(), '+15 minutes');
+$key = $authenticator->authenticate($requestWrapper, $keyLoader);
 
 ```
 
