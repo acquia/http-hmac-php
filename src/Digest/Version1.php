@@ -87,8 +87,8 @@ class Version1 extends DigestAbstract
         $headers = $requestSigner->getCustomHeaders($request);
 
         $canonicalizedHeaders = array();
-        foreach ($headers as $header) {
-            $canonicalizedHeaders[] = strtolower($header) . ': ' . $request->getHeader($header);
+        foreach ($headers as $header => $value) {
+            $canonicalizedHeaders[] = strtolower($header) . ': ' . $value;
         }
 
         sort($canonicalizedHeaders);
