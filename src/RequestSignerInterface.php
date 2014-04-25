@@ -2,6 +2,8 @@
 
 namespace Acquia\Hmac;
 
+use Acquia\Hmac\Request\RequestInterface;
+
 interface RequestSignerInterface
 {
     /**
@@ -12,7 +14,7 @@ interface RequestSignerInterface
      *
      * @return string
      */
-    public function signRequest(Request\RequestInterface $request, $secretKey);
+    public function signRequest(RequestInterface $request, $secretKey);
 
     /**
      * Returns the value of the "Authorization" header.
@@ -24,7 +26,7 @@ interface RequestSignerInterface
      *
      * @return string
      */
-    public function getAuthorization(Request\RequestInterface $request, $id, $secretKey, $algorithm = null);
+    public function getAuthorization(RequestInterface $request, $id, $secretKey, $algorithm = null);
 
     /**
      * Gets the signature passed through the HTTP request.
@@ -33,5 +35,38 @@ interface RequestSignerInterface
      *
      * @return \Acquia\Hmac\SignatureInterface
      */
-    public function getSignature(Request\RequestInterface $request);
+    public function getSignature(RequestInterface $request);
+
+    /**
+     * Returns the content type passed through the request.
+     *
+     * @param \Acquia\Hmac\Request\RequestInterface $request
+     *
+     * @return string
+     *
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function getContentType(RequestInterface $request);
+
+    /**
+     * Returns timestamp passed through the request.
+     *
+     * @param \Acquia\Hmac\Request\RequestInterface $request
+     *
+     * @return string
+     *
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function getTimestamp(RequestInterface $request);
+
+    /**
+     * Returns an associative array of custom headers.
+     *
+     * @param \Acquia\Hmac\Request\RequestInterface $request
+     *
+     * @return string
+     *
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function getCustomHeaders(RequestInterface $request);
 }

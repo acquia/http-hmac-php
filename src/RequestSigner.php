@@ -2,6 +2,8 @@
 
 namespace Acquia\Hmac;
 
+use Acquia\Hmac\Request\RequestInterface;
+
 class RequestSigner implements RequestSignerInterface
 {
     /**
@@ -37,7 +39,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
-    public function getSignature(Request\RequestInterface $request)
+    public function getSignature(RequestInterface $request)
     {
         if (!$request->hasHeader('Authorization')) {
             throw new Exception\MalformedRequestException('Authorization header required');
@@ -65,9 +67,9 @@ class RequestSigner implements RequestSignerInterface
      * @throws \InvalidArgumentException
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function signRequest(Request\RequestInterface $request, $secretKey)
+    public function signRequest(RequestInterface $request, $secretKey)
     {
-        return $this->digest->get($request, $secretKey, $this->timestampHeaders, $this->customHeaders);
+        return $this->digest->get($this, $request, $secretKey);
     }
 
     /**
@@ -75,7 +77,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(Request\RequestInterface $request, $id, $secretKey, $algorithm = null)
+    public function getAuthorization(RequestInterface $request, $id, $secretKey, $algorithm = null)
     {
         $signature = $this->signRequest($request, $secretKey, $algorithm);
         return $this->provider . ' ' . $id . ':' . $signature;
@@ -125,14 +127,6 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * @return array
-     */
-    public function getTimestampHeaders()
-    {
-        return $this->timestampHeaders;
-    }
-
-    /**
      * Append a custom headers to be used in the signature.
      *
      * @param string $header
@@ -157,10 +151,48 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * @return array
+     * {@inheritDoc}
      */
-    public function getCustomHeaders()
+    public function getContentType(RequestInterface $request)
     {
-        return $this->customHeaders;
+        if (!$request->hasHeader('Content-Type')) {
+            throw new Exception\MalformedRequestException('Content type header required');
+        }
+
+        return $request->getHeader('Content-Type');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTimestamp(RequestInterface $request)
+    {
+        foreach ($this->timestampHeaders as $header) {
+            if ($request->hasHeader($header)) {
+                return $request->getHeader($header);
+            }
+        }
+
+        if (count($this->timestampHeaders) > 1) {
+            $message = 'At least one of the following headers is required: ' . join(', ' . $this->timestampHeaders);
+        } else {
+            $message = $this->timestampHeaders[0] . ' header required';
+        }
+
+        throw new Exception\MalformedRequestException($message);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getCustomHeaders(RequestInterface $request)
+    {
+        $headers = array();
+        foreach ($this->customHeaders as $header) {
+            if ($request->hasHeader($header)) {
+                $headers[$header] = $request->getHeader($header);
+            }
+        }
+        return $headers;
     }
 }

@@ -3,18 +3,18 @@
 namespace Acquia\Hmac\Digest;
 
 use Acquia\Hmac\Request\RequestInterface;
+use Acquia\Hmac\RequestSignerInterface;
 
 interface DigestInterface
 {
     /**
      * Returns the signature.
      *
-     * @param Acquia\Hmac\Request\RequestInterface $request
+     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
+     * @param \Acquia\Hmac\Request\RequestInterface $request
      * @param string $secretKey
-     * @param array $timestampHeaders
-     * @param array $customHeaders
      *
      * @return string
      */
-    public function get(RequestInterface $request, $secretKey, array $timestampHeaders, array $customHeaders);
+    public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey);
 }

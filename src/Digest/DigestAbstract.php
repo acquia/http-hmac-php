@@ -2,7 +2,7 @@
 
 namespace Acquia\Hmac\Digest;
 
-use Acquia\Hmac\Exception as Exception;
+use Acquia\Hmac\RequestSignerInterface;
 use Acquia\Hmac\Request\RequestInterface;
 
 abstract class DigestAbstract implements DigestInterface
@@ -10,16 +10,27 @@ abstract class DigestAbstract implements DigestInterface
     /**
      * @var string
      */
-    protected $algorithm = 'sha1';
+    protected $algorithm;
 
     /**
      * @param string $algorithm
+     */
+    public function __construct($algorithm = 'sha1')
+    {
+        $this->algorithm = $algorithm;
+    }
+
+    /**
+     * @param string $algorithm
+     *
+     * @return \Acquia\Hmac\Digest\DigestAbstract
      */
     public function setAlgorithm($algorithm)
     {
         $this->algorithm = $algorithm;
         return $this;
     }
+
     /**
      * @return string
      */
@@ -31,86 +42,20 @@ abstract class DigestAbstract implements DigestInterface
     /**
      * {@inheritDoc}
      */
-    public function get(RequestInterface $request, $secretKey, array $timestampHeaders, array $customHeaders)
+    public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
-        $message = $this->getMessage($request, $timestampHeaders, $customHeaders);
+        $message = $this->getMessage($requestSigner, $request);
         $digest = hash_hmac($this->algorithm, $message, $secretKey, true);
         return base64_encode($digest);
     }
 
     /**
-     * Returns the signature.
+     * Returns the message being signed.
      *
-     * @param Acquia\Hmac\Request\RequestInterface $request
-     * @param array $timestampHeaders
-     * @param array $customHeaders
-     *
-     * @return string
-     */
-    abstract protected function getMessage(RequestInterface $request, array $timestampHeaders, array $customHeaders);
-
-    /**
+     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
      * @param \Acquia\Hmac\Request\RequestInterface $request
      *
      * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
      */
-    protected function getContentType(RequestInterface $request)
-    {
-        if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequestException('Content type header required');
-        }
-
-        return $request->getHeader('Content-Type');
-    }
-
-    /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param array $timestampHeaders
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function getTimestamp(RequestInterface $request, array $timestampHeaders)
-    {
-        foreach ($timestampHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                return $request->getHeader($header);
-            }
-        }
-
-        if (count($timestampHeaders) > 1) {
-            $message = 'At least one of the following headers is required: ' . join(', ' . $timestampHeaders);
-        } else {
-            $message = $timestampHeaders[0] . ' header required';
-        }
-
-        throw new Exception\MalformedRequestException($message);
-    }
-
-    /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param array $customHeaders
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function getCustomHeaders(RequestInterface $request, array $customHeaders)
-    {
-        // Normalize the header list.
-        sort($customHeaders);
-        $customHeaders = array_map('strtolower', $customHeaders);
-
-        $values = array();
-        foreach ($customHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                $values[] = $header . ': ' . $request->getHeader($header);
-            }
-        }
-
-        return join("\n", $values);
-    }
+    abstract protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request);
 }
