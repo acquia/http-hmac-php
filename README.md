@@ -51,13 +51,14 @@ The message is a concatenated string  generated from the following parts:
 * `HTTP-Verb`: The uppercase HTTP request method e.g. "GET", "POST"
 * `Request-Body`: The raw body of the HTTP request
 * `Content-Type`: The lowercase value of the "Content-type" header
+  * Note that in the message, the body is hashed using the MD5 algorithm
 * `Date`: The value of the "Date" header
   * Can be configured to read the timestamp from a custom header, e.g. `x-acquia-timestamp`
 * `Custom-Headers`: A canonicalized concatenation of specified custom headers
-  * Each header is in `header: value` format
+  * Each header is in `x-custom-header: value` format
   * Header names are lowercase
-  * Multiple values are separated by a comma and space, e.g. `value1, value2`
-  * Each header is separated by a newline
+  * Headers with multiple multiple values are separated by a comma and space, e.g. `value1, value2`
+  * Each header is separated by a newline in the concatenated string
 * `Resource`: The HTTP request path + query string, e.g. `/resource?key=value`
 
 ## Installation
