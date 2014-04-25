@@ -23,6 +23,7 @@ Message =
 	MD5( Request-Body ) + "\n" +
 	Content-Type + "\n" +
 	Date + "\n" +
+    Custom headers + "\n"
 	Resource
 ;
 ```
@@ -32,6 +33,8 @@ Message =
 either the value of the `Date` HTTP header or a custom header defined by the
 application, e.g. `x-acquia-timestamp`. `Resource` is the request path + query
 string.
+
+@todo Document `Custom headers`
 
 ## Installation
 

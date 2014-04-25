@@ -16,6 +16,7 @@ class Version1 extends DigestAbstract
             md5($request->getBody()),
             $this->getContentType($request),
             $this->getTimestamp($request, $timestampHeaders),
+            $this->getCustomHeaders($request, $customHeaders),
             $request->getResource(),
         );
 

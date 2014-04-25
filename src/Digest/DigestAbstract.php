@@ -51,6 +51,22 @@ abstract class DigestAbstract implements DigestInterface
 
     /**
      * @param \Acquia\Hmac\Request\RequestInterface $request
+     *
+     * @return string
+     *
+     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    protected function getContentType(RequestInterface $request)
+    {
+        if (!$request->hasHeader('Content-Type')) {
+            throw new Exception\MalformedRequestException('Content type header required');
+        }
+
+        return $request->getHeader('Content-Type');
+    }
+
+    /**
+     * @param \Acquia\Hmac\Request\RequestInterface $request
      * @param array $timestampHeaders
      *
      * @return string
@@ -76,17 +92,25 @@ abstract class DigestAbstract implements DigestInterface
 
     /**
      * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param array $customHeaders
      *
      * @return string
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequestException
      */
-    protected function getContentType(RequestInterface $request)
+    public function getCustomHeaders(RequestInterface $request, array $customHeaders)
     {
-        if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequestException('Content type header required');
+        // Normalize the header list.
+        sort($customHeaders);
+        $customHeaders = array_map('strtolower', $customHeaders);
+
+        $values = array();
+        foreach ($customHeaders as $header) {
+            if ($request->hasHeader($header)) {
+                $values[] = $header . ': ' . $request->getHeader($header);
+            }
         }
 
-        return $request->getHeader('Content-Type');
+        return join("\n", $values);
     }
 }
