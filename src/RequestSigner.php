@@ -5,14 +5,9 @@ namespace Acquia\Hmac;
 class RequestSigner implements RequestSignerInterface
 {
     /**
-     * @var string
+     * @var \Acquia\Hmac\Digest\DigestInterface
      */
-    protected $defaultAlgorithm;
-
-    /**
-     * @var array
-     */
-    protected $validAlgorithms;
+    protected $digest;
 
     /**
      * @var string
@@ -25,13 +20,16 @@ class RequestSigner implements RequestSignerInterface
     protected $timestampHeaders = array('Date');
 
     /**
-     * @param string $defaultAlgorithm
-     * @param array $validAlgorithms
+     * @var array
      */
-    public function __construct($defaultAlgorithm = 'sha1', array $validAlgorithms = array('sha1', 'sha256'))
+    protected $customHeaders = array();
+
+    /**
+     * @param \Acquia\Hmac\Digest\DigestInterface $digest
+     */
+    public function __construct(Digest\DigestInterface $digest = null)
     {
-        $this->defaultAlgorithm = $defaultAlgorithm;
-        $this->validAlgorithms  = $validAlgorithms;
+        $this->digest = $digest ?: new Digest\Version1();
     }
 
     /**
@@ -67,20 +65,9 @@ class RequestSigner implements RequestSignerInterface
      * @throws \InvalidArgumentException
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function signRequest(Request\RequestInterface $request, $secretKey, $algorithm = null)
+    public function signRequest(Request\RequestInterface $request, $secretKey)
     {
-        $algorithm = $algorithm ?: $this->defaultAlgorithm;
-
-        if (!in_array($algorithm, hash_algos())) {
-            throw new \InvalidArgumentException('Algorithm not supported by server: ' . $algorithm);
-        }
-
-        if (!in_array($algorithm, $this->validAlgorithms)) {
-            throw new \InvalidArgumentException('Algorithm not valid: ' . $algorithm);
-        }
-
-        $digest = hash_hmac($algorithm, $this->getMessage($request), $secretKey, true);
-        return base64_encode($digest);
+        return $this->digest->get($request, $secretKey, $this->timestampHeaders, $this->customHeaders);
     }
 
     /**
@@ -95,47 +82,9 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * @param string $algorithm
-     *
-     * @return \Acquia\Hmac\Hash
-     */
-    public function setDefaultAlgorithm($algorithm)
-    {
-        $this->defaultAlgorithm = $algorithm;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultAlgorithm()
-    {
-        return $this->defaultAlgorithm;
-    }
-
-    /**
-     * @param array $algorithms
-     *
-     * @return \Acquia\Hmac\Hash
-     */
-    public function setValidAlgorithms(array $algorithms)
-    {
-        $this->validAlgorithms = $algorithms;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidAlgorithms()
-    {
-        return $this->validAlgorithms;
-    }
-
-    /**
      * @param string $provider
      *
-     * @return \Acquia\Hmac\Hash
+     * @return \Acquia\Hmac\RequestSigner
      */
     public function setProvider($provider)
     {
@@ -156,7 +105,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @param string $header
      *
-     * @return \Acquia\Hmac\Hash
+     * @return \Acquia\Hmac\RequestSigner
      */
     public function addTimestampHeader($header)
     {
@@ -167,7 +116,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * @param array $headers
      *
-     * @return \Acquia\Hmac\Hash
+     * @return \Acquia\Hmac\RequestSigner
      */
     public function setTimestampHeaders(array $headers)
     {
@@ -184,64 +133,34 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * Generates the message to be signed from the HTTP request.
+     * Append a custom headers to be used in the signature.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param string $header
      *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\InvalidRequestException
+     * @return \Acquia\Hmac\RequestSigner
      */
-    public function getMessage(Request\RequestInterface $request)
+    public function addCustomHeader($header)
     {
-        $parts = array(
-            $request->getMethod(),
-            md5($request->getBody()),
-            $this->getContentType($request),
-            $this->getTimestamp($request),
-            $request->getResource(),
-        );
-
-        return join("\n", $parts);
+        $this->customHeaders[] = $header;
+        return $this;
     }
 
     /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param array $headers
      *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     * @return \Acquia\Hmac\RequestSigner
      */
-    public function getTimestamp(Request\RequestInterface $request)
+    public function setCustomHeaders(array $headers)
     {
-        foreach ($this->timestampHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                return $request->getHeader($header);
-            }
-        }
-
-        if (count($this->timestampHeaders) > 1) {
-            $message = 'At least one of the following headers is required: ' . join(', ' . $this->timestampHeaders);
-        } else {
-            $message = $this->timestampHeaders[0] . ' header required';
-        }
-
-        throw new Exception\MalformedRequestException($message);
+        $this->customHeaders = $headers;
+        return $this;
     }
 
     /**
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     * @return array
      */
-    public function getContentType(Request\RequestInterface $request)
+    public function getCustomHeaders()
     {
-        if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequestException('Content type header required');
-        }
-
-        return $request->getHeader('Content-Type');
+        return $this->customHeaders;
     }
 }

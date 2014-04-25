@@ -5,6 +5,8 @@ namespace Acquia\Hmac;
 interface SignatureInterface
 {
     /**
+     * Returns the key's ID.
+     *
      * @return string
      */
     public function getId();

@@ -9,11 +9,10 @@ interface RequestSignerInterface
      *
      * @param \Acquia\Hmac\Request\RequestInterface $request
      * @param string $secretKey
-     * @param string|null $algorithm
      *
      * @return string
      */
-    public function signRequest(Request\RequestInterface $request, $secretKey, $algorithm = null);
+    public function signRequest(Request\RequestInterface $request, $secretKey);
 
     /**
      * Returns the value of the "Authorization" header.
