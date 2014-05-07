@@ -94,10 +94,10 @@ use Acquia\Hmac\RequestSigner;
 use Guzzle\Http\Client;
 
 $requestSigner = new RequestSigner();
-$plugin = new HmacAuthPlugin(requestSigner, 'apiKeyId', 'secretKey');
+$plugin = new HmacAuthPlugin($requestSigner, 'apiKeyId', 'secretKey');
 
 $client = new Client('http://example.com');
-$client->addSubscriber(plugin);
+$client->addSubscriber($plugin);
 
 $client->get('/resource')->send();
 
