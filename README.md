@@ -2,8 +2,8 @@
 
 A PHP library that signs HTTP requests using a HMAC digest. The algorithm is
 heavily inspired by [Amazon Web Service's](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html)
-implementation and derived from the HMAC authentication system developed for
-[Acquia Search](https://www.acquia.com/products-services/acquia-network/cloud-services/acquia-search).
+implementation and in part is derived from the HMAC authentication system
+developed for [Acquia Search](https://www.acquia.com/products-services/acquia-network/cloud-services/acquia-search).
 
 The goal of this project is to generate a digest from common HTTP request
 objects, e.g. [Guzzle](http://api.guzzlephp.org/class-Guzzle.Http.Message.Request.html)
