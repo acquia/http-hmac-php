@@ -1,7 +1,20 @@
 # HMAC Request Signer
 
-A PHP library that signs HTTP requests using a HMAC digest. The algorithm is
-heavily inspired by [Amazon Web Service's](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html)
+### Why?
+
+Securing RESTful web APIs is challenging. This library is intended to simplify
+implementing an authentication system to your API that balances security and
+simplicity while using code that can be reused in client-side libraries as well.
+
+HMAC authentication is a shared-secret cryptography method where signatures
+are generated on the client side and validated by the server in order to
+authenticate the request. This method is more secure than basic HTTP
+authentication but less secure (albeit simpler) than OAuth protocols.
+
+### What?
+
+HMAC Request Signer is a PHP library that signs HTTP requests using a HMAC
+digest. The algorithm is heavily inspired by [Amazon Web Service's](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html)
 implementation and in part is derived from the HMAC authentication system
 developed for [Acquia Search](https://www.acquia.com/products-services/acquia-network/cloud-services/acquia-search).
 
