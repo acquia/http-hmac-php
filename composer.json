@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Signs HTTP requests using a HMAC digest",
     "homepage": "https://github.com/acquia/hmac-request",
-    "license": "proprietary",
+    "license": "MIT",
     "authors": [
         {
             "name": "See contributors",
