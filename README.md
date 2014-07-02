@@ -4,7 +4,7 @@
 
 Securing RESTful web APIs is challenging. This library is intended to simplify
 implementing an authentication system to your API that balances security and
-simplicity while using code that can be reused in client-side libraries as well.
+simplicity using code that can be reused in client-side libraries as well.
 
 HMAC authentication is a shared-secret cryptography method where signatures
 are generated on the client side and validated by the server in order to
