@@ -161,6 +161,19 @@ $key = $authenticator->authenticate($requestWrapper, $keyLoader);
 
 ```
 
+## Contributing and Development
+
+Submit changes using GitHub's standard [pull request](https://help.github.com/articles/using-pull-requests) workflow.
+
+All code should adhere to the following standards:
+
+* [PSR-1](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md)
+* [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md)
+* [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md)
+
+It is recommend to use the [PHP Coding Standards Fixer](https://github.com/fabpot/PHP-CS-Fixer)
+tool to ensure that code adheres to the coding standards mentioned above.
+
 ## Attribution
 
 The techniques in this library were adapted from the work done by Peter Wolanin,
