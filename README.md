@@ -16,8 +16,8 @@ authenticate API requests.
 #### Why not HTTP basic authentication?
 
 Basic authentication is the simplest way to add authentication to a REST API,
-however is generally considered the least secure authentication method since the
-hashed password must be sent on every API request.
+however it is generally considered the least secure authentication method since
+the hashed password must be sent on every API request.
 
 #### Why not OAuth 1.0a?
 
