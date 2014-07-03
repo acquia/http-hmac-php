@@ -6,9 +6,10 @@ Securing RESTful web APIs is challenging. This library is intended to simplify
 implementing an authentication system to your API that balances security and
 simplicity using code that can be reused in client-side libraries as well.
 
-HMAC authentication is a shared-secret cryptography method where signatures
-are generated on the client side and validated by the server in order to
-authenticate the request. It is used by popular web services such as [AWS](http://aws.amazon.com/)
+[HMAC authentication](http://en.wikipedia.org/wiki/Hash-based_message_authentication_code)
+is a shared-secret cryptography method where signatures are generated on the
+client side and validated by the server in order to authenticate the request. It
+is used by popular web services such as [AWS](http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html)
 and in protocols such as [OAuth 1.0a](http://oauth.net/core/1.0a/) to sign and
 authenticate API requests.
 
