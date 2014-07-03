@@ -8,8 +8,34 @@ simplicity using code that can be reused in client-side libraries as well.
 
 HMAC authentication is a shared-secret cryptography method where signatures
 are generated on the client side and validated by the server in order to
-authenticate the request. This method is more secure than basic HTTP
-authentication but less secure (albeit simpler) than OAuth protocols.
+authenticate the request. It is used by popular web services such as [AWS](http://aws.amazon.com/)
+and in protocols such as [OAuth 1.0a](http://oauth.net/core/1.0a/) to sign and
+authenticate API requests.
+
+#### Why not HTTP basic authentication?
+
+Basic authentication is the simplest way to add authentication to a REST API,
+however is generally considered the least secure authentication method since the
+hashed password must be sent on every API request.
+
+#### Why not OAuth 1.0a?
+
+OAuth 1.0a is a widely adopted protocol that also uses an HMAC-based algorithm
+to sign and authenticate API requests. The main security advantage that OAuth
+1.0a has over bare HMAC authentication systems is the "request token" workflow
+that enables browsers to initiate authentication requests on behalf of a server
+without ever being passed the shared secret.
+
+The downside of this technique is the overall complexity it adds by requiring
+the application making requests to implement the OAuth 1.0a protocol as well. If
+passing the shared secret in a browser is not a concern for the app, then bare
+HMAC authentication systems can provide equivalent security with less
+complexity.
+
+#### Why not OAuth 2.0?
+
+This is best explained by Eran Hammer's [OAuth 2.0 and the Road to Hell](http://hueniverse.com/2012/07/26/oauth-2-0-and-the-road-to-hell/)
+blog post explaining why he resigned as lead author and editor of the spec.
 
 ### What?
 
@@ -21,7 +47,7 @@ developed for [Acquia Search](https://www.acquia.com/products-services/acquia-ne
 The goal of this project is to generate a digest from common HTTP request
 objects, e.g. [Guzzle](http://api.guzzlephp.org/class-Guzzle.Http.Message.Request.html)
 and [Symfony](http://api.symfony.com/2.0/Symfony/Component/HttpFoundation/Request.html),
-so that it can be reused in client-side and server-side implementations.
+so that it can be reused in both server-side and client-side applications.
 
 The following pseudocode illustrates the construction of the Authorization
 header and signature.
