@@ -174,7 +174,7 @@ class RequestSigner implements RequestSignerInterface
         }
 
         if (count($this->timestampHeaders) > 1) {
-            $message = 'At least one of the following headers is required: ' . join(', ' . $this->timestampHeaders);
+            $message = 'At least one of the following headers is required: ' . join(', ', $this->timestampHeaders);
         } else {
             $message = $this->timestampHeaders[0] . ' header required';
         }
