@@ -174,6 +174,9 @@ All code should adhere to the following standards:
 It is recommend to use the [PHP Coding Standards Fixer](https://github.com/fabpot/PHP-CS-Fixer)
 tool to ensure that code adheres to the coding standards mentioned above.
 
+Refer to [PHP Project Starter's documentation](https://github.com/cpliakas/php-project-starter#using-apache-ant)
+for the Apache Ant targets supported by this project.
+
 ## Attribution
 
 The techniques in this library were adapted from the work done by Peter Wolanin,
