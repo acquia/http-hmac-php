@@ -7,7 +7,7 @@ interface KeyLoaderInterface
     /**
      * @param string $id
      *
-     * @return \Acquia\Hmac\KeyInterface
+     * @return \Acquia\Hmac\KeyInterface|false
      */
     public function load($id);
 }
