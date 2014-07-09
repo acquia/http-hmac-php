@@ -7,5 +7,5 @@ if (!file_exists($autoloadFile)) {
 require_once $autoloadFile;
 
 $loader = new \Composer\Autoload\ClassLoader();
-$loader->addPsr4('Cpliakas\\Hmac\\Test\\', 'test');
+$loader->addPsr4('Acquia\\Hmac\\Test\\', 'test');
 $loader->register();
