@@ -108,12 +108,6 @@ by adding it as a dependency to your project's composer.json file.
 
 ```json
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/acquia/hmac-request"
-        }
-    ],
     "require": {
         "acquia/hmac-request": "*"
     }
