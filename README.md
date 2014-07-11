@@ -1,5 +1,8 @@
 # HMAC Request Signer
 
+[![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.svg)](https://packagist.org/packages/acquia/hmac-request)
+[![License](https://poser.pugx.org/acquia/hmac-request/license.svg)](https://packagist.org/packages/acquia/hmac-request)
+
 ### Why?
 
 Securing RESTful web APIs is challenging. This library is intended to simplify
