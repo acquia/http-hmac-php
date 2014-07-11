@@ -1,5 +1,6 @@
 # HMAC Request Signer
 
+[![Build Status](https://travis-ci.org/acquia/hmac-request.svg)](https://travis-ci.org/acquia/hmac-request)
 [![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.svg)](https://packagist.org/packages/acquia/hmac-request)
 [![License](https://poser.pugx.org/acquia/hmac-request/license.svg)](https://packagist.org/packages/acquia/hmac-request)
 
