@@ -20,6 +20,7 @@ interface SignatureInterface
 
     /**
      * Returns the timestamp.
+     * @return integer
      */
     public function getTimestamp();
 
