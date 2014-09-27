@@ -14,7 +14,7 @@ interface RequestInterface
     /**
      * @param string $header
      *
-     * @return mixed
+     * @return string
      */
     public function getHeader($header);
 
