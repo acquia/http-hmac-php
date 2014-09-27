@@ -1,6 +1,8 @@
 # HMAC Request Signer
 
 [![Build Status](https://travis-ci.org/acquia/hmac-request.svg)](https://travis-ci.org/acquia/hmac-request)
+[![Code Coverage](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.svg)](https://packagist.org/packages/acquia/hmac-request)
 [![License](https://poser.pugx.org/acquia/hmac-request/license.svg)](https://packagist.org/packages/acquia/hmac-request)
 
