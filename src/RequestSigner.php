@@ -77,9 +77,9 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey, $algorithm = null)
+    public function getAuthorization(RequestInterface $request, $id, $secretKey)
     {
-        $signature = $this->signRequest($request, $secretKey, $algorithm);
+        $signature = $this->signRequest($request, $secretKey);
         return $this->provider . ' ' . $id . ':' . $signature;
     }
 
