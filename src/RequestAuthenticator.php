@@ -10,7 +10,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     protected $requestSigner;
 
     /**
-     * @var \Acquia\Hmac\RequestSignerInterface
+     * @var int|string
      */
     protected $expiry;
 
