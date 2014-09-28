@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/acquia/hmac-request.svg)](https://travis-ci.org/acquia/hmac-request)
 [![Code Coverage](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
+[![HHVM Status](http://hhvm.h4cc.de/badge/acquia/hmac-request.svg)](http://hhvm.h4cc.de/package/acquia/hmac-request)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.svg)](https://packagist.org/packages/acquia/hmac-request)
 [![License](https://poser.pugx.org/acquia/hmac-request/license.svg)](https://packagist.org/packages/acquia/hmac-request)
