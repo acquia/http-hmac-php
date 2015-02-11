@@ -88,6 +88,7 @@ class HmacAuthPlugin implements EventSubscriberInterface
 
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
+            $time->setTimezone(new \DateTimeZone('GMT'));
             $request->setHeader('Date', $time->format(ClientInterface::HTTP_DATE));
         }
 
