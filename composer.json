@@ -1,17 +1,17 @@
 {
-    "name": "acquia/hmac-request",
+    "name": "acquia/http-hmac-php",
     "type": "library",
-    "description": "Signs HTTP requests using a HMAC digest",
-    "homepage": "https://github.com/acquia/hmac-request",
+    "description": "An implementation of the HTTP HMAC Spec in PHP that integrates with popular libraries such as Symfony and Guzzle.",
+    "homepage": "https://github.com/acquia/http-hmac-php",
     "license": "MIT",
     "authors": [
         {
             "name": "See contributors",
-            "homepage": "https://github.com/acquia/hmac-request/graphs/contributors"
+            "homepage": "https://github.com/acquia/http-hmac-php/graphs/contributors"
         }
     ],
     "support": {
-        "issues": "https://github.com/acquia/hmac-request/issues"
+        "issues": "https://github.com/acquia/http-hmac-php/issues"
     },
     "require": {
         "php": ">=5.3.0"

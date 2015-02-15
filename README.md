@@ -1,11 +1,11 @@
 # HTTP HMAC Signer for PHP
 
-[![Build Status](https://travis-ci.org/acquia/hmac-request.svg)](https://travis-ci.org/acquia/hmac-request)
-[![Code Coverage](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
-[![HHVM Status](http://hhvm.h4cc.de/badge/acquia/hmac-request.svg)](http://hhvm.h4cc.de/package/acquia/hmac-request)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/acquia/hmac-request/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/acquia/hmac-request/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/acquia/hmac-request/v/stable.svg)](https://packagist.org/packages/acquia/hmac-request)
-[![License](https://poser.pugx.org/acquia/hmac-request/license.svg)](https://packagist.org/packages/acquia/hmac-request)
+[![Build Status](https://travis-ci.org/acquia/http-hmac-php.svg)](https://travis-ci.org/acquia/http-hmac-php)
+[![Code Coverage](https://scrutinizer-ci.com/g/acquia/http-hmac-php/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/acquia/http-hmac-php/?branch=master)
+[![HHVM Status](http://hhvm.h4cc.de/badge/acquia/http-hmac-php.svg)](http://hhvm.h4cc.de/package/acquia/http-hmac-php)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/acquia/http-hmac-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/acquia/http-hmac-php/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
+[![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 
 HMAC Request Signer is a PHP library that implements the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec)
 to sign and verify RESTful Web API requests. It integrates with popular libraries such as
@@ -19,7 +19,7 @@ by adding it as a dependency to your project's composer.json file.
 ```json
 {
     "require": {
-        "acquia/hmac-request": "*"
+        "acquia/http-hmac-php": "*"
     }
 }
 ```
@@ -80,4 +80,3 @@ tool to ensure that code adheres to the coding standards mentioned above.
 
 Refer to [PHP Project Starter's documentation](https://github.com/cpliakas/php-project-starter#using-apache-ant)
 for the Apache Ant targets supported by this project.
->>>>>>> ab363d02516afce3e7fa4af42ba6e5724de8f9cc
