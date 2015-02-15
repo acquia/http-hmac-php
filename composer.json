@@ -26,6 +26,9 @@
         "sebastian/phpcpd": "~2.0",
         "symfony/http-foundation": "~2.0"
     },
+    "replace": {
+        "acquia/hmac-request": "self.version"
+    },
     "autoload": {
         "psr-4": {
             "Acquia\\Hmac\\": "src/"
