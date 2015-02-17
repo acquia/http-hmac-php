@@ -18,11 +18,12 @@
     },
     "require-dev": {
         "guzzle/guzzle": "~3.0",
+        "guzzlehttp/guzzle": "~4.0|~5.0",
         "pdepend/pdepend": "~1.0",
         "phploc/phploc": "~2.0",
         "phpmd/phpmd": "~1.0",
         "phpunit/phpunit": "~3.0",
-       "scrutinizer/ocular": "~1.0",
+        "scrutinizer/ocular": "~1.0",
         "sebastian/phpcpd": "~2.0",
         "symfony/http-foundation": "~2.0"
     },

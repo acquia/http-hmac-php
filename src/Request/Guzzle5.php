@@ -2,18 +2,18 @@
 
 namespace Acquia\Hmac\Request;
 
-use Guzzle\Http\Message\Request;
-use Guzzle\Http\Message\EntityEnclosingRequestInterface;
+use GuzzleHttp\Message\Request;
+use GuzzleHttp\Message\MessageInterface;
 
-class Guzzle3 implements RequestInterface
+class Guzzle5 implements RequestInterface
 {
     /**
-     * @var \Guzzle\Http\Message\Request
+     * @var \GuzzleHttp\Message\Request
      */
     protected $request;
 
     /**
-     * @param \Guzzle\Http\Message\Request $request
+     * @param \GuzzleHttp\Message\Request $request
      */
     public function __construct(Request $request)
     {
@@ -49,7 +49,7 @@ class Guzzle3 implements RequestInterface
      */
     public function getBody()
     {
-        return ($this->request instanceof EntityEnclosingRequestInterface) ? $this->request->getBody() : '';
+        return ($this->request instanceof MessageInterface) ? $this->request->getBody() : '';
     }
 
     /**

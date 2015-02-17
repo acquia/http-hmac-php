@@ -1,15 +1,16 @@
 <?php
 
-namespace Acquia\Hmac\Guzzle3;
+namespace Acquia\Hmac\Guzzle5;
 
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\Guzzle3 as RequestWrapper;
-use Guzzle\Common\Event;
-use Guzzle\Http\Message\Request;
-use Guzzle\Http\ClientInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Acquia\Hmac\Request\Guzzle5 as RequestWrapper;
+use GuzzleHttp\Message\Request;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Event\SubscriberInterface;
+use GuzzleHttp\Event\BeforeEvent;
 
-class HmacAuthPlugin implements EventSubscriberInterface
+
+class HmacAuthPlugin implements SubscriberInterface
 {
     /**
      * @var \Acquia\Hmac\RequestSignerInterface
@@ -62,25 +63,23 @@ class HmacAuthPlugin implements EventSubscriberInterface
     /**
      * {@inheritdoc}
      */
-    public static function getSubscribedEvents()
+    public static function getEvents()
     {
-        return array(
-            'request.before_send' => array('onRequestBeforeSend', -1000)
-        );
+        return ['before' => ['onBefore', -1000]];
     }
 
     /**
-     * Request before-send event handler.
-     *
-     * @param \Guzzle\Common\Event $event
+     * Request before event handler.
+     * 
+     * @param \GuzzleHttp\Event\BeforeEvent $event
      */
-    public function onRequestBeforeSend(Event $event)
+    public function onBefore(BeforeEvent $event)
     {
-        $this->signRequest($event['request']);
+        $this->signRequest($event->getRequest());
     }
 
     /**
-     * @param \Guzzle\Http\Message\Request $request
+     * @param \GuzzleHttp\Message\Request $request
      */
     public function signRequest(Request $request)
     {

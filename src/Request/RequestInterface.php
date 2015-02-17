@@ -33,7 +33,7 @@ interface RequestInterface
     public function getBody();
 
     /**
-     * Returns the resource, which is the path + query string of the request.
+     * Returns the resource, which is the path + query string + fragment of the request.
      *
      * @return string
      */
