@@ -98,4 +98,4 @@ class HmacAuthPlugin implements SubscriberInterface
         $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
         $request->setHeader('Authorization', $authorization);
     }
-}
+} 
