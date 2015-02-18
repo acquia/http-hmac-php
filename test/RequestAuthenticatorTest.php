@@ -4,7 +4,7 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
-use Guzzle\Http\ClientInterface;
+use GuzzleHttp\ClientInterface;
 
 class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
