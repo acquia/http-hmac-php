@@ -4,7 +4,6 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
-use Guzzle\Http\ClientInterface;
 
 class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
@@ -78,7 +77,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = new DummyRequest();
         $request->headers = array(
             'Content-Type' => 'text/plain',
-            'Date' => $time->format(ClientInterface::HTTP_DATE),
+            'Date' => $time->format('D, d M Y H:i:s \G\M\T'),
             'Authorization' => 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH,
         );
 

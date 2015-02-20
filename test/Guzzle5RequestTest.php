@@ -2,28 +2,19 @@
 
 namespace Acquia\Hmac\Test;
 
-use Acquia\Hmac\Request\Symfony;
-use Symfony\Component\HttpFoundation\Request;
+use Acquia\Hmac\Request\Guzzle5;
+use GuzzleHttp\Message\Request;
+use GuzzleHttp\Stream\Stream;
 
-class SymfonyRequestTest extends \PHPUnit_Framework_TestCase
+class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @return \Acquia\Hmac\Request\Guzzle5
      */
-    public function getRequest(array $headers = array(), $method = 'GET', $body = null)
+    public function getRequest(array $headers = array(), $method = 'GET')
     {
-        $query = array('key' => 'value');
-
-        $server = array(
-            'REQUEST_METHOD' => $method,
-            'REQUEST_URI' => '/resource/1?key=value',
-        );
-
-        foreach ($headers as $header => $value) {
-            $server['HTTP_' . $header] = $value;
-        }
-
-        return new Symfony(new Request($query, array(), array(), array(), array(), $server, $body));
+        $uri = 'http://example.com/resource/1?key=value';
+        return new Guzzle5(new Request($method, $uri, $headers));
     }
 
     public function testHasHeader()
@@ -55,7 +46,10 @@ class SymfonyRequestTest extends \PHPUnit_Framework_TestCase
         $request1 = $this->getRequest();
         $this->assertEquals('', $request1->getBody());
 
-        $request2 = $this->getRequest(array(), 'GET', 'test content');
+        $guzzleRequest = new Request('GET', 'http://example.com');
+        $stream = Stream::factory('test content');
+        $guzzleRequest->setBody($stream);
+        $request2 = new Guzzle5($guzzleRequest);
         $this->assertEquals('test content', $request2->getBody());
     }
 
