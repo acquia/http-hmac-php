@@ -8,7 +8,6 @@ use GuzzleHttp\Message\Request;
 use GuzzleHttp\Event\SubscriberInterface;
 use GuzzleHttp\Event\BeforeEvent;
 
-
 class HmacAuthPlugin implements SubscriberInterface
 {
     /**
@@ -97,4 +96,4 @@ class HmacAuthPlugin implements SubscriberInterface
         $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
         $request->setHeader('Authorization', $authorization);
     }
-} 
+}
