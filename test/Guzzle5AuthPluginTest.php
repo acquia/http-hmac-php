@@ -9,7 +9,6 @@ use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Subscriber\Mock;
 use GuzzleHttp\Stream\Stream;
-use GuzzleHttp\Exception\RequestException;
 
 class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 {
