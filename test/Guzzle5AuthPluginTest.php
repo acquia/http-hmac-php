@@ -8,6 +8,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Message\Request;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Exception\RequestException;
 
 class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 {
@@ -77,7 +79,8 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
             'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
             'Custom1' => 'Value1',
         ));
-        $request->setBody('test content');
+        $stream = Stream::factory('test content');
+        $request->setBody($stream);
 
         $plugin->signRequest($request);
 
@@ -87,16 +90,17 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testRegisterPlugin()
     {
-        $client = new Client('http://example.com');
+        $client = new Client(['base_url' => 'http://example.com']);
         $client->getEmitter()->attach($this->getPlugin());
 
         $mock = new Mock();
         $mock->addResponse(new Response(200));
         $client->getEmitter()->attach($mock);
 
-        $response = $client->get('/resource/1');
+        $request = $client->createRequest('GET', '/resource/1');
+        $client->send($request);
 
-        $authorization = (string) $response->getHeader('Authorization');
+        $authorization = (string) $request->getHeader('Authorization');
         $this->assertRegExp('@Acquia 1:([a-zA-Z0-9+/]+={0,2})$@', $authorization);
     }
 }

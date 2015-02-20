@@ -4,6 +4,7 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Request\Guzzle5;
 use GuzzleHttp\Message\Request;
+use GuzzleHttp\Stream\Stream;
 
 class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 {
@@ -46,7 +47,8 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('', $request1->getBody());
 
         $guzzleRequest = new Request('GET', 'http://example.com');
-        $guzzleRequest->setBody('test content');
+        $stream = Stream::factory('test content');
+        $guzzleRequest->setBody($stream);
         $request2 = new Guzzle5($guzzleRequest);
         $this->assertEquals('test content', $request2->getBody());
     }

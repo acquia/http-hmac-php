@@ -1,15 +1,15 @@
 <?php
 
-namespace Acquia\Hmac\Guzzle5;
+namespace Acquia\Hmac\Guzzle3;
 
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\Guzzle5 as RequestWrapper;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Event\BeforeEvent;
+use Acquia\Hmac\Request\Guzzle3 as RequestWrapper;
+use Guzzle\Common\Event;
+use Guzzle\Http\Message\Request;
+use Guzzle\Http\ClientInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-
-class HmacAuthPlugin implements SubscriberInterface
+class HmacAuthPlugin implements EventSubscriberInterface
 {
     /**
      * @var \Acquia\Hmac\RequestSignerInterface
@@ -62,23 +62,25 @@ class HmacAuthPlugin implements SubscriberInterface
     /**
      * {@inheritdoc}
      */
-    public function getEvents()
+    public static function getSubscribedEvents()
     {
-        return ['before' => ['onBefore', -1000]];
+        return array(
+            'request.before_send' => array('onRequestBeforeSend', -1000)
+        );
     }
 
     /**
-     * Request before event handler.
-     * 
-     * @param \GuzzleHttp\Event\BeforeEvent $event
+     * Request before-send event handler.
+     *
+     * @param \Guzzle\Common\Event $event
      */
-    public function onBefore(BeforeEvent $event)
+    public function onRequestBeforeSend(Event $event)
     {
-        $this->signRequest($event->getRequest());
+        $this->signRequest($event['request']);
     }
 
     /**
-     * @param \GuzzleHttp\Message\Request $request
+     * @param \Guzzle\Http\Message\Request $request
      */
     public function signRequest(Request $request)
     {
@@ -87,7 +89,7 @@ class HmacAuthPlugin implements SubscriberInterface
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
             $time->setTimezone(new \DateTimeZone('GMT'));
-            $request->setHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
+            $request->setHeader('Date', $time->format(ClientInterface::HTTP_DATE));
         }
 
         if (!$request->hasHeader('Content-Type')) {
@@ -97,4 +99,4 @@ class HmacAuthPlugin implements SubscriberInterface
         $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
         $request->setHeader('Authorization', $authorization);
     }
-} 
+}
