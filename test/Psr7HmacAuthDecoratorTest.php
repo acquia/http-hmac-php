@@ -93,13 +93,6 @@ class Psr7HmacAuthDecoratorTest extends \PHPUnit_Framework_TestCase
 
     public function testAddDecoratorToStack()
     {
-        $uri = '/resource/1?key=value';
-        $request = new Request('GET', $uri, array(
-            'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
-        ));
-
         $container = [];
         $history = Middleware::history($container);
 
@@ -115,7 +108,7 @@ class Psr7HmacAuthDecoratorTest extends \PHPUnit_Framework_TestCase
         $stack->push($history);
 
         $client = new Client(['base_url' => 'http://example.com', 'handler' => $stack]);
-        $client->send($request);
+        $client->get('/resource/1?key=value');
         $request = $container[0]['request'];
         $authorization = (string) $request->getHeader('Authorization')[0];
         $this->assertRegExp('@Acquia 1:([a-zA-Z0-9+/]+={0,2})$@', $authorization);

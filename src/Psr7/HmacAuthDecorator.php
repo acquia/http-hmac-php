@@ -58,9 +58,8 @@ class HmacAuthDecorator
 
     /**
      * @param \Psr\Http\Message\RequestInterface $request
-     * @param array                              $options
      *
-     * @return \Psr\Http\Message\RequestInterface $requestSigner
+     * @return \Psr\Http\Message\RequestInterface $request
      */
     public function __invoke(RequestInterface &$request)
     {

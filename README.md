@@ -29,21 +29,30 @@ for more detailed installation and usage instructions.
 
 ## Usage
 
-Sign an API request sent via Guzzle.
+Sign an API request sent via Guzzle 6.
 
 ```php
 
-use Acquia\Hmac\Guzzle3\HmacAuthPlugin;
+use Acquia\Hmac\Psr7\HmacAuthDecorator;
 use Acquia\Hmac\RequestSigner;
-use Guzzle\Http\Client;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\Middleware;
 
 $requestSigner = new RequestSigner();
-$plugin = new HmacAuthPlugin($requestSigner, 'apiKeyId', 'secretKey');
+$hmacAuthDecorator = new HmacAuthDecorator($requestSigner, 'apiKeyId', 'secretKey');
 
-$client = new Client('http://example.com');
-$client->addSubscriber($plugin);
+$handler = new CurlHandler();
+$stack = HandlerStack::create($handler); // Wrap w/ middleware
+$stack->push(Middleware::mapRequest($hmacAuthDecorator));
 
-$client->get('/resource')->send();
+$client = new Client([
+	'base_url' => 'http://example.com', 
+	'handler' => $stack
+]);
+
+$client->get('/resource/v1');
 
 ```
 
