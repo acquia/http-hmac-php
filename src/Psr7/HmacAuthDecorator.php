@@ -1,14 +1,12 @@
 <?php
 
-namespace Acquia\Hmac\Guzzle5;
+namespace Acquia\Hmac\Psr7;
 
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\Guzzle5 as RequestWrapper;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Event\BeforeEvent;
+use Acquia\Hmac\Request\Psr7RequestAdapter as RequestWrapper;
+use Psr\Http\Message\RequestInterface;
 
-class HmacAuthPlugin implements SubscriberInterface
+class HmacAuthDecorator
 {
     /**
      * @var \Acquia\Hmac\RequestSignerInterface
@@ -32,8 +30,8 @@ class HmacAuthPlugin implements SubscriberInterface
 
     /**
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param string $id
-     * @param string $secretKey
+     * @param string                              $id
+     * @param string                              $secretKey
      */
     public function __construct(RequestSignerInterface $requestSigner, $id, $secretKey)
     {
@@ -43,7 +41,7 @@ class HmacAuthPlugin implements SubscriberInterface
     }
 
     /**
-     * @var string $contentType
+     * @var string
      */
     public function setDefaultContentType($contentType)
     {
@@ -59,41 +57,30 @@ class HmacAuthPlugin implements SubscriberInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param \Psr\Http\Message\RequestInterface $request
+     * @param array                              $options
+     *
+     * @return \Psr\Http\Message\RequestInterface $requestSigner
      */
-    public function getEvents()
+    public function __invoke(RequestInterface &$request)
     {
-        return ['before' => ['onBefore', -1000]];
-    }
-
-    /**
-     * Request before event handler.
-     * 
-     * @param \GuzzleHttp\Event\BeforeEvent $event
-     */
-    public function onBefore(BeforeEvent $event)
-    {
-        $this->signRequest($event->getRequest());
-    }
-
-    /**
-     * @param \GuzzleHttp\Message\Request $request
-     */
-    public function signRequest(Request $request)
-    {
-        $requestWrapper = new RequestWrapper($request);
-
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
             $time->setTimezone(new \DateTimeZone('GMT'));
-            $request->setHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
+            $request = $request->withHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
         }
 
         if (!$request->hasHeader('Content-Type')) {
-            $request->setHeader('Content-Type', $this->defaultContentType);
+            $request = $request->withHeader('Content-Type', $this->defaultContentType);
         }
 
+        $requestWrapper = new requestWrapper($request);
+
         $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
-        $request->setHeader('Authorization', $authorization);
+
+        $request = $request->withHeader('Authorization', $authorization);
+
+        // Return decorated request
+        return $request;
     }
 }
