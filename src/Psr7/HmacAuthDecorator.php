@@ -61,7 +61,7 @@ class HmacAuthDecorator
      *
      * @return \Psr\Http\Message\RequestInterface $request
      */
-    public function __invoke(RequestInterface &$request)
+    public function __invoke(RequestInterface $request)
     {
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
