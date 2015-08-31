@@ -20,7 +20,7 @@ class Guzzle6 implements RequestInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function hasHeader($header)
     {
@@ -28,16 +28,17 @@ class Guzzle6 implements RequestInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getHeader($header)
     {
         $headers = $this->request->getHeader($header);
+
         return reset($headers);
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getMethod()
     {
@@ -45,7 +46,7 @@ class Guzzle6 implements RequestInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getBody()
     {
@@ -53,7 +54,7 @@ class Guzzle6 implements RequestInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getResource()
     {
@@ -62,11 +63,12 @@ class Guzzle6 implements RequestInterface
         $query = $url->getQuery();
         $fragment = $url->getFragment();
         if (!empty($query)) {
-          $resource .= '?' . $query;
+            $resource .= '?'.$query;
         }
         if (!empty($fragment)) {
-          $resource .= '#' . $fragment;
+            $resource .= '#'.$fragment;
         }
-      return $resource;
+
+        return $resource;
     }
 }

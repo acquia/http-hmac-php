@@ -1,6 +1,6 @@
 <?php
 
-namespace Acquia\Hmac\Test;
+namespace Acquia\Hmac\test;
 
 use Acquia\Hmac\Request\Guzzle6;
 use GuzzleHttp\Psr7\Request;
@@ -13,6 +13,7 @@ class Guzzle6RequestTest extends \PHPUnit_Framework_TestCase
     public function getRequest(array $headers = array(), $method = 'GET')
     {
         $uri = 'http://example.com/resource/1?key=value';
+
         return new Guzzle6(new Request($method, $uri, $headers));
     }
 

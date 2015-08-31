@@ -1,6 +1,6 @@
 <?php
 
-namespace Acquia\Hmac\Test;
+namespace Acquia\Hmac\test;
 
 use Acquia\Hmac\Guzzle6\HmacAuthHandler;
 use Acquia\Hmac\RequestSigner;
@@ -18,10 +18,12 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \Acquia\Hmac\RequestSigner;
      */
-    public function getSigner() {
-      $signer = new RequestSigner();
-      $signer->addCustomHeader('Custom1');
-      return $signer;
+    public function getSigner()
+    {
+        $signer = new RequestSigner();
+        $signer->addCustomHeader('Custom1');
+
+        return $signer;
     }
 
     /**
@@ -31,6 +33,7 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
     {
         $signer = $this->getSigner();
         $handler = new HmacAuthHandler($signer, $this->test_id, $this->test_secret_key);
+
         return $handler;
     }
 
@@ -92,14 +95,13 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
         $request = $handler->signRequest($request);
 
-        $expected = 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH;
+        $expected = 'Acquia 1:'.DigestVersion1Test::EXPECTED_HASH;
         $auth_header = $request->getHeader('Authorization');
         $this->assertEquals($expected, reset($auth_header));
     }
 
     public function testRegisterHandler()
     {
-
         $container = [];
         $history = Middleware::history($container);
 

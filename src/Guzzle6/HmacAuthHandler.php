@@ -3,7 +3,6 @@
 /**
  * A middleware handler to sign all requests.
  */
-
 namespace Acquia\Hmac\Guzzle6;
 
 use Acquia\Hmac\RequestSignerInterface;
@@ -11,7 +10,6 @@ use Acquia\Hmac\Request\Guzzle6 as RequestWrapper;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
-use JsonSchema\Uri\Retrievers\Curl;
 use Psr\Http\Message\RequestInterface;
 
 class HmacAuthHandler
@@ -38,31 +36,33 @@ class HmacAuthHandler
 
     /**
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param string $id
-     * @param string $secretKey
+     * @param string                              $id
+     * @param string                              $secretKey
      */
     public function __construct(RequestSignerInterface $requestSigner, $id, $secretKey)
     {
         $this->requestSigner = $requestSigner;
-        $this->id            = $id;
-        $this->secretKey     = $secretKey;
+        $this->id = $id;
+        $this->secretKey = $secretKey;
     }
 
     /**
      * Creates a new HmacAuthHandler that uses the default handler stack list of
      * middleware.
      */
-    public static function createWithMiddleware(RequestSignerInterface $requestSigner, $id, $secretKey, $handler = NULL) {
-      $auth_handler = new self($requestSigner, $id, $secretKey);
-      $handler = is_null($handler) ? new CurlHandler() : $handler;
-      $stack = new HandlerStack();
-      $stack->setHandler($handler);
-      $stack->push(Middleware::mapRequest(array($auth_handler, 'signRequest')));
-      return $stack;
+    public static function createWithMiddleware(RequestSignerInterface $requestSigner, $id, $secretKey, $handler = null)
+    {
+        $auth_handler = new self($requestSigner, $id, $secretKey);
+        $handler = is_null($handler) ? new CurlHandler() : $handler;
+        $stack = new HandlerStack();
+        $stack->setHandler($handler);
+        $stack->push(Middleware::mapRequest(array($auth_handler, 'signRequest')));
+
+        return $stack;
     }
 
     /**
-     * @var string $contentType
+     * @var string
      */
     public function setDefaultContentType($contentType)
     {
@@ -94,6 +94,7 @@ class HmacAuthHandler
 
         $requestWrapper = new RequestWrapper($request);
         $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
+
         return $request->withAddedHeader('Authorization', $authorization);
     }
 }
