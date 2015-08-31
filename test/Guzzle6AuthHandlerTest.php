@@ -39,12 +39,18 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDefaultContentType()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $handler = $this->getHandler();
         $this->assertEquals('application/json; charset=utf-8', $handler->getDefaultContentType());
     }
 
     public function testSetDefaultContentType()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $handler = $this->getHandler();
         $handler->setDefaultContentType('text/plain');
         $this->assertEquals('text/plain', $handler->getDefaultContentType());
@@ -52,6 +58,9 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testSetDefaultContentTypeHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $handler = $this->getHandler();
         $handler->setDefaultContentType('some/content-type');
 
@@ -65,6 +74,9 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testSetDefaultDateHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $handler = $this->getHandler();
 
         $uri = 'http://example.com/resource/1?key=value';
@@ -84,6 +96,9 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testAuthorizationHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $handler = $this->getHandler();
 
         $uri = 'http://example.com/resource/1?key=value';
@@ -102,6 +117,9 @@ class Guzzle6AuthHandlerTest extends \PHPUnit_Framework_TestCase
 
     public function testRegisterHandler()
     {
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6AuthHandlerTest requires Guzzle 6 compliant library.');
+        }
         $container = [];
         $history = Middleware::history($container);
 
