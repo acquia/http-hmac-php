@@ -49,6 +49,15 @@ class HmacAuthHandler
     /**
      * Creates a new HmacAuthHandler that uses the default handler stack list of
      * middleware.
+     *
+     * @param \Acquia\Hmac\RequestSignerInterface   $requestSigner
+     *   An authentication signer
+     * @param string                                $id
+     *   The public key for signing
+     * $param string                                $secretKey
+     *   The secret key for signing
+     * @param callable                               $handler
+     *   (Optional) a callable handler to be set in the middleware stack.
      */
     public static function createWithMiddleware(RequestSignerInterface $requestSigner, $id, $secretKey, $handler = null)
     {
