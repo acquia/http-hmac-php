@@ -53,7 +53,7 @@ class HmacAuthHandler
     public static function createWithMiddleware(RequestSignerInterface $requestSigner, $id, $secretKey, $handler = null)
     {
         $auth_handler = new self($requestSigner, $id, $secretKey);
-        $handler = is_null($handler) ? new CurlHandler() : $handler;
+        $handler = is_callable($handler) ? $handler : new CurlHandler();
         $stack = new HandlerStack();
         $stack->setHandler($handler);
         $stack->push(Middleware::mapRequest(array($auth_handler, 'signRequest')));
