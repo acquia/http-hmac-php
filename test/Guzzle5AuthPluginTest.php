@@ -17,6 +17,9 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
      */
     public function getPlugin()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $signer = new RequestSigner();
         $signer->addCustomHeader('Custom1');
 
@@ -26,12 +29,18 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testGetDefaultContentType()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $plugin = $this->getPlugin();
         $this->assertEquals('application/json; charset=utf-8', $plugin->getDefaultContentType());
     }
 
     public function testSetDefaultContentType()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $plugin = $this->getPlugin();
         $plugin->setDefaultContentType('text/plain');
         $this->assertEquals('text/plain', $plugin->getDefaultContentType());
@@ -39,6 +48,9 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testSetDefaultContentTypeHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $plugin = $this->getPlugin();
         $plugin->setDefaultContentType('some/content-type');
 
@@ -51,6 +63,9 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testSetDefaultDateHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $plugin = $this->getPlugin();
 
         $uri = 'http://example.com/resource/1?key=value';
@@ -70,6 +85,9 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testAuthorizationHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $plugin = $this->getPlugin();
 
         $uri = 'http://example.com/resource/1?key=value';
@@ -89,6 +107,9 @@ class Guzzle5AuthPluginTest extends \PHPUnit_Framework_TestCase
 
     public function testRegisterPlugin()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5AuthPluginTest requires Guzzle 5 compliant library.');
+        }
         $client = new Client(['base_url' => 'http://example.com']);
         $client->getEmitter()->attach($this->getPlugin());
 
