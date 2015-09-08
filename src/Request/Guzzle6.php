@@ -34,7 +34,8 @@ class Guzzle6 implements RequestInterface
     {
         $headers = $this->request->getHeader($header);
 
-        return reset($headers);
+        $header_value = reset($headers);
+        return $header_value;
     }
 
     /**
