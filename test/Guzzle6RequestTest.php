@@ -1,6 +1,6 @@
 <?php
 
-namespace Acquia\Hmac\test;
+namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Request\Guzzle6;
 use GuzzleHttp\Psr7\Request;

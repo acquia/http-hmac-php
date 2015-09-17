@@ -1,6 +1,6 @@
 <?php
 
-namespace Acquia\Hmac\test;
+namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Guzzle6\HmacAuthHandler;
 use Acquia\Hmac\RequestSigner;
