@@ -2,25 +2,25 @@
 
 namespace Acquia\Hmac\Test;
 
-use Acquia\Hmac\Request\Guzzle5;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Stream\Stream;
+use Acquia\Hmac\Request\Guzzle6;
+use GuzzleHttp\Psr7\Request;
 
-class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
+class Guzzle6RequestTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @return \Acquia\Hmac\Request\Guzzle5
+     * @return \Acquia\Hmac\Request\Guzzle6
      */
     public function getRequest(array $headers = array(), $method = 'GET')
     {
         $uri = 'http://example.com/resource/1?key=value';
-        return new Guzzle5(new Request($method, $uri, $headers));
+
+        return new Guzzle6(new Request($method, $uri, $headers));
     }
 
     public function testHasHeader()
     {
-        if (!GuzzleVersionChecker::hasGuzzle5()) {
-            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6RequestTest requires Guzzle 6 compliant library.');
         }
         $request = $this->getRequest(array('header' => 'value'));
 
@@ -30,8 +30,8 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetHeader()
     {
-        if (!GuzzleVersionChecker::hasGuzzle5()) {
-            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6RequestTest requires Guzzle 6 compliant library.');
         }
         $request = $this->getRequest(array('header' => 'value'));
         $this->assertEquals('value', $request->getHeader('header'));
@@ -40,8 +40,8 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMethod()
     {
-        if (!GuzzleVersionChecker::hasGuzzle5()) {
-            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6RequestTest requires Guzzle 6 compliant library.');
         }
         $request1 = $this->getRequest(array(), 'GET');
         $this->assertEquals('GET', $request1->getMethod());
@@ -52,23 +52,21 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBody()
     {
-        if (!GuzzleVersionChecker::hasGuzzle5()) {
-            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6RequestTest requires Guzzle 6 compliant library.');
         }
         $request1 = $this->getRequest();
         $this->assertEquals('', $request1->getBody());
 
-        $guzzleRequest = new Request('GET', 'http://example.com');
-        $stream = Stream::factory('test content');
-        $guzzleRequest->setBody($stream);
-        $request2 = new Guzzle5($guzzleRequest);
+        $guzzleRequest = new Request('GET', 'http://example.com', [], 'test content');
+        $request2 = new Guzzle6($guzzleRequest);
         $this->assertEquals('test content', $request2->getBody());
     }
 
     public function testGetResource()
     {
-        if (!GuzzleVersionChecker::hasGuzzle5()) {
-            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        if (!GuzzleVersionChecker::hasGuzzle6()) {
+            $this->markTestSkipped('Guzzle6RequestTest requires Guzzle 6 compliant library.');
         }
         $request = $this->getRequest();
         $this->assertEquals('/resource/1?key=value', $request->getResource());
