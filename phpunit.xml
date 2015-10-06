@@ -13,6 +13,15 @@
        <testsuite name="HMAC Request">
          <directory suffix="Test.php">test</directory>
        </testsuite>
+        <testsuite name="Guzzle3">
+          <directory prefix="Guzzle3">test</directory>
+        </testsuite>
+        <testsuite name="Guzzle5">
+          <directory prefix="Guzzle5">test</directory>
+        </testsuite>
+        <testsuite name="Guzzle6">
+          <directory prefix="Guzzle6">test</directory>
+        </testsuite>
     </testsuites>
 
     <filter>

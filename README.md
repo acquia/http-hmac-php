@@ -29,7 +29,7 @@ for more detailed installation and usage instructions.
 
 ## Usage
 
-Sign an API request sent via Guzzle.
+Sign an API request sent via Guzzle 5.
 
 ```php
 
@@ -44,6 +44,22 @@ $client = new Client('http://example.com');
 $client->addSubscriber($plugin);
 
 $client->get('/resource')->send();
+
+```
+
+Sign an API request sent via Guzzle 6.
+
+```php
+
+use Acquia\Hmac\Guzzle6\HmacAuthHandler;
+use Acquia\Hmac\RequestSigner;
+use GuzzleHttp\Client;
+
+$requestSigner = new RequestSigner();
+$stack = HmacAuthHandler::createWithMiddleware($requestSigner, 'apiKeyId', 'secretKey');
+
+$client = new Client(['handler' => $stack]);
+$client->get('http://example.com/resource');
 
 ```
 

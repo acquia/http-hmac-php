@@ -19,6 +19,9 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testHasHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        }
         $request = $this->getRequest(array('header' => 'value'));
 
         $this->assertTrue($request->hasHeader('header'));
@@ -27,6 +30,9 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetHeader()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        }
         $request = $this->getRequest(array('header' => 'value'));
         $this->assertEquals('value', $request->getHeader('header'));
         $this->assertEmpty($request->getHeader('missing'));
@@ -34,6 +40,9 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetMethod()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        }
         $request1 = $this->getRequest(array(), 'GET');
         $this->assertEquals('GET', $request1->getMethod());
 
@@ -43,6 +52,9 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetBody()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        }
         $request1 = $this->getRequest();
         $this->assertEquals('', $request1->getBody());
 
@@ -55,6 +67,9 @@ class Guzzle5RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testGetResource()
     {
+        if (!GuzzleVersionChecker::hasGuzzle5()) {
+            $this->markTestSkipped('Guzzle5RequestTest requires Guzzle 5 compliant library.');
+        }
         $request = $this->getRequest();
         $this->assertEquals('/resource/1?key=value', $request->getResource());
     }
