@@ -29,11 +29,6 @@ class HmacAuthMiddleware
     protected $defaultContentType = 'application/json; charset=utf-8';
 
     /**
-     * @var \Psr\Http\Message\RequestInterface|null
-     */
-    protected $lastRequest;
-
-    /**
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
      * @param string $id
      * @param string $secretKey
@@ -71,7 +66,7 @@ class HmacAuthMiddleware
     public function __invoke(callable $handler)
     {
         return function ($request, array $options) use ($handler) {
-            $this->lastRequest = $request = $this->signRequest($request);
+            $request = $this->signRequest($request);
             return $handler($request, $options);
         };
     }
@@ -96,16 +91,6 @@ class HmacAuthMiddleware
         }
 
         $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey);
-        $request = $request->withHeader('Authorization', $authorization);
-
-        return $request;
-    }
-
-    /**
-     * @var \Psr\Http\Message\RequestInterface|null
-     */
-    public function getLastRequest()
-    {
-        return $this->lastRequest;
+        return $request->withHeader('Authorization', $authorization);
     }
 }

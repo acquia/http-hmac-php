@@ -7,6 +7,7 @@ use Acquia\Hmac\RequestSigner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
@@ -20,8 +21,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->addCustomHeader('Custom1');
 
-        $middleware = new HmacAuthMiddleware($signer, '1', 'secret-key');
-        return $middleware;
+        return new HmacAuthMiddleware($signer, '1', 'secret-key');
     }
 
     public function testGetDefaultContentType()
@@ -86,9 +86,13 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
         $middleware = $this->getMiddleware();
 
+        $container = [];
+        $history = Middleware::history($container);
+
         $stack = new HandlerStack();
         $stack->setHandler(new MockHandler([new Response(200)]));
         $stack->push($middleware);
+        $stack->push($history);
 
         $client = new Client([
             'base_url' => 'http://example.com',
@@ -97,12 +101,10 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 
         $client->get('/resource/1');
 
-        $request = $middleware->getLastRequest();
-        if ($request !== null) {
-            $authorization = $request->getHeaderLine('Authorization');
-            $this->assertRegExp('@Acquia 1:([a-zA-Z0-9+/]+={0,2})$@', $authorization);
-        } else {
-            $this->fail('Request was not signed.');
-        }
+        $transaction = reset($container);
+        $request = $transaction['request'];
+        $authorization = $request->getHeaderLine('Authorization');
+
+        $this->assertRegExp('@Acquia 1:([a-zA-Z0-9+/]+={0,2})$@', $authorization);
     }
 }
