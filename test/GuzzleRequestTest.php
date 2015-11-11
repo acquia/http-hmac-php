@@ -2,19 +2,18 @@
 
 namespace Acquia\Hmac\Test;
 
-use Acquia\Hmac\Request\Guzzle3;
-use Guzzle\Http\Message\Request;
-use Guzzle\Http\Message\EntityEnclosingRequest;
+use Acquia\Hmac\Request\Guzzle;
+use GuzzleHttp\Psr7\Request;
 
-class Guzzle3RequestTest extends \PHPUnit_Framework_TestCase
+class GuzzleRequestTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @return \Acquia\Hmac\Request\Guzzle3
+     * @return \Acquia\Hmac\Request\Guzzle
      */
     public function getRequest(array $headers = array(), $method = 'GET')
     {
         $uri = 'http://example.com/resource/1?key=value';
-        return new Guzzle3(new Request($method, $uri, $headers));
+        return new Guzzle(new Request($method, $uri, $headers));
     }
 
     public function testHasHeader()
@@ -28,6 +27,7 @@ class Guzzle3RequestTest extends \PHPUnit_Framework_TestCase
     public function testGetHeader()
     {
         $request = $this->getRequest(array('header' => 'value'));
+
         $this->assertEquals('value', $request->getHeader('header'));
         $this->assertEmpty($request->getHeader('missing'));
     }
@@ -46,9 +46,7 @@ class Guzzle3RequestTest extends \PHPUnit_Framework_TestCase
         $request1 = $this->getRequest();
         $this->assertEquals('', $request1->getBody());
 
-        $guzzleRequest = new EntityEnclosingRequest('GET', 'http://example.com');
-        $guzzleRequest->setBody('test content');
-        $request2 = new Guzzle3($guzzleRequest);
+        $request2 = new Guzzle(new Request('GET', 'http://example.com', [], 'test content'));
         $this->assertEquals('test content', $request2->getBody());
     }
 

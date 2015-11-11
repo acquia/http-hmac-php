@@ -2,18 +2,17 @@
 
 namespace Acquia\Hmac\Request;
 
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\MessageInterface;
+use GuzzleHttp\Psr7\Request;
 
-class Guzzle5 implements RequestInterface
+class Guzzle implements RequestInterface
 {
     /**
-     * @var \GuzzleHttp\Message\Request
+     * @var \GuzzleHttp\Psr7\Request
      */
     protected $request;
 
     /**
-     * @param \GuzzleHttp\Message\Request $request
+     * @param \GuzzleHttp\Psr7\Request $request
      */
     public function __construct(Request $request)
     {
@@ -33,7 +32,7 @@ class Guzzle5 implements RequestInterface
      */
     public function getHeader($header)
     {
-        return (string) $this->request->getHeader($header);
+        return $this->request->getHeaderLine($header);
     }
 
     /**
@@ -49,7 +48,8 @@ class Guzzle5 implements RequestInterface
      */
     public function getBody()
     {
-        return ($this->request instanceof MessageInterface) ? $this->request->getBody() : '';
+
+        return $this->request->getBody();
     }
 
     /**
@@ -57,6 +57,6 @@ class Guzzle5 implements RequestInterface
      */
     public function getResource()
     {
-        return $this->request->getResource();
+        return $this->request->getRequestTarget();
     }
 }
