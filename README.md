@@ -33,17 +33,22 @@ Sign an API request sent via Guzzle.
 
 ```php
 
-use Acquia\Hmac\Guzzle3\HmacAuthPlugin;
+use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\RequestSigner;
-use Guzzle\Http\Client;
+use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
 
 $requestSigner = new RequestSigner();
-$plugin = new HmacAuthPlugin($requestSigner, 'apiKeyId', 'secretKey');
+$middleware = new HmacAuthMiddleware($requestSigner, 'apiKeyId', 'secretKey');
 
-$client = new Client('http://example.com');
-$client->addSubscriber($plugin);
+$stack = HandlerStack::create();
+$stack->push($middleware);
 
-$client->get('/resource')->send();
+$client = new Client([
+    'handler' => $stack,
+]);
+
+$client->get('http://example.com/resource');
 
 ```
 
