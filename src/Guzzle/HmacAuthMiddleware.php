@@ -67,28 +67,26 @@ class HmacAuthMiddleware
     {
         return function ($request, array $options) use ($handler) {
 
-            $request = $this->onBefore($request);
+            $request = $this->signRequest($request);
 
             return $handler($request, $options);
         };
     }
 
-    private function onBefore(RequestInterface $request)
+    public function signRequest(RequestInterface $request)
     {
-        $requestWrapper = new RequestWrapper($request);
-
         if (!$request->hasHeader('Date')) {
             $time = new \DateTime();
             $time->setTimezone(new \DateTimeZone('GMT'));
-            $request->setHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
+            $request = $request->withHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
         }
 
         if (!$request->hasHeader('Content-Type')) {
-            $request->setHeader('Content-Type', $this->defaultContentType);
+            $request = $request->withHeader('Content-Type', $this->defaultContentType);
         }
 
-        $authorization = $this->requestSigner->getAuthorization($requestWrapper, $this->id, $this->secretKey);
-        $request->setHeader('Authorization', $authorization);
+        $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey);
+        $request = $request->withHeader('Authorization', $authorization);
 
         return $request;
     }

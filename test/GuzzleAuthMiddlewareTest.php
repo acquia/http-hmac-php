@@ -5,8 +5,8 @@ namespace Acquia\Hmac\Test;
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\RequestSigner;
 use GuzzleHttp\Client;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Subscriber\Mock;
 use GuzzleHttp\Stream\Stream;
 
@@ -35,5 +35,15 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $middleware = $this->getMiddleware();
         $middleware->setDefaultContentType('text/plain');
         $this->assertEquals('text/plain', $middleware->getDefaultContentType());
+    }
+
+    public function testSetDefaultContentTypeHeader()
+    {
+        $middleware = $this->getMiddleware();
+        $middleware->setDefaultContentType('some/content-type');
+
+        $uri = 'http://example.com/resource/1?key=value';
+        $request = $middleware->signRequest(new Request('GET', $uri, []));
+        $this->assertEquals('some/content-type', $request->getHeaderLine('Content-Type'));
     }
 }
