@@ -45,11 +45,23 @@ class RequestSigner implements RequestSignerInterface
             throw new Exception\MalformedRequestException('Authorization header required');
         }
 
-        $provider = preg_quote($this->provider, '@');
-        $pattern = '@^' . $provider . ' ([a-zA-Z0-9]+):([a-zA-Z0-9+/]+={0,2})$@';
+        // Check the provider.
+        $header = $request->getHeader('Authorization');
+        if ($pos = strpos($header, $this->provider . ' ') === false) {
+            throw new Exception\MalformedRequestException('Invalid provider in authorization header');
+        }
 
-        if (!preg_match($pattern, $request->getHeader('Authorization'), $matches)) {
-            throw new Exception\MalformedRequestException('Authorization header not valid');
+        // Split ID and sgnature by an unescaped colon.
+        $offset = strlen($this->provider) + 1;
+        $credentials = substr($header, $offset);
+        $matches = preg_split('@\\\\.(*SKIP)(*FAIL)|:@s', $credentials);
+        if (!isset($matches[1])) {
+            throw new Exception\MalformedRequestException('Unable to parse ID and signature from authorization header');
+        }
+
+        // Ensure the signature is a base64 encoded string.
+        if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $matches[1])) {
+            throw new Exception\MalformedRequestException('Invalid signature in authorization header');
         }
 
         $time = $this->getTimestamp($request);
@@ -58,7 +70,7 @@ class RequestSigner implements RequestSignerInterface
             throw new Exception\MalformedRequestException('Timestamp not valid');
         }
 
-        return new Signature($matches[1], $matches[2], $timestamp);
+        return new Signature(stripslashes($matches[0]), $matches[1], $timestamp);
     }
 
     /**
@@ -80,7 +92,7 @@ class RequestSigner implements RequestSignerInterface
     public function getAuthorization(RequestInterface $request, $id, $secretKey)
     {
         $signature = $this->signRequest($request, $secretKey);
-        return $this->provider . ' ' . $id . ':' . $signature;
+        return $this->provider . ' ' . str_replace(':', '\\:', $id) . ':' . $signature;
     }
 
     /**
