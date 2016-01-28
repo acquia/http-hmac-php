@@ -8,7 +8,7 @@
 [![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 [![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 
-HMAC Request Signer is a PHP library that implements the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec)
+HMAC Request Signer is a PHP library that implements the version 1.0 of the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec/tree/1.0)
 to sign and verify RESTful Web API requests. It integrates with popular libraries such as
 Symfony and Guzzle and can be used on both the server and client.
 
