@@ -2,8 +2,9 @@
 
 [![Build Status](https://travis-ci.org/acquia/http-hmac-php.svg)](https://travis-ci.org/acquia/http-hmac-php)
 [![Code Coverage](https://scrutinizer-ci.com/g/acquia/http-hmac-php/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/acquia/http-hmac-php/?branch=master)
-[![HHVM Status](http://hhvm.h4cc.de/badge/acquia/http-hmac-php.svg)](http://hhvm.h4cc.de/package/acquia/http-hmac-php)
+[![HHVM Status](http://hhvm.h4cc.de/badge/acquia/http-hmac-php.svg?style=flat)](http://hhvm.h4cc.de/package/acquia/http-hmac-php)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/acquia/http-hmac-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/acquia/http-hmac-php/?branch=master)
+[![Total Downloads](https://poser.pugx.org/acquia/http-hmac-php/downloads)](https://packagist.org/packages/acquia/http-hmac-php)
 [![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 [![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 
