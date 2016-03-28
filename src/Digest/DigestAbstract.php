@@ -15,7 +15,7 @@ abstract class DigestAbstract implements DigestInterface
     /**
      * @param string $algorithm
      */
-    public function __construct($algorithm = 'sha1')
+    public function __construct($algorithm = 'sha256')
     {
         $this->algorithm = $algorithm;
     }
@@ -44,8 +44,9 @@ abstract class DigestAbstract implements DigestInterface
      */
     public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
-        $message = $this->getMessage($requestSigner, $request);
-        $digest = hash_hmac($this->algorithm, $message, $secretKey, true);
+        $message = $this->getMessage($requestSigner, $request, $secretKey);
+        // @TODO 3.0 we need to accept the secret key as a base64 encoded string and decode before creating the hash.
+        $digest = hash_hmac($this->algorithm, $message, base64_decode($secretKey), true);
         return base64_encode($digest);
     }
 
@@ -54,8 +55,9 @@ abstract class DigestAbstract implements DigestInterface
      *
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
      * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param string $secretKey
      *
      * @return string
      */
-    abstract protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request);
+    abstract protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey);
 }

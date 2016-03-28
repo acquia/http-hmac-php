@@ -25,17 +25,19 @@ interface RequestInterface
      */
     public function getMethod();
 
+    // @TODO 3.0 Document
+    public function getHost();
+
+    // @TODO 3.0 Document
+    public function getPath();
+
+    // @TODO 3.0 Document
+    public function getQueryParameters();
+
     /**
      * Returns the raw request body.
      *
      * @return string
      */
     public function getBody();
-
-    /**
-     * Returns the resource, which is the path + query string + fragment of the request.
-     *
-     * @return string
-     */
-    public function getResource();
 }

@@ -14,12 +14,22 @@ class RequestSigner implements RequestSignerInterface
     /**
      * @var string
      */
-    protected $provider = 'Acquia';
+    protected $realm = 'Acquia';
+
+    /**
+     * @var string
+     */
+    protected $id;
+
+    /**
+     * @var string
+     */
+    protected $nonce;
 
     /**
      * @var array
      */
-    protected $timestampHeaders = array('Date');
+    protected $timestampHeaders = array('X-Authorization-Timestamp');
 
     /**
      * @var array
@@ -31,7 +41,19 @@ class RequestSigner implements RequestSignerInterface
      */
     public function __construct(Digest\DigestInterface $digest = null)
     {
-        $this->digest = $digest ?: new Digest\Version1();
+        $this->digest = $digest ?: new Digest\Version2();
+    }
+
+    // @TODO 3.0 Interface/test
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    // @TODO 3.0 Interface/test
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
     /**
@@ -41,36 +63,49 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getSignature(RequestInterface $request)
     {
+        // @TODO 3.0 better AuthHeader handling, probably new class
+        $header = $request->getHeader('Authorization');
         if (!$request->hasHeader('Authorization')) {
             throw new Exception\MalformedRequestException('Authorization header required');
         }
 
-        // Check the provider.
-        $header = $request->getHeader('Authorization');
-        if ($pos = strpos($header, $this->provider . ' ') === false) {
-            throw new Exception\MalformedRequestException('Invalid provider in authorization header');
+        $id = '';
+        $signature = '';
+        foreach (explode("\n", $header) as $auth_info) {
+          $auth_parts = explode(':', $auth_info);
+          if (count($auth_parts) < 2) {
+            continue;
+          }
+          $key = trim($auth_parts[0]);
+          // @TODO 3.0 better quote replacement.
+          $value = preg_replace('/[,\"]/', '', trim($auth_parts[1]));
+          switch ($key) {
+            case 'realm':
+              $realm = $value;
+              break;
+            case 'id':
+              $id = $value;
+              break;
+            case 'signature':
+              $signature = $value;
+              break;
+          }
         }
 
-        // Split ID and sgnature by an unescaped colon.
-        $offset = strlen($this->provider) + 1;
-        $credentials = substr($header, $offset);
-        $matches = preg_split('@\\\\.(*SKIP)(*FAIL)|:@s', $credentials);
-        if (!isset($matches[1])) {
-            throw new Exception\MalformedRequestException('Unable to parse ID and signature from authorization header');
-        }
+        // @TODO 3.0 exceptions if realm, id or signature empty.
 
         // Ensure the signature is a base64 encoded string.
-        if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $matches[1])) {
+        if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $signature)) {
             throw new Exception\MalformedRequestException('Invalid signature in authorization header');
         }
 
-        $time = $this->getTimestamp($request);
-        $timestamp = strtotime($time);
+        $timestamp = $this->getTimestamp($request);
+        // @TODO 3.0 validate a timestamp
         if (!$timestamp) {
             throw new Exception\MalformedRequestException('Timestamp not valid');
         }
 
-        return new Signature(stripslashes($matches[0]), $matches[1], $timestamp);
+        return new Signature(stripslashes($id), $signature, $timestamp);
     }
 
     /**
@@ -84,34 +119,86 @@ class RequestSigner implements RequestSignerInterface
         return $this->digest->get($this, $request, $secretKey);
     }
 
+    // @TODO 3.0 Interface
+    // @TODO 3.0 Test
+    public function getHashedBody(RequestInterface $request) {
+        $hash = '';
+        if (!empty((string) $request->getBody())) { 
+            $hash = $this->digest->getHashedBody($request);
+        }
+        return $hash;
+    }
+
     /**
      * {@inheritDoc}
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey)
+    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null)
     {
-        $signature = $this->signRequest($request, $secretKey);
-        return $this->provider . ' ' . str_replace(':', '\\:', $id) . ':' . $signature;
+        // @TODO 3.0 New Authorization header format:
+        // realm: The provider, for example "Acquia", "MyCompany", etc.
+        // id: The API key's unique identifier, which is an arbitrary string
+        // nonce: a hex version 4 (or version 1) UUID.
+        // version: the version of this spec
+        // headers: a list of additional request headers that are to be included in the signature base string. These are lower-case, and separated with ;
+        // signature: the Signature (base64 encoded) as described below.
+        // Each value should be enclosed in double quotes and urlencoded (percent encoded).
+
+        $this->setId($id);
+
+        // e.g. Authorization: acquia-http-hmac realm="Pipet%20service",
+        // @TODO 3.0 generate a UUID nonce if not supplied.
+        // @TODO 3.0 supply the headers.
+        // @TODO 3.0 This temporarily had newlines, so make sure the parser doesn't expect them
+        // @TODO 3.0 real dynamic default nonce, or handle better via the API
+        if (!empty($nonce)) {
+          $this->setNonce($nonce);
+        } elseif (empty($this->getNonce())) {
+          $this->setNonce($this->generateNonce());
+        }
+        $nonce = $this->getNonce();
+
+        $signed_headers = implode(';', array_keys($this->getCustomHeaders($request)));
+        return 'acquia-http-hmac realm="' . $this->realm . '",'
+        . 'id="' . $id . '",'
+        . 'nonce="' . $nonce . '",'
+        . 'version="2.0",'
+        . 'headers="' . $signed_headers . '",'
+        . 'signature="' . $this->signRequest($request, $secretKey) . '"';
     }
 
     /**
-     * @param string $provider
+     * @param string $realm
      *
      * @return \Acquia\Hmac\RequestSigner
      */
-    public function setProvider($provider)
+    public function setRealm($realm)
     {
-        $this->provider = $provider;
+        $this->realm = $realm;
         return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getProvider()
+    public function getRealm()
     {
-        return $this->provider;
+        return $this->realm;
+    }
+
+    // @TODO 3.0 Interface
+    // @TODO Test
+    public function setNonce($nonce)
+    {
+        $this->nonce = $nonce;
+    }
+
+    // @TODO 3.0 Interface
+    // @TODO Test
+    public function getNonce()
+    {
+        return $this->nonce;
     }
 
     /**
@@ -167,10 +254,6 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getContentType(RequestInterface $request)
     {
-        if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequestException('Content type header required');
-        }
-
         return $request->getHeader('Content-Type');
     }
 
@@ -179,6 +262,7 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getTimestamp(RequestInterface $request)
     {
+        // @TODO 3.0 only the X-Authorization-Timestamp is valid here.
         foreach ($this->timestampHeaders as $header) {
             if ($request->hasHeader($header)) {
                 return $request->getHeader($header);
@@ -206,5 +290,28 @@ class RequestSigner implements RequestSignerInterface
             }
         }
         return $headers;
+    }
+
+    // @TODO 3.0 interface/test
+    public function generateNonce() {
+        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            // 32 bits for "time_low"
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+
+            // 16 bits for "time_mid"
+            mt_rand( 0, 0xffff ),
+
+            // 16 bits for "time_hi_and_version",
+            // four most significant bits holds version number 4
+            mt_rand( 0, 0x0fff ) | 0x4000,
+
+            // 16 bits, 8 bits for "clk_seq_hi_res",
+            // 8 bits for "clk_seq_low",
+            // two most significant bits holds zero and one for variant DCE1.1
+            mt_rand( 0, 0x3fff ) | 0x8000,
+
+            // 48 bits for "node"
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+        );
     }
 }

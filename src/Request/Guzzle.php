@@ -43,20 +43,29 @@ class Guzzle implements RequestInterface
         return $this->request->getMethod();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getBody()
-    {
+    // @TODO 3.0 Implement
+    public function getHost() {
+      $port = $this->request->getUri()->getPort();
+      $host = $this->request->getUri()->getHost();
+      $host_string = empty($port) ? $host : "$host:$port";
+      return $host_string;
+    }
 
-        return $this->request->getBody();
+    // @TODO 3.0 Implement
+    public function getPath() {
+      return $this->request->getUri()->getPath();
+    }
+
+    // @TODO 3.0 Implement
+    public function getQueryParameters() {
+      return $this->request->getUri()->getQuery();
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getResource()
+    public function getBody()
     {
-        return $this->request->getRequestTarget();
+        return $this->request->getBody();
     }
 }

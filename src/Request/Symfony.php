@@ -43,6 +43,24 @@ class Symfony implements RequestInterface
         return $this->request->getMethod();
     }
 
+    // @TODO 3.0 Document
+    public function getHost()
+    {
+        return $this->request->getUrl->getHost();
+    }
+
+    // @TODO 3.0 Document
+    public function getPath()
+    {
+        return $this->request->getUrl->getPath();
+    }
+
+    // @TODO 3.0 Document
+    // @TODO 3.0 Not sure of the format for this one.
+    public function getQueryParameters() {
+        return $this->request->getUrl->getQuery();
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -3,6 +3,7 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
+use Acquia\Hmac\Request\Psr7;
 use Acquia\Hmac\RequestSigner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -13,15 +14,33 @@ use GuzzleHttp\Psr7\Response;
 
 class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
+    protected $auth_id;
+
+    protected $auth_secret;
+
+    protected function setUp()
+    {
+        $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+    }
+
     /**
      * @return \Acquia\Hmac\Guzzle\HmacAuthMiddleware
      */
-    public function getMiddleware()
+    public function getMiddleware(RequestSigner $requestSigner = null, $id = null, $secret = null)
     {
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        if (empty($requestSigner)) {
+            $requestSigner = new RequestSigner();
+        }
 
-        return new HmacAuthMiddleware($signer, '1', 'secret-key');
+        if (empty($id)) {
+            $id = $this->auth_id;
+        } 
+        if (empty($secret)) {
+            $secret = $this->auth_secret;
+        }
+       
+        return new HmacAuthMiddleware($requestSigner, $id, $secret);
     }
 
     public function testGetDefaultContentType()
@@ -54,8 +73,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $uri = 'http://example.com/resource/1?key=value';
         $request = $middleware->signRequest(new Request('GET', $uri, []));
 
-        $date = $request->getHeaderLine('Date');
-        $timestamp = strtotime($date);
+        $timestamp = (int) $request->getHeaderLine('X-Authorization-Timestamp');
 
         // It shouldn't take this test 10 seconds to run, but pad it since we
         // can not assume the time will be exactly the same.
@@ -66,25 +84,37 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 
     public function testAuthorizationHeader()
     {
-        $middleware = $this->getMiddleware();
+        $requestSigner = new RequestSigner();
+        $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $requestSigner->setRealm('Pipet service');
+        $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
 
-        $uri = 'http://example.com/resource/1?key=value';
+        $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
+
+        $uri = 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10';
 
         $headers = [
-            'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
+          'X-Authorization-Timestamp' => '1432075982',
         ];
+        $request = $middleware->signRequest(new Request('GET', $uri, $headers));
 
-        $request = $middleware->signRequest(new Request('GET', $uri, $headers, 'test content'));
-
-        $expected = 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH;
+        $expected = 'acquia-http-hmac realm="Pipet service",'
+                    . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
+                    . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                    . 'version="2.0",'
+                    . 'headers="",'
+                    . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
         $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
     }
 
     public function testRegisterPlugin()
     {
-        $middleware = $this->getMiddleware();
+        $requestSigner = new RequestSigner();
+        $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $requestSigner->setRealm('Pipet service');
+        $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
+
+        $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
 
         $container = [];
         $history = Middleware::history($container);
@@ -95,16 +125,29 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $stack->push($history);
 
         $client = new Client([
-            'base_url' => 'http://example.com',
+            'base_uri' => 'https://example.acquiapipet.net/',
             'handler' => $stack,
         ]);
 
-        $client->get('/resource/1');
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+        ];
+
+        $client->request('GET', '/v1.0/task-status/133', [
+          'query' => ['limit' => '10'],
+          'headers' => $headers,
+        ]);
 
         $transaction = reset($container);
         $request = $transaction['request'];
-        $authorization = $request->getHeaderLine('Authorization');
 
-        $this->assertRegExp('@Acquia 1:([a-zA-Z0-9+/]+={0,2})$@', $authorization);
+        $expected = 'acquia-http-hmac realm="Pipet service",'
+                    . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
+                    . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                    . 'version="2.0",'
+                    . 'headers="",'
+                    . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
+        $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
+
     }
 }

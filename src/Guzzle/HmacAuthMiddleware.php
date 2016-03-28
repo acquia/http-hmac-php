@@ -80,17 +80,26 @@ class HmacAuthMiddleware
      */
     public function signRequest(RequestInterface $request)
     {
-        if (!$request->hasHeader('Date')) {
+        // @TODO 3.0 has "X-Authorization-Timestamp" in unix timestamp format.
+        if (!$request->hasHeader('X-Authorization-Timestamp')) {
             $time = new \DateTime();
             $time->setTimezone(new \DateTimeZone('GMT'));
-            $request = $request->withHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
+            $request = $request->withHeader('X-Authorization-Timestamp', $time->getTimestamp());
         }
 
         if (!$request->hasHeader('Content-Type')) {
             $request = $request->withHeader('Content-Type', $this->defaultContentType);
         }
 
-        $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey);
-        return $request->withHeader('Authorization', $authorization);
+        if (!$request->hasHeader('X-Authorization-Content-SHA256')) {
+            $hashed_body = $this->requestSigner->getHashedBody(new RequestWrapper($request));
+            if (!empty($hashed_body)) {
+                $request = $request->withHeader('X-Authorization-Content-SHA256', $hashed_body);
+            }
+        }
+
+        $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey, null);
+        $signed_request = $request->withHeader('Authorization', $authorization);
+        return $signed_request;
     }
 }

@@ -6,10 +6,12 @@ use Acquia\Hmac\Request\RequestInterface;
 
 class DummyRequest implements RequestInterface
 {
-    public $body = 'test content';
+    public $body = '';
     public $headers = array();
     public $method = 'GET';
-    public $resource = '/resource/1?key=value';
+    public $host = 'example.acquiapipet.net';
+    public $path = '/v1.0/task-status/133';
+    public $queryParameters = 'limit=10';
 
     public function getBody()
     {
@@ -26,9 +28,18 @@ class DummyRequest implements RequestInterface
         return $this->method;
     }
 
-    public function getResource()
+    public function getHost()
     {
-        return $this->resource;
+        return $this->host;
+    }
+
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    public function getQueryParameters() {
+        return $this->queryParameters;
     }
 
     public function hasHeader($header)

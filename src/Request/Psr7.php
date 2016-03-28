@@ -48,7 +48,25 @@ class Psr7 implements RequestInterface
      */
     public function getBody()
     {
-        return $this->request->getBody();
+        return (string) $this->request->getBody();
+    }
+
+    // @TODO 3.0 Document
+    public function getHost()
+    {
+        return $this->request->getUri->getHost();
+    }
+
+    // @TODO 3.0 Document
+    public function getPath()
+    {
+        return $this->request->getUri->getPath();
+    }
+
+    // @TODO 3.0 Document
+    // @TODO 3.0 Not sure of the format for this one.
+    public function getQueryParameters() {
+        return $this->request->getUri->getQuery();
     }
 
     /**

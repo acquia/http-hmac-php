@@ -50,9 +50,21 @@ class GuzzleRequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('test content', $request2->getBody());
     }
 
-    public function testGetResource()
+    public function testGetHost()
     {
         $request = $this->getRequest();
-        $this->assertEquals('/resource/1?key=value', $request->getResource());
+        $this->assertEquals('example.com', $request->getHost());
+    }
+
+    public function testGetPath()
+    {
+        $request = $this->getRequest();
+        $this->assertEquals('/resource/1', $request->getPath());
+    }
+
+    public function testGetQueryParameters()
+    {
+        $request = $this->getRequest();
+        $this->assertEquals('key=value', $request->getQueryParameters());
     }
 }

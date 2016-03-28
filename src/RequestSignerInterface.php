@@ -22,10 +22,11 @@ interface RequestSignerInterface
      * @param \Acquia\Hmac\Request\RequestInterface $request
      * @param string $id
      * @param string $secretKey
+     * @param string $nonce
      *
      * @return string
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey);
+    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null);
 
     /**
      * Gets the signature passed through the HTTP request.

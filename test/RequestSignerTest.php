@@ -4,13 +4,24 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\RequestSigner;
 
+// @TODO 3.0 This contains a lot of malformed headers, which are false negatives because they are v1
 class RequestSignerTest extends \PHPUnit_Framework_TestCase
 {
-    public function testSetProvider()
+    protected $auth_id;
+
+    protected $auth_secret;
+
+    protected function setUp()
+    {
+        $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+    }
+
+    public function testSetRealm()
     {
         $signer = new RequestSigner();
-        $signer->setProvider('TestProvider');
-        $this->assertEquals('TestProvider', $signer->getProvider());
+        $signer->setRealm('TestRealm');
+        $this->assertEquals('TestRealm', $signer->getRealm());
     }
 
     public function testSetCustomHeaders()
@@ -60,17 +71,6 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
-    public function testMissingContentType()
-    {
-        $request = new DummyRequest();
-
-        $signer = new RequestSigner();
-        $signer->getContentType($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
     public function testMissingAuthorizationHeader()
     {
         $signer = new RequestSigner();
@@ -92,10 +92,10 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
-    public function testInvalidProvider()
+    public function testInvalidRealm()
     {
         $request = new DummyRequest();
-        $request->headers['Authorization'] = 'BadProvider 1:abcd';
+        $request->headers['Authorization'] = 'BadRealm 1:abcd';
 
         $signer = new RequestSigner();
         $signer->getSignature($request);
@@ -107,7 +107,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     public function testMissingTimestampHeader()
     {
         $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
+        $request->headers['Authorization'] = 'Acquia 2:abcd';
 
         $signer = new RequestSigner();
         $signer->getSignature($request);
@@ -119,7 +119,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     public function testMissingMultiTimestampHeader()
     {
         $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
+        $request->headers['Authorization'] = 'Acquia 2:abcd';
 
         $signer = new RequestSigner();
         $signer->addTimestampHeader('Date2');
@@ -132,7 +132,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     public function testInvalidSignature()
     {
         $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
+        $request->headers['Authorization'] = 'Acquia 2:abcd';
         $request->headers['Date'] = 'bad-timestamp';
 
         $signer = new RequestSigner();
@@ -141,50 +141,72 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
 
     public function testSignature()
     {
-        $date = 'Fri, 19 Mar 1982 00:00:04 GMT';
-
         $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
-        $request->headers['Date1'] = $date;
+        $request->headers = array(
+            'Content-Type' => 'text/plain',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
+            . 'id:"' . $this->auth_id . '",' . "\n"
+            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
+            . 'version:"2.0",' . "\n"
+            . 'headers:"",' . "\n"
+            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        );
 
         $signer = new RequestSigner();
-        $signer->setTimestampHeaders(array('Date1'));
         $signature = $signer->getSignature($request);
 
         $this->assertInstanceOf('Acquia\Hmac\Signature', $signature);
-        $this->assertEquals('1', $signature->getId());
-        $this->assertEquals('abcd', $signature->getSignature());
-        $this->assertEquals(strtotime($date), $signature->getTimestamp());
+        $this->assertEquals($this->auth_id, $signature->getId());
+        $this->assertEquals('MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc=', $signature->getSignature());
+        $this->assertEquals(1432075982, $signature->getTimestamp());
     }
 
     public function testSignRequest()
     {
         $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        // @TODO 3.0 add custom headers into the message.
+        //$signer->addCustomHeader('Custom1');
 
         $request = new DummyRequest();
         $request->headers = array(
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
+            . 'id:"' . $this->auth_id . '",' . "\n"
+            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
+            . 'version:"2.0",' . "\n"
+            . 'headers:"",' . "\n"
+            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
 
-        $this->assertEquals(DigestVersion1Test::EXPECTED_HASH, $signer->signRequest($request, 'secret-key'));
+        $this->assertEquals("MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc=", $signer->signRequest($request, $this->auth_secret));
     }
 
     public function testgetAuthorization()
     {
         $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        $signer->setNonce('d1954337-5319-4821-8427-115542e08d10');
 
         $request = new DummyRequest();
         $request->headers = array(
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm:"Pipet service",'
+            . 'id:"' . $this->auth_id . '",'
+            . 'nonce:"' . $signer->getNonce() .'",'
+            . 'version:"2.0",'
+            . 'headers:"",'
+            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
 
-        $expected = 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH;
-        $this->assertEquals($expected, $signer->getAuthorization($request, '1', 'secret-key'));
+        $expected = 'acquia-http-hmac realm="Acquia",'
+                    . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
+                    . 'nonce="' . $signer->getNonce() .'",'
+                    . 'version="2.0",'
+                    . 'headers="",'
+                    . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
+
+        $this->assertEquals($expected, $signer->getAuthorization($request, $this->auth_id, $this->auth_secret));
     }
 }
