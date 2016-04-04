@@ -29,11 +29,6 @@ class RequestSigner implements RequestSignerInterface
     /**
      * @var array
      */
-    protected $timestampHeaders = array('X-Authorization-Timestamp');
-
-    /**
-     * @var array
-     */
     protected $customHeaders = array();
 
     /**
@@ -100,8 +95,7 @@ class RequestSigner implements RequestSignerInterface
         }
 
         $timestamp = $this->getTimestamp($request);
-        // @TODO 3.0 validate a timestamp
-        if (!$timestamp) {
+        if (!$timestamp || !is_numeric($timestamp) || (int) $timestamp < 0 || (int) $timestamp > time()) {
             throw new Exception\MalformedRequestException('Timestamp not valid');
         }
 
@@ -148,10 +142,7 @@ class RequestSigner implements RequestSignerInterface
         $this->setId($id);
 
         // e.g. Authorization: acquia-http-hmac realm="Pipet%20service",
-        // @TODO 3.0 generate a UUID nonce if not supplied.
         // @TODO 3.0 supply the headers.
-        // @TODO 3.0 This temporarily had newlines, so make sure the parser doesn't expect them
-        // @TODO 3.0 real dynamic default nonce, or handle better via the API
         if (!empty($nonce)) {
           $this->setNonce($nonce);
         } elseif (empty($this->getNonce())) {
@@ -202,30 +193,6 @@ class RequestSigner implements RequestSignerInterface
     }
 
     /**
-     * Appends a timestap header to the stack.
-     *
-     * @param string $header
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function addTimestampHeader($header)
-    {
-        $this->timestampHeaders[] = $header;
-        return $this;
-    }
-
-    /**
-     * @param array $headers
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function setTimestampHeaders(array $headers)
-    {
-        $this->timestampHeaders = $headers;
-        return $this;
-    }
-
-    /**
      * Append a custom headers to be used in the signature.
      *
      * @param string $header
@@ -262,20 +229,13 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getTimestamp(RequestInterface $request)
     {
-        // @TODO 3.0 only the X-Authorization-Timestamp is valid here.
-        foreach ($this->timestampHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                return $request->getHeader($header);
-            }
+        $timestamp = $request->getHeader('X-Authorization-Timestamp');
+
+        if (empty($timestamp)) {
+            throw new Exception\MalformedRequestException($message);
         }
 
-        if (count($this->timestampHeaders) > 1) {
-            $message = 'At least one of the following headers is required: ' . join(', ', $this->timestampHeaders);
-        } else {
-            $message = $this->timestampHeaders[0] . ' header required';
-        }
-
-        throw new Exception\MalformedRequestException($message);
+        return $timestamp;
     }
 
     /**

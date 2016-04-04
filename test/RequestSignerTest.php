@@ -116,13 +116,13 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
-    public function testMissingMultiTimestampHeader()
+    public function testInvalidTimestampHeader()
     {
         $request = new DummyRequest();
         $request->headers['Authorization'] = 'Acquia 2:abcd';
+        $request->headers['X-Authorization-Timestamp'] = 'Acquia 2:abcd';
 
         $signer = new RequestSigner();
-        $signer->addTimestampHeader('Date2');
         $signer->getSignature($request);
     }
 

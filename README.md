@@ -8,7 +8,7 @@
 [![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 [![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 
-HMAC Request Signer is a PHP library that implements the version 1.0 of the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec/tree/1.0)
+HMAC Request Signer is a PHP library that implements the version 2.0 of the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec/tree/2.0)
 to sign and verify RESTful Web API requests. It integrates with popular libraries such as
 Symfony and Guzzle and can be used on both the server and client.
 
@@ -40,7 +40,14 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 $requestSigner = new RequestSigner();
-$middleware = new HmacAuthMiddleware($requestSigner, 'apiKeyId', 'secretKey');
+$requestSigner->setRealm('CIStore');
+$requestSigner->addCustomHeader('X-Custom-1');
+$requestSigner->addCustomHeader('X-Custom-2');
+
+// Guzzle middleware will sign the request by generating the required headers.
+// You must provide the ID and secret. According to the Acquia HMAC 2.0 spec,
+// the ID is an arbitrary string and the secret is a base64 encoded string.
+$middleware = new HmacAuthMiddleware($requestSigner, 'auth_id', base64_encode('secret'));
 
 $stack = HandlerStack::create();
 $stack->push($middleware);
@@ -49,14 +56,22 @@ $client = new Client([
     'handler' => $stack,
 ]);
 
-$client->get('http://example.com/resource');
+// Signed headers must be provided if added above. These will be used to
+// generate the signature hash.
+$options = [
+  'headers' => [
+    'X-Custom-1' => 'some custom value',
+    'X-Custom-2' => 'another custom value',
+  ],
+];
 
+$client->get('http://example.com/resource', $options);
 ```
 
 Authenticate the request in a Symfony-powered app e.g. [Silex](https://github.com/silexphp/Silex).
 
 ```php
-
+// @TODO 3.0 This needs to be verified.
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Request\Symfony as RequestWrapper;
