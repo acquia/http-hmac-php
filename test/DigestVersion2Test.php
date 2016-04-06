@@ -42,21 +42,18 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
     public function testGetMessage()
     {
         $signer = new RequestSigner();
-        // @TODO 3.0 add custom headers into the message.
-        //$signer->addCustomHeader('Custom1');
 
-        $request = new DummyRequest();
-        $request->queryParameters = 'limit=20';
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"' . $this->auth_id . '",' . "\n"
-            . 'nonce:"24c0c836-4f6c-4ed6-a6b0-e091d75ea19d",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"P9D+Oc8QDU0puyGuqJHvrneek02g0F5D0+2qrXmSOOA"',
+            'Authorization' => 'acquia-http-hmac realm="Pipet%20service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="24c0c836-4f6c-4ed6-a6b0-e091d75ea19d",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="P9D+Oc8QDU0puyGuqJHvrneek02g0F5D0+2qrXmSOOA"',
         );
+        $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=20', $headers);
 
         $digest = new Digest();
 
@@ -87,23 +84,22 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         // @TODO 3.0 add custom headers into the message.
         $secretKey = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
 
-        $request = new DummyRequest();
-        $request->method = 'POST';
-        $request->path = '/v1.0/task';
-        $request->queryParameters = '';
-        $request->body = '{"method":"hi.bob","params":["5","4","8"]}';
-        $request->headers = array(
+        $method = 'POST';
+        $path = '/v1.0/task';
+        $body = '{"method":"hi.bob","params":["5","4","8"]}';
+        $headers = array(
             'Content-Type' => 'application/json',
-            'Content-Length' => strlen($request->body),
+            'Content-Length' => strlen($body),
             'X-Authorization-Timestamp' => '1432075982',
-            'X-Authorization-Content-SHA256' => $signer->getHashedBody($request),
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"efdde334-fe7b-11e4-a322-1697f925ec7b",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM"',
+            'Authorization' => 'acquia-http-hmac realm="Pipet%20service",'
+            . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM"',
         );
+        $request = DummyRequest::generate($method, 'https://example.acquiapipet.net', $path, '', $headers, $body);
+        $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
 
         $this->assertEquals('XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM=', $digest->get($signer, $request, $secretKey));
 
@@ -126,26 +122,25 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         // Slight variation of the POST request.
         $secretKey = 'eox4TsBBPhpi737yMxpdBbr3sgg/DEC4m47VXO0B8qJLsbdMsmN47j/ZF/EFpyUKtAhm0OWXMGaAjRaho7/93Q==';
-        $request = new DummyRequest();
-        $request->host = '54.154.147.142:3000';
-        $request->method = 'POST';
-        $request->path = '/register';
-        $request->queryParameters = '';
-        $request->body = '{"method":"hi.bob","params":["5","4","8"]}';
-        $request->headers = array(
+        $host = 'http://54.154.147.142:3000';
+        $method = 'POST';
+        $path = '/register';
+        $body = '{"method":"hi.bob","params":["5","4","8"]}';
+        $headers = array(
             'Content-Type' => 'application/json',
-            'Content-Length' => strlen($request->body),
+            'Content-Length' => strlen($body),
             'X-Authorization-Timestamp' => '1449578521',
-            'X-Authorization-Content-SHA256' => $signer->getHashedBody($request),
             'Custom1' => 'value1',
             'Custom2' => 'value2',
-            'Authorization' => 'acquia-http-hmac realm:"Plexus",' . "\n"
-            . 'id:"f0d16792-cdc9-4585-a5fd-bae3d898d8c5",' . "\n"
-            . 'nonce:"64d02132-40bf-4fce-85bf-3f1bb1bfe7dd",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"Custom1;Custom2",' . "\n"
-            . 'signature:"4VtBHjqrdDeYrJySoJVDUHpN9u3vyTsyOLz4chezi98="',
+            'Authorization' => 'acquia-http-hmac realm="Plexus",'
+            . 'id="f0d16792-cdc9-4585-a5fd-bae3d898d8c5",'
+            . 'nonce="64d02132-40bf-4fce-85bf-3f1bb1bfe7dd",'
+            . 'version="2.0",'
+            . 'headers="Custom1;Custom2",'
+            . 'signature="4VtBHjqrdDeYrJySoJVDUHpN9u3vyTsyOLz4chezi98="',
         );
+        $request = DummyRequest::generate($method, $host, $path, '', $headers, $body);
+        $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
 
         $digest = new Digest();
 

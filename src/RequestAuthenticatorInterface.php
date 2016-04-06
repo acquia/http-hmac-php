@@ -1,6 +1,7 @@
 <?php
 
 namespace Acquia\Hmac;
+use GuzzleHttp\Psr7\Request;
 
 interface RequestAuthenticatorInterface
 {
@@ -14,5 +15,5 @@ interface RequestAuthenticatorInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function authenticate(Request\RequestInterface $request, KeyLoaderInterface $keyLoader);
+    public function authenticate(Request $request, KeyLoaderInterface $keyLoader);
 }

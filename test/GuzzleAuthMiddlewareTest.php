@@ -3,7 +3,6 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
-use Acquia\Hmac\Request\Psr7;
 use Acquia\Hmac\RequestSigner;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -98,7 +97,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         ];
         $request = $middleware->signRequest(new Request('GET', $uri, $headers));
 
-        $expected = 'acquia-http-hmac realm="Pipet service",'
+        $expected = 'acquia-http-hmac realm="Pipet%20service",'
                     . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
                     . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
                     . 'version="2.0",'
@@ -141,7 +140,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $transaction = reset($container);
         $request = $transaction['request'];
 
-        $expected = 'acquia-http-hmac realm="Pipet service",'
+        $expected = 'acquia-http-hmac realm="Pipet%20service",'
                     . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
                     . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
                     . 'version="2.0",'

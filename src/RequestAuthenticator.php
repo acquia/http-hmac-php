@@ -1,6 +1,7 @@
 <?php
 
 namespace Acquia\Hmac;
+use GuzzleHttp\Psr7\Request;
 
 class RequestAuthenticator implements RequestAuthenticatorInterface
 {
@@ -27,7 +28,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     /**
      * {inheritDoc}
      */
-    public function authenticate(Request\RequestInterface $request, KeyLoaderInterface $keyLoader)
+    public function authenticate(Request $request, KeyLoaderInterface $keyLoader)
     {
         // Get the signature passed through the HTTP request.
         $passedSignature = $this->requestSigner->getSignature($request);

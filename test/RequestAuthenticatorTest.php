@@ -21,20 +21,18 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     public function testValidSignature()
     {
         $signer = new RequestSigner();
-        // @TODO 3.0 add custom headers into the message.
-        //$signer->addCustomHeader('Custom1');
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"' . $this->auth_id . '",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
+        $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
         $key = $authenticator->authenticate($request, new DummyKeyLoader());
@@ -50,20 +48,18 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     public function testInvalidSignature()
     {
         $signer = new RequestSigner();
-        // @TODO 3.0 add custom headers into the message.
-        //$signer->addCustomHeader('Custom1');
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"' . $this->auth_id . '",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"bRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="bRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
+        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
         $authenticator->authenticate($request, new DummyKeyLoader());
@@ -76,17 +72,17 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $signer = new RequestSigner();
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"' . $this->auth_id . '",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
+        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
         $authenticator->authenticate($request, new DummyKeyLoader());
@@ -100,17 +96,17 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $time = new \DateTime('+11 minutes');
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1232075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"' . $this->auth_id . '",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
+        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
         $authenticator->authenticate($request, new DummyKeyLoader());
@@ -123,17 +119,17 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $signer = new RequestSigner();
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1232075982',
-            'Authorization' => 'acquia-http-hmac realm:"Pipet service",' . "\n"
-            . 'id:"bad-id",' . "\n"
-            . 'nonce:"d1954337-5319-4821-8427-115542e08d10",' . "\n"
-            . 'version:"2.0",' . "\n"
-            . 'headers:"",' . "\n"
-            . 'signature:"MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="bad-id",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
+        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator(new RequestSigner(), 0);
         $authenticator->authenticate($request, new DummyKeyLoader());

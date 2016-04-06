@@ -3,8 +3,8 @@
 namespace Acquia\Hmac\Guzzle;
 
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\Guzzle as RequestWrapper;
 use Psr\Http\Message\RequestInterface;
+use GuzzleHttp\Psr7\Request;
 
 class HmacAuthMiddleware
 {
@@ -92,13 +92,13 @@ class HmacAuthMiddleware
         }
 
         if (!$request->hasHeader('X-Authorization-Content-SHA256')) {
-            $hashed_body = $this->requestSigner->getHashedBody(new RequestWrapper($request));
+            $hashed_body = $this->requestSigner->getHashedBody($request);
             if (!empty($hashed_body)) {
                 $request = $request->withHeader('X-Authorization-Content-SHA256', $hashed_body);
             }
         }
 
-        $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey, null);
+        $authorization = $this->requestSigner->getAuthorization($request, $this->id, $this->secretKey, null);
         $signed_request = $request->withHeader('Authorization', $authorization);
         return $signed_request;
     }

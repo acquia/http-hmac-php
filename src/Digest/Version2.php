@@ -2,8 +2,10 @@
 
 namespace Acquia\Hmac\Digest;
 
+use Acquia\Hmac\Exception;
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\RequestInterface;
+//use Acquia\Hmac\Request\RequestInterface;
+use GuzzleHttp\Psr7\Request;
 
 // @TODO 3.0 This class should be Version2
 class Version2 extends DigestAbstract
@@ -11,7 +13,7 @@ class Version2 extends DigestAbstract
     /**
      * {@inheritDoc}
      */
-    protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
+    protected function getMessage(RequestSignerInterface $requestSigner, Request $request, $secretKey)
     {
         $parts = array(
             // @TODO 3.0 Message format has changed
@@ -51,13 +53,13 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getMethod(RequestInterface $request)
+    protected function getMethod(Request $request)
     {
         return strtoupper($request->getMethod());
     }
 
     // @TODO 3.0 Document
-    protected function getBody(RequestInterface $request)
+    protected function getBody(Request $request)
     {
         return $request->getBody();
     }
@@ -69,7 +71,7 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    public function getHashedBody(RequestInterface $request)
+    public function getHashedBody(Request $request)
     {
         // @TODO 3.0 base64 encoded SHA-256 digest of the raw body of the HTTP request,
         // @TODO 3.0 Send the X-Authorization-Content-SHA256 header with requests.
@@ -88,30 +90,34 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getContentType(RequestSignerInterface $requestSigner, RequestInterface $request)
+    protected function getContentType(RequestSignerInterface $requestSigner, Request $request)
     {
         $type = strtolower($requestSigner->getContentType($request));
         return is_null($type) ? '' : $type;
     }
 
     // @TODO 3.0 Document
-    public function getHost(RequestInterface $request) {
-        return $request->getHost();
+    public function getHost(Request $request) {
+        $host = $request->getUri()->getHost();
+        if ($port = $request->getUri()->getPort()) {
+            $host .= ':' . $port;
+        }
+        return $host;
     }
 
     // @TODO 3.0 Document
-    public function getPath(RequestInterface $request) {
-        return $request->getPath();
+    public function getPath(Request $request) {
+        return $request->getUri()->getPath();
     }
 
     // @TODO 3.0 Document
-    public function getQueryParameters(RequestInterface $request) {
-        return $request->getQueryParameters();
+    public function getQueryParameters(Request $request) {
+        return $request->getUri()->getQuery();
     }
 
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
-    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request) {
+    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, Request $request) {
         // @TODO 3.0 better AuthHeader handling, probably new class
         $headers = array();
         $header_message = '';
@@ -121,25 +127,27 @@ class Version2 extends DigestAbstract
         if (!empty($signer_headers)) {
             $headers = array_keys($signer_headers);
         } else {
-            $header = $request->getHeader('Authorization');
-            foreach (explode(',', $header) as $auth) {
-                $auth_parts = explode(':', $auth);
-                if (count($auth_parts) < 2) {
-                    continue;
-                }
-                // @TODO 3.0 better quote replacement.
-                $key = trim($auth_parts[0], " '\"");
-                $value = trim($auth_parts[1], " '\"");
-                if ($key == 'headers') {
-                    $headers = explode(';', $value);
-                    break;
+            $header = $request->getHeaderLine('Authorization');
+            if (!empty($header)) {
+                foreach (explode(',', $header) as $auth) {
+                    $auth_parts = explode(':', $auth);
+                    if (count($auth_parts) < 2) {
+                        continue;
+                    }
+                    // @TODO 3.0 better quote replacement.
+                    $key = trim($auth_parts[0], " '\"");
+                    $value = trim($auth_parts[1], " '\"");
+                    if ($key == 'headers') {
+                        $headers = explode(';', $value);
+                        break;
+                    }
                 }
             }
         }
 
         foreach ($headers as $key) {
             if (!empty($key)) {
-                $value = $request->getHeader($key);
+                $value = $request->getHeaderLine($key);
                 $header_message .= strtolower($key) . ':' . $value . "\n";
             }
         }
@@ -149,46 +157,37 @@ class Version2 extends DigestAbstract
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
     // @TODO 3.0 This deserves a new class for the auth headers
-    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, RequestInterface $request) {
+    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, Request $request) {
         // Authorization-Header-Parameters: normalized parameters similar to
         // section 9.1.1 of OAuth 1.0a. The parameters are the id, nonce, realm,
         // and version from the Authorization header. Parameters are sorted by
         // name and separated by '&' with name and value separated by =, percent
         // encoded (urlencoded)
-        $header = $request->getHeader('Authorization');
+        $header = $request->getHeaderLine('Authorization');
 
         if (empty($header)) {
           $id = $requestSigner->getId();
           $nonce = $requestSigner->getNonce();
-          $realm = rawurlencode($requestSigner->getRealm());
+          $realm = $requestSigner->getRealm();
         } else {
-          // @TODO 3.0 better AuthHeader handling, probably new class
-          $id = '';
-          $nonce = '';
-          $realm = '';
-          foreach (explode(',', $header) as $auth) {
-              $auth_parts = explode(':', $auth);
-              if (count($auth_parts) < 2) {
-                  continue;
-              }
-              // @TODO 3.0 better quote replacement.
-              $key = trim($auth_parts[0], " '\"\n");
-              $value = trim($auth_parts[1], " '\"\n");
-              switch ($key) {
-                  case 'id':
-                      $id = $value;
-                      break;
-                  case 'nonce':
-                      $nonce = $value;
-                      break;
-                  case 'acquia-http-hmac realm':
-                      $realm = rawurlencode($value);
-                      break;
-              }
-          }
+            $id = '';
+            $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
+
+            $realm = '';
+            $realm_match = preg_match('/.*realm="(.*?)"/', $header, $realm_matches);
+
+            $nonce = '';
+            $nonce_match = preg_match('/.*nonce="(.*?)"/', $header, $nonce_matches);
+
+            if (!$id_match || !$realm_match || !$nonce_match) {
+                throw new Exception\MalformedRequestException('Authorization header requires a realm, id and a nonce.');
+            }
+            $id = $id_matches[1];
+            $realm = rawurldecode($realm_matches[1]);
+            $nonce = $nonce_matches[1];
         }
 
-        $auth_message = sprintf('id=%s&nonce=%s&realm=%s&version=2.0', $id, $nonce, $realm);
+        $auth_message = sprintf('id=%s&nonce=%s&realm=%s&version=2.0', $id, $nonce, rawurlencode($realm));
         return $auth_message;
     }
 
@@ -200,7 +199,7 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getTimestamp(RequestSignerInterface $requestSigner, RequestInterface $request)
+    protected function getTimestamp(RequestSignerInterface $requestSigner, Request $request)
     {
         return $requestSigner->getTimestamp($request);
     }
@@ -213,7 +212,7 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getCustomHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
+    protected function getCustomHeaders(RequestSignerInterface $requestSigner, Request $request)
     {
         $headers = $requestSigner->getCustomHeaders($request);
 
@@ -234,7 +233,7 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getResource(RequestInterface $request)
+    protected function getResource(Request $request)
     {
         return $request->getResource();
     }

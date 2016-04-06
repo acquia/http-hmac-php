@@ -2,7 +2,8 @@
 
 namespace Acquia\Hmac;
 
-use Acquia\Hmac\Request\RequestInterface;
+//use Acquia\Hmac\Request\RequestInterface;
+use GuzzleHttp\Psr7\Request;
 
 class RequestSigner implements RequestSignerInterface
 {
@@ -56,38 +57,30 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
-    public function getSignature(RequestInterface $request)
+    public function getSignature(Request $request)
     {
         // @TODO 3.0 better AuthHeader handling, probably new class
-        $header = $request->getHeader('Authorization');
+        $header = $request->getHeaderLine('Authorization');
         if (!$request->hasHeader('Authorization')) {
             throw new Exception\MalformedRequestException('Authorization header required');
         }
 
         $id = '';
+        $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
+
         $signature = '';
-        foreach (explode("\n", $header) as $auth_info) {
-          $auth_parts = explode(':', $auth_info);
-          if (count($auth_parts) < 2) {
-            continue;
-          }
-          $key = trim($auth_parts[0]);
-          // @TODO 3.0 better quote replacement.
-          $value = preg_replace('/[,\"]/', '', trim($auth_parts[1]));
-          switch ($key) {
-            case 'realm':
-              $realm = $value;
-              break;
-            case 'id':
-              $id = $value;
-              break;
-            case 'signature':
-              $signature = $value;
-              break;
-          }
+        $signature_match = preg_match('/.*signature="(.*?)"/', $header, $signature_matches);
+
+        if (!$id_match) {
+            throw new Exception\KeyNotFoundException('Authorization header requires an id.');
         }
 
-        // @TODO 3.0 exceptions if realm, id or signature empty.
+        if (!$signature_match) {
+            throw new Exception\KeyNotFoundException('Authorization header requires a signature.');
+        }
+
+        $id = $id_matches[1];
+        $signature = $signature_matches[1];
 
         // Ensure the signature is a base64 encoded string.
         if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $signature)) {
@@ -108,14 +101,14 @@ class RequestSigner implements RequestSignerInterface
      * @throws \InvalidArgumentException
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function signRequest(RequestInterface $request, $secretKey)
+    public function signRequest(Request $request, $secretKey)
     {
         return $this->digest->get($this, $request, $secretKey);
     }
 
     // @TODO 3.0 Interface
     // @TODO 3.0 Test
-    public function getHashedBody(RequestInterface $request) {
+    public function getHashedBody(Request $request) {
         $hash = '';
         if (!empty((string) $request->getBody())) { 
             $hash = $this->digest->getHashedBody($request);
@@ -128,7 +121,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null)
+    public function getAuthorization(Request $request, $id, $secretKey, $nonce = null)
     {
         // @TODO 3.0 New Authorization header format:
         // realm: The provider, for example "Acquia", "MyCompany", etc.
@@ -151,7 +144,7 @@ class RequestSigner implements RequestSignerInterface
         $nonce = $this->getNonce();
 
         $signed_headers = implode(';', array_keys($this->getCustomHeaders($request)));
-        return 'acquia-http-hmac realm="' . $this->realm . '",'
+        return 'acquia-http-hmac realm="' . rawurlencode($this->realm) . '",'
         . 'id="' . $id . '",'
         . 'nonce="' . $nonce . '",'
         . 'version="2.0",'
@@ -219,20 +212,20 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getContentType(RequestInterface $request)
+    public function getContentType(Request $request)
     {
-        return $request->getHeader('Content-Type');
+        return $request->getHeaderLine('Content-Type');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getTimestamp(RequestInterface $request)
+    public function getTimestamp(Request $request)
     {
-        $timestamp = $request->getHeader('X-Authorization-Timestamp');
+        $timestamp = $request->getHeaderLine('X-Authorization-Timestamp');
 
         if (empty($timestamp)) {
-            throw new Exception\MalformedRequestException($message);
+            throw new Exception\MalformedRequestException('X-Authorization-Timestamp is required');
         }
 
         return $timestamp;
@@ -241,12 +234,12 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getCustomHeaders(RequestInterface $request)
+    public function getCustomHeaders(Request $request)
     {
         $headers = array();
         foreach ($this->customHeaders as $header) {
             if ($request->hasHeader($header)) {
-                $headers[$header] = $request->getHeader($header);
+                $headers[$header] = $request->getHeaderLine($header);
             }
         }
         return $headers;

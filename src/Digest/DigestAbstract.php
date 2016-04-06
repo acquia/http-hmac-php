@@ -3,7 +3,7 @@
 namespace Acquia\Hmac\Digest;
 
 use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\RequestInterface;
+use GuzzleHttp\Psr7\Request;
 
 abstract class DigestAbstract implements DigestInterface
 {
@@ -42,7 +42,7 @@ abstract class DigestAbstract implements DigestInterface
     /**
      * {@inheritDoc}
      */
-    public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
+    public function get(RequestSignerInterface $requestSigner, Request $request, $secretKey)
     {
         $message = $this->getMessage($requestSigner, $request, $secretKey);
         // @TODO 3.0 we need to accept the secret key as a base64 encoded string and decode before creating the hash.
@@ -59,5 +59,5 @@ abstract class DigestAbstract implements DigestInterface
      *
      * @return string
      */
-    abstract protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey);
+    abstract protected function getMessage(RequestSignerInterface $requestSigner, Request $request, $secretKey);
 }
