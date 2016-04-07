@@ -107,9 +107,10 @@ class RequestSigner implements RequestSignerInterface
 
     // @TODO 3.0 Interface
     // @TODO 3.0 Test
-    public function getHashedBody(RequestInterface $request) {
+    public function getHashedBody(RequestInterface $request)
+    {
         $hash = '';
-        if (!empty((string) $request->getBody())) { 
+        if (!empty((string) $request->getBody())) {
             $hash = $this->digest->getHashedBody($request);
         }
         return $hash;
@@ -122,23 +123,14 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null)
     {
-        // @TODO 3.0 New Authorization header format:
-        // realm: The provider, for example "Acquia", "MyCompany", etc.
-        // id: The API key's unique identifier, which is an arbitrary string
-        // nonce: a hex version 4 (or version 1) UUID.
-        // version: the version of this spec
-        // headers: a list of additional request headers that are to be included in the signature base string. These are lower-case, and separated with ;
-        // signature: the Signature (base64 encoded) as described below.
-        // Each value should be enclosed in double quotes and urlencoded (percent encoded).
-
         $this->setId($id);
 
         // e.g. Authorization: acquia-http-hmac realm="Pipet%20service",
         // @TODO 3.0 supply the headers.
         if (!empty($nonce)) {
-          $this->setNonce($nonce);
+            $this->setNonce($nonce);
         } elseif (empty($this->getNonce())) {
-          $this->setNonce($this->generateNonce());
+            $this->setNonce($this->generateNonce());
         }
         $nonce = $this->getNonce();
 
@@ -245,25 +237,26 @@ class RequestSigner implements RequestSignerInterface
     }
 
     // @TODO 3.0 interface/test
-    public function generateNonce() {
-        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+    public function generateNonce()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
-            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
             // 16 bits for "time_mid"
-            mt_rand( 0, 0xffff ),
-
+            mt_rand(0, 0xffff),
             // 16 bits for "time_hi_and_version",
             // four most significant bits holds version number 4
-            mt_rand( 0, 0x0fff ) | 0x4000,
-
+            mt_rand(0, 0x0fff) | 0x4000,
             // 16 bits, 8 bits for "clk_seq_hi_res",
             // 8 bits for "clk_seq_low",
             // two most significant bits holds zero and one for variant DCE1.1
-            mt_rand( 0, 0x3fff ) | 0x8000,
-
+            mt_rand(0, 0x3fff) | 0x8000,
             // 48 bits for "node"
-            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 }

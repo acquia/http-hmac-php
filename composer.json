@@ -24,7 +24,8 @@
         "phpunit/phpunit": "~3.0",
         "scrutinizer/ocular": "~1.0",
         "sebastian/phpcpd": "~2.0",
-        "symfony/http-foundation": "~2.0"
+        "symfony/http-foundation": "~2.0",
+        "squizlabs/php_codesniffer": "^2.3"
     },
     "replace": {
         "acquia/hmac-request": "self.version"

@@ -33,10 +33,12 @@ class Version2 extends DigestAbstract
         $parts[] = $this->getTimestamp($requestSigner, $request);
 
         // Omit if there is no request body.
-        // @TODO 3.0 The string cast is because the HmacAuthMiddleware::signRequest method takes a Psr RequestInterface and uses this api, however the getBody method returns a stream. This can be cast to a string here, but this is wrong. the signRequest method should really take an acquia RequestInterface object.
-        // @TODO 3.0 the ruby implementation just looks for the X-Authorization-Content-SHA256 header, should we do the same?
+        // @TODO 3.0 The string cast is because the HmacAuthMiddleware::signRequest method takes a Psr RequestInterface
+        // and uses this api, however the getBody method returns a stream. This can be cast to a string here, but this
+        // is wrong. the signRequest method should really take an acquia RequestInterface object.
+        // @TODO 3.0 the ruby implementation just looks for the X-Authorization-Content-SHA256 header, should we?
         $body = (string) $this->getBody($request);
-        if (!empty($body)) { 
+        if (!empty($body)) {
             $parts[] = $this->getContentType($requestSigner, $request);
             $parts[] = $this->getHashedBody($request);
         }
@@ -96,7 +98,8 @@ class Version2 extends DigestAbstract
     }
 
     // @TODO 3.0 Document
-    public function getHost(RequestInterface$request) {
+    public function getHost(RequestInterface$request)
+    {
         $host = $request->getUri()->getHost();
         if ($port = $request->getUri()->getPort()) {
             $host .= ':' . $port;
@@ -105,18 +108,21 @@ class Version2 extends DigestAbstract
     }
 
     // @TODO 3.0 Document
-    public function getPath(RequestInterface$request) {
+    public function getPath(RequestInterface$request)
+    {
         return $request->getUri()->getPath();
     }
 
     // @TODO 3.0 Document
-    public function getQueryParameters(RequestInterface$request) {
+    public function getQueryParameters(RequestInterface$request)
+    {
         return $request->getUri()->getQuery();
     }
 
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
-    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request) {
+    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request)
+    {
         // @TODO 3.0 better AuthHeader handling, probably new class
         $headers = array();
         $header_message = '';
@@ -156,7 +162,8 @@ class Version2 extends DigestAbstract
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
     // @TODO 3.0 This deserves a new class for the auth headers
-    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, RequestInterface $request) {
+    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
+    {
         // Authorization-Header-Parameters: normalized parameters similar to
         // section 9.1.1 of OAuth 1.0a. The parameters are the id, nonce, realm,
         // and version from the Authorization header. Parameters are sorted by
@@ -165,9 +172,9 @@ class Version2 extends DigestAbstract
         $header = $request->getHeaderLine('Authorization');
 
         if (empty($header)) {
-          $id = $requestSigner->getId();
-          $nonce = $requestSigner->getNonce();
-          $realm = $requestSigner->getRealm();
+            $id = $requestSigner->getId();
+            $nonce = $requestSigner->getNonce();
+            $realm = $requestSigner->getRealm();
         } else {
             $id = '';
             $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
