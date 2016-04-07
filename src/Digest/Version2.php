@@ -12,6 +12,7 @@ class Version2 extends DigestAbstract
     /**
      * {@inheritDoc}
      */
+    // @TODO 3.0 make this public and test it with the fixtures
     protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
         $parts = array(

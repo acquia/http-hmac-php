@@ -21,6 +21,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     public function testValidSignature()
     {
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
 
         $headers = array(
             'Content-Type' => 'text/plain',
@@ -71,6 +72,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     public function testExpiredRequest()
     {
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
 
         $headers = array(
             'Content-Type' => 'text/plain',
@@ -84,7 +86,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
+        $authenticator = new RequestAuthenticator($signer, '10 minutes');
         $authenticator->authenticate($request, new DummyKeyLoader());
     }
 
@@ -93,12 +95,15 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFutureRequest()
     {
-        $signer = new RequestSigner();
         $time = new \DateTime('+11 minutes');
+        $timestamp = (string) $time->getTimestamp();
+
+        $signer = new RequestSigner();
+        $signer->setTimestamp($timestamp);
 
         $headers = array(
             'Content-Type' => 'text/plain',
-            'X-Authorization-Timestamp' => '1232075982',
+            'X-Authorization-Timestamp' => $timestamp,
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
             . 'id="' . $this->auth_id . '",'
             . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
@@ -108,7 +113,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
+        $authenticator = new RequestAuthenticator($signer, '10 minutes');
         $authenticator->authenticate($request, new DummyKeyLoader());
     }
 

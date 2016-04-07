@@ -35,8 +35,32 @@ class HmacAuthMiddleware
     public function __construct(RequestSignerInterface $requestSigner, $id, $secretKey)
     {
         $this->requestSigner = $requestSigner;
-        $this->id            = $id;
-        $this->secretKey     = $secretKey;
+        $this->setId($id);
+        $this->setSecretKey($secretKey);
+    }
+
+    // @TODO 3.0 document
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    // @TODO 3.0 document
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    // @TODO 3.0 document
+    public function getSecretKey()
+    {
+        return $this->secretKey;
+    }
+
+    // @TODO 3.0 document
+    public function setSecretKey($secretKey)
+    {
+        $this->secretKey = $secretKey;
     }
 
     /**
@@ -79,26 +103,7 @@ class HmacAuthMiddleware
      */
     public function signRequest(RequestInterface $request)
     {
-        // @TODO 3.0 has "X-Authorization-Timestamp" in unix timestamp format.
-        if (!$request->hasHeader('X-Authorization-Timestamp')) {
-            $time = new \DateTime();
-            $time->setTimezone(new \DateTimeZone('GMT'));
-            $request = $request->withHeader('X-Authorization-Timestamp', $time->getTimestamp());
-        }
-        
-        if (!$request->hasHeader('Content-Type')) {
-            $request = $request->withHeader('Content-Type', $this->defaultContentType);
-        }
-
-        if (!$request->hasHeader('X-Authorization-Content-SHA256')) {
-            $hashed_body = $this->requestSigner->getHashedBody($request);
-            if (!empty($hashed_body)) {
-                $request = $request->withHeader('X-Authorization-Content-SHA256', $hashed_body);
-            }
-        }
-
-        $authorization = $this->requestSigner->getAuthorization($request, $this->id, $this->secretKey, null);
-        $signed_request = $request->withHeader('Authorization', $authorization);
-        return $signed_request;
+        $this->requestSigner->setDefaultContentType($this->getDefaultContentType());
+        return $this->requestSigner->signRequest($request, $this->getId(), $this->getSecretKey());
     }
 }

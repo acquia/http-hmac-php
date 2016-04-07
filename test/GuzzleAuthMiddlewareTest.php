@@ -87,15 +87,13 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
         $requestSigner->setRealm('Pipet service');
         $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $requestSigner->setTimestamp('1432075982');
 
         $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
 
         $uri = 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10';
 
-        $headers = [
-          'X-Authorization-Timestamp' => '1432075982',
-        ];
-        $request = $middleware->signRequest(new Request('GET', $uri, $headers));
+        $request = $middleware->signRequest(new Request('GET', $uri));
 
         $expected = 'acquia-http-hmac realm="Pipet%20service",'
                     . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
@@ -112,6 +110,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
         $requestSigner->setRealm('Pipet service');
         $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $requestSigner->setTimestamp('1432075982');
 
         $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
 
@@ -128,13 +127,8 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
             'handler' => $stack,
         ]);
 
-        $headers = [
-            'X-Authorization-Timestamp' => '1432075982',
-        ];
-
         $client->request('GET', '/v1.0/task-status/133', [
           'query' => ['limit' => '10'],
-          'headers' => $headers,
         ]);
 
         $transaction = reset($container);

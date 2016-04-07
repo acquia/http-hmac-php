@@ -14,7 +14,7 @@ interface RequestSignerInterface
      *
      * @return string
      */
-    public function signRequest(RequestInterface $request, $secretKey);
+    public function getDigest(RequestInterface $request, $secretKey);
 
     /**
      * Returns the value of the "Authorization" header.
@@ -22,11 +22,10 @@ interface RequestSignerInterface
      * @param \Psr\Http\Message\RequestInterface $request
      * @param string $id
      * @param string $secretKey
-     * @param string $nonce
      *
      * @return string
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null);
+    public function getAuthorization(RequestInterface $request, $id, $secretKey);
 
     /**
      * Gets the signature passed through the HTTP request.
@@ -51,13 +50,18 @@ interface RequestSignerInterface
     /**
      * Returns timestamp passed through the request.
      *
-     * @param \Psr\Http\Message\RequestInterface $request
-     *
-     * @return string
+     * @return int
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequestException
      */
-    public function getTimestamp(RequestInterface $request);
+    public function getTimestamp();
+
+    /**
+     * Returns timestamp passed through the request.
+     *
+     * @param int $timestamp
+     */
+    public function setTimestamp($timestamp);
 
     /**
      * Returns an associative array of custom headers.

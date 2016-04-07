@@ -160,6 +160,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
         $signature = $signer->getSignature($request);
 
         $this->assertInstanceOf('Acquia\Hmac\Signature', $signature);
@@ -171,6 +172,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     public function testSignRequest()
     {
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
 
         $headers = array(
             'Content-Type' => 'text/plain',
@@ -184,13 +186,15 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
-        $this->assertEquals("MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc=", $signer->signRequest($request, $this->auth_secret));
+        $signed_request = $signer->signRequest($request, $this->auth_id, $this->auth_secret);
+        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signed_request->getHeaderLine('Authorization'));
     }
 
     public function testgetAuthorization()
     {
         $signer = new RequestSigner();
         $signer->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $signer->setTimestamp('1432075982');
 
         $headers = array(
             'Content-Type' => 'text/plain',

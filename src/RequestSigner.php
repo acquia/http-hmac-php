@@ -27,9 +27,19 @@ class RequestSigner implements RequestSignerInterface
     protected $nonce;
 
     /**
+     * @var int
+     */
+    protected $timestamp;
+
+    /**
      * @var array
      */
     protected $customHeaders = array();
+
+    /**
+     * @var string
+     */
+    protected $defaultContentType = 'application/json; charset=utf-8';
 
     /**
      * @param \Acquia\Hmac\Digest\DigestInterface $digest
@@ -49,6 +59,50 @@ class RequestSigner implements RequestSignerInterface
     public function setId($id)
     {
         $this->id = $id;
+    }
+
+    /**
+     * @var string $contentType
+     */
+    // @TODO 3.0 Interface/test
+    public function setDefaultContentType($contentType)
+    {
+        $this->defaultContentType = $contentType;
+    }
+
+    /**
+     * @return string
+     */
+    // @TODO 3.0 Interface/test
+    public function getDefaultContentType()
+    {
+        return $this->defaultContentType;
+    }
+
+    // @TODO 3.0 getters/setters at top.
+
+    // @TODO 3.0 Interface/test
+    public function signRequest(RequestInterface $request, $id, $secretKey)
+    {
+        // @TODO 3.0 do we still need getters/setters for $id?
+        if (!$request->hasHeader('X-Authorization-Timestamp')) {
+            $request = $request->withHeader('X-Authorization-Timestamp', $this->getTimestamp());
+        }
+
+        if (!$request->hasHeader('Content-Type')) {
+            $request = $request->withHeader('Content-Type', $this->getDefaultContentType());
+        }
+
+        if (!$request->hasHeader('X-Authorization-Content-SHA256')) {
+            $hashed_body = $this->getHashedBody($request);
+            if (!empty($hashed_body)) {
+                $request = $request->withHeader('X-Authorization-Content-SHA256', $hashed_body);
+            }
+        }
+
+        $authorization = $this->getAuthorization($request, $id, $secretKey);
+        $signed_request = $request->withHeader('Authorization', $authorization);
+        return $signed_request;
     }
 
     /**
@@ -86,8 +140,8 @@ class RequestSigner implements RequestSignerInterface
             throw new Exception\MalformedRequestException('Invalid signature in authorization header');
         }
 
-        $timestamp = $this->getTimestamp($request);
-        if (!$timestamp || !is_numeric($timestamp) || (int) $timestamp < 0 || (int) $timestamp > time()) {
+        $timestamp = $this->getTimestamp();
+        if (!$timestamp || !is_numeric($timestamp) || (int) $timestamp < 0) {
             throw new Exception\MalformedRequestException('Timestamp not valid');
         }
 
@@ -100,7 +154,7 @@ class RequestSigner implements RequestSignerInterface
      * @throws \InvalidArgumentException
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function signRequest(RequestInterface $request, $secretKey)
+    public function getDigest(RequestInterface $request, $secretKey)
     {
         return $this->digest->get($this, $request, $secretKey);
     }
@@ -121,17 +175,9 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null)
+    public function getAuthorization(RequestInterface $request, $id, $secretKey)
     {
         $this->setId($id);
-
-        // e.g. Authorization: acquia-http-hmac realm="Pipet%20service",
-        // @TODO 3.0 supply the headers.
-        if (!empty($nonce)) {
-            $this->setNonce($nonce);
-        } elseif (empty($this->getNonce())) {
-            $this->setNonce($this->generateNonce());
-        }
         $nonce = $this->getNonce();
 
         $signed_headers = implode(';', array_keys($this->getCustomHeaders($request)));
@@ -140,7 +186,7 @@ class RequestSigner implements RequestSignerInterface
         . 'nonce="' . $nonce . '",'
         . 'version="2.0",'
         . 'headers="' . $signed_headers . '",'
-        . 'signature="' . $this->signRequest($request, $secretKey) . '"';
+        . 'signature="' . $this->getDigest($request, $secretKey) . '"';
     }
 
     /**
@@ -173,6 +219,9 @@ class RequestSigner implements RequestSignerInterface
     // @TODO Test
     public function getNonce()
     {
+        if (empty($this->nonce)) {
+            $this->setNonce($this->generateNonce());
+        }
         return $this->nonce;
     }
 
@@ -211,15 +260,23 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getTimestamp(RequestInterface $request)
+    public function getTimestamp()
     {
-        $timestamp = $request->getHeaderLine('X-Authorization-Timestamp');
-
-        if (empty($timestamp)) {
-            throw new Exception\MalformedRequestException('X-Authorization-Timestamp is required');
+        if (empty($this->timestamp)) {
+            $time = new \DateTime();
+            $time->setTimezone(new \DateTimeZone('GMT'));
+            $this->timestamp = $time->getTimestamp();
         }
 
-        return $timestamp;
+        return $this->timestamp;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTimestamp($timestamp)
+    {
+        $this->timestamp = (int) $timestamp;
     }
 
     /**

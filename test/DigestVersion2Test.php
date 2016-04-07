@@ -42,6 +42,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
     public function testGetMessage()
     {
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
 
         $headers = array(
             'Content-Type' => 'text/plain',
@@ -79,6 +80,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
     public function testPostMessage()
     {
         $signer = new RequestSigner();
+        $signer->setTimestamp(1432075982);
         $digest = new Digest();
 
         // @TODO 3.0 add custom headers into the message.
@@ -120,6 +122,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals('XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM=', $digest->get($signer, $request, $secretKey));
 
         $signer = new RequestSigner();
+        $signer->setTimestamp(1449578521);
         // Slight variation of the POST request.
         $secretKey = 'eox4TsBBPhpi737yMxpdBbr3sgg/DEC4m47VXO0B8qJLsbdMsmN47j/ZF/EFpyUKtAhm0OWXMGaAjRaho7/93Q==';
         $host = 'http://54.154.147.142:3000';
