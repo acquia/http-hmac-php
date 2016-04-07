@@ -4,8 +4,7 @@ namespace Acquia\Hmac\Digest;
 
 use Acquia\Hmac\Exception;
 use Acquia\Hmac\RequestSignerInterface;
-//use Acquia\Hmac\Request\RequestInterface;
-use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 
 // @TODO 3.0 This class should be Version2
 class Version2 extends DigestAbstract
@@ -13,7 +12,7 @@ class Version2 extends DigestAbstract
     /**
      * {@inheritDoc}
      */
-    protected function getMessage(RequestSignerInterface $requestSigner, Request $request, $secretKey)
+    protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
         $parts = array(
             // @TODO 3.0 Message format has changed
@@ -49,17 +48,17 @@ class Version2 extends DigestAbstract
     /**
      * Returns the normalized HTTP mthod, e.g. GET, POST, etc.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
      *
      * @return string
      */
-    protected function getMethod(Request $request)
+    protected function getMethod(RequestInterface$request)
     {
         return strtoupper($request->getMethod());
     }
 
     // @TODO 3.0 Document
-    protected function getBody(Request $request)
+    protected function getBody(RequestInterface$request)
     {
         return $request->getBody();
     }
@@ -67,11 +66,11 @@ class Version2 extends DigestAbstract
     /**
      * Returns the sha256 hash of the HTTP request body.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
      *
      * @return string
      */
-    public function getHashedBody(Request $request)
+    public function getHashedBody(RequestInterface$request)
     {
         // @TODO 3.0 base64 encoded SHA-256 digest of the raw body of the HTTP request,
         // @TODO 3.0 Send the X-Authorization-Content-SHA256 header with requests.
@@ -86,18 +85,18 @@ class Version2 extends DigestAbstract
      * Returns the normalized value of the "Content-type" header.
      *
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
      *
      * @return string
      */
-    protected function getContentType(RequestSignerInterface $requestSigner, Request $request)
+    protected function getContentType(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
         $type = strtolower($requestSigner->getContentType($request));
         return is_null($type) ? '' : $type;
     }
 
     // @TODO 3.0 Document
-    public function getHost(Request $request) {
+    public function getHost(RequestInterface$request) {
         $host = $request->getUri()->getHost();
         if ($port = $request->getUri()->getPort()) {
             $host .= ':' . $port;
@@ -106,18 +105,18 @@ class Version2 extends DigestAbstract
     }
 
     // @TODO 3.0 Document
-    public function getPath(Request $request) {
+    public function getPath(RequestInterface$request) {
         return $request->getUri()->getPath();
     }
 
     // @TODO 3.0 Document
-    public function getQueryParameters(Request $request) {
+    public function getQueryParameters(RequestInterface$request) {
         return $request->getUri()->getQuery();
     }
 
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
-    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, Request $request) {
+    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request) {
         // @TODO 3.0 better AuthHeader handling, probably new class
         $headers = array();
         $header_message = '';
@@ -157,7 +156,7 @@ class Version2 extends DigestAbstract
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
     // @TODO 3.0 This deserves a new class for the auth headers
-    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, Request $request) {
+    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, RequestInterface $request) {
         // Authorization-Header-Parameters: normalized parameters similar to
         // section 9.1.1 of OAuth 1.0a. The parameters are the id, nonce, realm,
         // and version from the Authorization header. Parameters are sorted by
@@ -195,11 +194,11 @@ class Version2 extends DigestAbstract
      * Returns the value of the "Timestamp" header.
      *
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
      *
      * @return string
      */
-    protected function getTimestamp(RequestSignerInterface $requestSigner, Request $request)
+    protected function getTimestamp(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
         return $requestSigner->getTimestamp($request);
     }
@@ -208,11 +207,11 @@ class Version2 extends DigestAbstract
      * Returns the canonicalized custom headers.
      *
      * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
      *
      * @return string
      */
-    protected function getCustomHeaders(RequestSignerInterface $requestSigner, Request $request)
+    protected function getCustomHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
         $headers = $requestSigner->getCustomHeaders($request);
 
@@ -223,18 +222,5 @@ class Version2 extends DigestAbstract
 
         sort($canonicalizedHeaders);
         return join("\n", $canonicalizedHeaders);
-    }
-
-    /**
-     * Returns the canonicalized resource, which is a normalized path plus query
-     * string.
-     *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     *
-     * @return string
-     */
-    protected function getResource(Request $request)
-    {
-        return $request->getResource();
     }
 }

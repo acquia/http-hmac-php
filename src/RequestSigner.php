@@ -2,8 +2,7 @@
 
 namespace Acquia\Hmac;
 
-//use Acquia\Hmac\Request\RequestInterface;
-use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 
 class RequestSigner implements RequestSignerInterface
 {
@@ -57,7 +56,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\MalformedRequest
      */
-    public function getSignature(Request $request)
+    public function getSignature(RequestInterface $request)
     {
         // @TODO 3.0 better AuthHeader handling, probably new class
         $header = $request->getHeaderLine('Authorization');
@@ -101,14 +100,14 @@ class RequestSigner implements RequestSignerInterface
      * @throws \InvalidArgumentException
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function signRequest(Request $request, $secretKey)
+    public function signRequest(RequestInterface $request, $secretKey)
     {
         return $this->digest->get($this, $request, $secretKey);
     }
 
     // @TODO 3.0 Interface
     // @TODO 3.0 Test
-    public function getHashedBody(Request $request) {
+    public function getHashedBody(RequestInterface $request) {
         $hash = '';
         if (!empty((string) $request->getBody())) { 
             $hash = $this->digest->getHashedBody($request);
@@ -121,7 +120,7 @@ class RequestSigner implements RequestSignerInterface
      *
      * @throws \Acquia\Hmac\Exception\InvalidRequestException
      */
-    public function getAuthorization(Request $request, $id, $secretKey, $nonce = null)
+    public function getAuthorization(RequestInterface $request, $id, $secretKey, $nonce = null)
     {
         // @TODO 3.0 New Authorization header format:
         // realm: The provider, for example "Acquia", "MyCompany", etc.
@@ -212,7 +211,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getContentType(Request $request)
+    public function getContentType(RequestInterface $request)
     {
         return $request->getHeaderLine('Content-Type');
     }
@@ -220,7 +219,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getTimestamp(Request $request)
+    public function getTimestamp(RequestInterface $request)
     {
         $timestamp = $request->getHeaderLine('X-Authorization-Timestamp');
 
@@ -234,7 +233,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getCustomHeaders(Request $request)
+    public function getCustomHeaders(RequestInterface $request)
     {
         $headers = array();
         foreach ($this->customHeaders as $header) {

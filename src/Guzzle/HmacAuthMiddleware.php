@@ -4,7 +4,6 @@ namespace Acquia\Hmac\Guzzle;
 
 use Acquia\Hmac\RequestSignerInterface;
 use Psr\Http\Message\RequestInterface;
-use GuzzleHttp\Psr7\Request;
 
 class HmacAuthMiddleware
 {
@@ -86,7 +85,7 @@ class HmacAuthMiddleware
             $time->setTimezone(new \DateTimeZone('GMT'));
             $request = $request->withHeader('X-Authorization-Timestamp', $time->getTimestamp());
         }
-
+        
         if (!$request->hasHeader('Content-Type')) {
             $request = $request->withHeader('Content-Type', $this->defaultContentType);
         }
