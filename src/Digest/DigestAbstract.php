@@ -59,7 +59,7 @@ abstract class DigestAbstract implements DigestInterface
      *
      * @return string
      */
-    abstract protected function getMessage(
+    abstract public function getMessage(
         RequestSignerInterface $requestSigner,
         RequestInterface $request,
         $secretKey

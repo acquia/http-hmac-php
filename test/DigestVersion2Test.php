@@ -58,6 +58,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
 
         $digest = new Digest();
 
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $this->assertEquals(self::EXPECTED_HASH, $digest->get($signer, $request, $this->auth_secret));
 
         // Change the secret key
@@ -102,6 +103,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate($method, 'https://example.acquiapipet.net', $path, '', $headers, $body);
         $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
 
         $this->assertEquals('XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM=', $digest->get($signer, $request, $secretKey));
 
@@ -140,15 +142,14 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
             . 'nonce="64d02132-40bf-4fce-85bf-3f1bb1bfe7dd",'
             . 'version="2.0",'
             . 'headers="Custom1;Custom2",'
-            . 'signature="4VtBHjqrdDeYrJySoJVDUHpN9u3vyTsyOLz4chezi98="',
+            . 'signature="ko7P82BXY98fFVuCStnB+xo7zxJGqMC9rTW0EpDz+do="',
         );
         $request = DummyRequest::generate($method, $host, $path, '', $headers, $body);
         $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
 
         $digest = new Digest();
-
-        // @TODO 3.0 I'm not 100% about this hash, we don't have any reference implementations using signed headers to match against.
-        $this->assertEquals('4VtBHjqrdDeYrJySoJVDUHpN9u3vyTsyOLz4chezi98=', $digest->get($signer, $request, $secretKey));
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
+        $this->assertEquals('ko7P82BXY98fFVuCStnB+xo7zxJGqMC9rTW0EpDz+do=', $digest->get($signer, $request, $secretKey));
     }
 
 }

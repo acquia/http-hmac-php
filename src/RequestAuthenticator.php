@@ -49,7 +49,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
 
         // Sign the request and check whether it matches the one that was
         // passed. If it matches, the request is authenticated.
-        $signed_request = $this->requestSigner->signRequest($request, $key->getId(), $key->getSecret());
+        $signed_request = $this->requestSigner->signRequest($request, $key->getSecret());
         $requestSignature = $this->requestSigner->getSignature($signed_request);
 
         if (!$passedSignature->matches($requestSignature)) {

@@ -63,14 +63,4 @@ interface RequestSignerInterface
      */
     public function setTimestamp($timestamp);
 
-    /**
-     * Returns an associative array of custom headers.
-     *
-     * @param \Psr\Http\Message\RequestInterface $request
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function getCustomHeaders(RequestInterface $request);
 }

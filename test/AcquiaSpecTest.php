@@ -28,9 +28,9 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $headers = [];
 
         $signer = new RequestSigner();
-        $signer->setId($input['id']);
-        $signer->setRealm($input['realm']);
-        $signer->setNonce($input['nonce']);
+        $signer->getAuthorizationHeader()->setId($input['id']);
+        $signer->getAuthorizationHeader()->setRealm($input['realm']);
+        $signer->getAuthorizationHeader()->setNonce($input['nonce']);
         $signer->setTimestamp($input['timestamp']);
         $signer->setDefaultContentType($input['content_type']);
 
@@ -39,7 +39,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         }
 
         foreach ($input['signed_headers'] as $key) {
-            $signer->addCustomHeader($key);
+            $signer->getAuthorizationHeader()->addSignedHeader($key);
         }
 
         $body = !empty($input['content_body']) ? $input['content_body'] : null;
@@ -53,7 +53,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
             $input['nonce']
         );
         $request = $request->withHeader('Authorization', $auth_header);
-        $signed_request = $signer->signRequest($request, $input['id'], $input['secret']);
+        $signed_request = $signer->signRequest($request, $input['secret']);
         $signature = $signer->getSignature($signed_request);
 
         // Prove that the signature is valid.
@@ -72,10 +72,15 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectations['message_signature'], $request_signature->getSignature());
 
         // Prove that the digest generates the correct signature. 
+        $digest_message = $digest->getMessage($signer, $signed_request, $input['secret']);
+        $this->assertEquals($expectations['signable_message'], $digest_message);
         $digest_signature = $digest->get($signer, $signed_request, $input['secret']);
         $this->assertEquals($expectations['message_signature'], $digest_signature);
 
         // Prove that the authenticator can authenticate the request.
+        $signer = new RequestSigner();
+        $signer->setTimestamp($input['timestamp']);
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($signed_auth_header);
         $key_loader = new DummyKeyLoader();
         $key_loader->addKey($input['id'], $input['secret']);
         $authenticator = new RequestAuthenticator($signer, time() + 10);

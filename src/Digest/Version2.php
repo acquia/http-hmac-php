@@ -4,6 +4,7 @@ namespace Acquia\Hmac\Digest;
 
 use Acquia\Hmac\Exception;
 use Acquia\Hmac\RequestSignerInterface;
+use Acquia\Hmac\AuthorizationHeaderInterface;
 use Psr\Http\Message\RequestInterface;
 
 // @TODO 3.0 This class should be Version2
@@ -13,7 +14,7 @@ class Version2 extends DigestAbstract
      * {@inheritDoc}
      */
     // @TODO 3.0 make this public and test it with the fixtures
-    protected function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
+    public function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
         $parts = array(
             // @TODO 3.0 Message format has changed
@@ -33,11 +34,7 @@ class Version2 extends DigestAbstract
 
         $parts[] = $this->getTimestamp($requestSigner, $request);
 
-        // Omit if there is no request body.
-        // @TODO 3.0 The string cast is because the HmacAuthMiddleware::signRequest method takes a Psr RequestInterface
-        // and uses this api, however the getBody method returns a stream. This can be cast to a string here, but this
-        // is wrong. the signRequest method should really take an acquia RequestInterface object.
-        // @TODO 3.0 the ruby implementation just looks for the X-Authorization-Content-SHA256 header, should we?
+        // Guzzle PSR7 gives us a stream that can be cast to a string.
         $body = (string) $this->getBody($request);
         if (!empty($body)) {
             $parts[] = $this->getContentType($requestSigner, $request);
@@ -124,34 +121,8 @@ class Version2 extends DigestAbstract
     // @TODO 3.0 Interface?
     public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
-        // @TODO 3.0 better AuthHeader handling, probably new class
-        $headers = array();
         $header_message = '';
-
-        // @TODO 3.0 in general, we need better differentiation of signing in the client vs server.
-        $signer_headers = $requestSigner->getCustomHeaders($request);
-        if (!empty($signer_headers)) {
-            $headers = array_keys($signer_headers);
-        } else {
-            $header = $request->getHeaderLine('Authorization');
-            if (!empty($header)) {
-                foreach (explode(',', $header) as $auth) {
-                    $auth_parts = explode(':', $auth);
-                    if (count($auth_parts) < 2) {
-                        continue;
-                    }
-                    // @TODO 3.0 better quote replacement.
-                    $key = trim($auth_parts[0], " '\"");
-                    $value = trim($auth_parts[1], " '\"");
-                    if ($key == 'headers') {
-                        $headers = explode(';', $value);
-                        break;
-                    }
-                }
-            }
-        }
-
-        foreach ($headers as $key) {
+        foreach ($requestSigner->getAuthorizationHeader()->getSignedHeaders() as $key) {
             if (!empty($key)) {
                 $value = $request->getHeaderLine($key);
                 $header_message .= strtolower($key) . ':' . $value . "\n";
@@ -162,40 +133,15 @@ class Version2 extends DigestAbstract
 
     // @TODO 3.0 Document
     // @TODO 3.0 Interface?
-    // @TODO 3.0 This deserves a new class for the auth headers
-    public function getAuthorizationHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
+    public function getAuthorizationHeaders(RequestSignerInterface $signer)
     {
-        // Authorization-Header-Parameters: normalized parameters similar to
-        // section 9.1.1 of OAuth 1.0a. The parameters are the id, nonce, realm,
-        // and version from the Authorization header. Parameters are sorted by
-        // name and separated by '&' with name and value separated by =, percent
-        // encoded (urlencoded)
-        $header = $request->getHeaderLine('Authorization');
-
-        if (empty($header)) {
-            $id = $requestSigner->getId();
-            $nonce = $requestSigner->getNonce();
-            $realm = $requestSigner->getRealm();
-        } else {
-            $id = '';
-            $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
-
-            $realm = '';
-            $realm_match = preg_match('/.*realm="(.*?)"/', $header, $realm_matches);
-
-            $nonce = '';
-            $nonce_match = preg_match('/.*nonce="(.*?)"/', $header, $nonce_matches);
-
-            if (!$id_match || !$realm_match || !$nonce_match) {
-                throw new Exception\MalformedRequestException('Authorization header requires a realm, id and a nonce.');
-            }
-            $id = $id_matches[1];
-            $realm = rawurldecode($realm_matches[1]);
-            $nonce = $nonce_matches[1];
-        }
-
-        $auth_message = sprintf('id=%s&nonce=%s&realm=%s&version=2.0', $id, $nonce, rawurlencode($realm));
-        return $auth_message;
+        return sprintf(
+            'id=%s&nonce=%s&realm=%s&version=%s',
+            $signer->getAuthorizationHeader()->getId(),
+            $signer->getAuthorizationHeader()->getNonce(),
+            rawurlencode($signer->getAuthorizationHeader()->getRealm()),
+            $signer->getAuthorizationHeader()->getVersion()
+        );
     }
 
     /**
@@ -209,26 +155,5 @@ class Version2 extends DigestAbstract
     protected function getTimestamp(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
         return $requestSigner->getTimestamp($request);
-    }
-
-    /**
-     * Returns the canonicalized custom headers.
-     *
-     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param \Psr\Http\Message\RequestInterface $request
-     *
-     * @return string
-     */
-    protected function getCustomHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
-    {
-        $headers = $requestSigner->getCustomHeaders($request);
-
-        $canonicalizedHeaders = array();
-        foreach ($headers as $header => $value) {
-            $canonicalizedHeaders[] = strtolower($header) . ': ' . $value;
-        }
-
-        sort($canonicalizedHeaders);
-        return join("\n", $canonicalizedHeaders);
     }
 }

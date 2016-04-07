@@ -35,6 +35,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $authenticator = new RequestAuthenticator($signer, 0);
         $key = $authenticator->authenticate($request, new DummyKeyLoader());
 

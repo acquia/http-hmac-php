@@ -18,19 +18,14 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
     }
 
-    public function testSetRealm()
-    {
-        $signer = new RequestSigner();
-        $signer->setRealm('TestRealm');
-        $this->assertEquals('TestRealm', $signer->getRealm());
-    }
-
     public function testSetCustomHeaders()
     {
+        // @TODO 3.0 this test should move to AuthorizationHeader
         $headers = array('Custom1', 'Custom2');
 
         $signer = new RequestSigner();
-        $signer->setCustomHeaders(array('Custom1', 'Custom2'));
+        $signer->getAuthorizationHeader()->addSignedHeader('Custom1');
+        $signer->getAuthorizationHeader()->addSignedHeader('Custom2');
 
         $headers = array(
             'Custom1' => 'Value1',
@@ -39,24 +34,23 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $expected = array(
-            'Custom1' => 'Value1',
-            'Custom2' => 'Value2',
-        );
+        $expected = array('Custom1', 'Custom2');
 
-        $this->assertEquals($expected, $signer->getCustomHeaders($request));
+        $this->assertEquals($expected, $signer->getAuthorizationHeader()->getSignedHeaders($request));
     }
 
     public function testAddCustomHeader()
     {
+        // @TODO 3.0 this test should move to AuthorizationHeader
+        // @TODO 3.0 should this be testing the parsed header?
         $headers = array('Custom1' => 'Value1');
 
         $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        $signer->getAuthorizationHeader()->addSignedHeader('Custom1');
 
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $this->assertEquals($headers, $signer->getCustomHeaders($request));
+        $this->assertEquals(array('Custom1'), $signer->getAuthorizationHeader()->getSignedHeaders($request));
     }
 
     public function testGetContentType()
@@ -186,14 +180,15 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
-        $signed_request = $signer->signRequest($request, $this->auth_id, $this->auth_secret);
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
+        $signed_request = $signer->signRequest($request, $this->auth_secret);
         $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signed_request->getHeaderLine('Authorization'));
     }
 
     public function testgetAuthorization()
     {
         $signer = new RequestSigner();
-        $signer->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $signer->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
         $signer->setTimestamp('1432075982');
 
         $headers = array(
@@ -201,20 +196,21 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
             . 'id="' . $this->auth_id . '",'
-            . 'nonce="' . $signer->getNonce() .'",'
+            . 'nonce="' . $signer->getAuthorizationHeader()->getNonce() .'",'
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         );
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
-        $expected = 'acquia-http-hmac realm="Acquia",'
+        $expected = 'acquia-http-hmac realm="Pipet%20service",'
                     . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
-                    . 'nonce="' . $signer->getNonce() .'",'
+                    . 'nonce="' . $signer->getAuthorizationHeader()->getNonce() .'",'
                     . 'version="2.0",'
                     . 'headers="",'
                     . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
 
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $this->assertEquals($expected, $signer->getAuthorization($request, $this->auth_id, $this->auth_secret));
     }
 }

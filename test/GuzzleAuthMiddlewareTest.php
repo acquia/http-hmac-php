@@ -26,43 +26,17 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \Acquia\Hmac\Guzzle\HmacAuthMiddleware
      */
-    public function getMiddleware(RequestSigner $requestSigner = null, $id = null, $secret = null)
+    public function getMiddleware(RequestSigner $requestSigner = null, $secret = null)
     {
         if (empty($requestSigner)) {
             $requestSigner = new RequestSigner();
         }
 
-        if (empty($id)) {
-            $id = $this->auth_id;
-        } 
         if (empty($secret)) {
             $secret = $this->auth_secret;
         }
        
-        return new HmacAuthMiddleware($requestSigner, $id, $secret);
-    }
-
-    public function testGetDefaultContentType()
-    {
-        $middleware = $this->getMiddleware();
-        $this->assertEquals('application/json; charset=utf-8', $middleware->getDefaultContentType());
-    }
-
-    public function testSetDefaultContentType()
-    {
-        $middleware = $this->getMiddleware();
-        $middleware->setDefaultContentType('text/plain');
-        $this->assertEquals('text/plain', $middleware->getDefaultContentType());
-    }
-
-    public function testSetDefaultContentTypeHeader()
-    {
-        $middleware = $this->getMiddleware();
-        $middleware->setDefaultContentType('some/content-type');
-
-        $uri = 'http://example.com/resource/1?key=value';
-        $request = $middleware->signRequest(new Request('GET', $uri, []));
-        $this->assertEquals('some/content-type', $request->getHeaderLine('Content-Type'));
+        return new HmacAuthMiddleware($requestSigner, $secret);
     }
 
     public function testSetDefaultDateHeader()
@@ -84,12 +58,12 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
     public function testAuthorizationHeader()
     {
         $requestSigner = new RequestSigner();
-        $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
-        $requestSigner->setRealm('Pipet service');
-        $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $requestSigner->getAuthorizationHeader()->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $requestSigner->getAuthorizationHeader()->setRealm('Pipet service');
+        $requestSigner->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
         $requestSigner->setTimestamp('1432075982');
 
-        $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
+        $middleware = $this->getMiddleware($requestSigner, $this->auth_secret);
 
         $uri = 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10';
 
@@ -107,12 +81,12 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
     public function testRegisterPlugin()
     {
         $requestSigner = new RequestSigner();
-        $requestSigner->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
-        $requestSigner->setRealm('Pipet service');
-        $requestSigner->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $requestSigner->getAuthorizationHeader()->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $requestSigner->getAuthorizationHeader()->setRealm('Pipet service');
+        $requestSigner->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
         $requestSigner->setTimestamp('1432075982');
 
-        $middleware = $this->getMiddleware($requestSigner, $requestSigner->getId(), $this->auth_secret);
+        $middleware = $this->getMiddleware($requestSigner, $this->auth_secret);
 
         $container = [];
         $history = Middleware::history($container);
