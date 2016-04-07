@@ -30,7 +30,7 @@ for more detailed installation and usage instructions.
 
 ## Usage
 
-Sign an API request sent via Guzzle.
+### Sign an API request sent via Guzzle
 
 ```php
 
@@ -68,24 +68,40 @@ $options = [
 $client->get('http://example.com/resource', $options);
 ```
 
-Authenticate the request in a Symfony-powered app e.g. [Silex](https://github.com/silexphp/Silex).
+### Authenticate the request using PSR-7-compatible requests
 
 ```php
 // @TODO 3.0 This needs to be verified.
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
-use Acquia\Hmac\Request\Symfony as RequestWrapper;
-
-// $request is a \Symfony\Component\HttpFoundation\Request object.
-$requestWrapper = new RequestWrapper($request);
-
-// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
 
 $authenticator = new RequestAuthenticator(new RequestSigner(), '+15 minutes');
-$key = $authenticator->authenticate($requestWrapper, $keyLoader);
+
+// $request implements PSR-7's \Psr\Http\Message\RequestInterface
+// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
+$key = $authenticator->authenticate($request, $keyLoader);
 
 ```
 
+To convert a HTTP Foundation request (used in Symfony-powered apps like Silex) to PSR-7, use Symfony's [PSR-7 bridge](http://symfony.com/doc/current/cookbook/psr7.html):
+ 
+```php
+// @TODO 3.0 This needs to be verified.
+use Acquia\Hmac\RequestAuthenticator;
+use Acquia\Hmac\RequestSigner;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory
+
+$authenticator = new RequestAuthenticator(new RequestSigner(), '+15 minutes');
+
+// $request is an HTTP Foundation request
+$psr7Factory = new DiactorosFactory();
+$psr7Request = $psr7Factory->createRequest($request);
+
+// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
+$key = $authenticator->authenticate($psr7Request, $keyLoader);
+
+```
+ 
 ## Contributing and Development
 
 Submit changes using GitHub's standard [pull request](https://help.github.com/articles/using-pull-requests) workflow.
@@ -95,6 +111,7 @@ All code should adhere to the following standards:
 * [PSR-1](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md)
 * [PSR-2](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md)
 * [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md)
+* [PSR-7](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-7-http-message.md)
 
 It is recommend to use the [PHP Coding Standards Fixer](https://github.com/fabpot/PHP-CS-Fixer)
 tool to ensure that code adheres to the coding standards mentioned above.
