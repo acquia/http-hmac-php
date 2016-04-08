@@ -47,7 +47,7 @@ class RequestSigner implements RequestSignerInterface
     // @TODO 3.0 Interface/doc/test
     public function getAuthorizationHeader()
     {
-      return $this->authorizationHeader;
+        return $this->authorizationHeader;
     }
 
     /**

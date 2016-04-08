@@ -8,7 +8,8 @@ class DummyKeyLoader implements KeyLoaderInterface
 {
     protected $keys = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->keys = array(
           'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
           '615d6517-1cea-4aa3-b48e-96d83c16c4dd' => 'TXkgU2VjcmV0IEtleSBUaGF0IGlzIFZlcnkgU2VjdXJl',
@@ -16,8 +17,9 @@ class DummyKeyLoader implements KeyLoaderInterface
     }
 
     // @TODO 3.0 Interface?
-    public function addKey($id, $secret) {
-      $this->keys[$id] = $secret;
+    public function addKey($id, $secret)
+    {
+        $this->keys[$id] = $secret;
     }
 
     /**

@@ -62,5 +62,4 @@ interface RequestSignerInterface
      * @param int $timestamp
      */
     public function setTimestamp($timestamp);
-
 }

@@ -56,7 +56,8 @@ class HmacAuthMiddleware
     }
 
     // @TODO 3.0 document
-    public function signRequest(RequestInterface $request) {
+    public function signRequest(RequestInterface $request)
+    {
         return $this->requestSigner->signRequest($request, $this->getSecretKey());
     }
 }

@@ -15,7 +15,8 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function addSignedHeader($key) {
+    public function addSignedHeader($key)
+    {
         $this->headers[] = $key;
     }
 
@@ -23,7 +24,8 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function getSignedHeaders() {
+    public function getSignedHeaders()
+    {
         return $this->headers;
     }
 
@@ -198,5 +200,4 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
             mt_rand(0, 0xffff)
         );
     }
-
 }

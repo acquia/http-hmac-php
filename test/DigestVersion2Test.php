@@ -151,5 +151,4 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $this->assertEquals('ko7P82BXY98fFVuCStnB+xo7zxJGqMC9rTW0EpDz+do=', $digest->get($signer, $request, $secretKey));
     }
-
 }

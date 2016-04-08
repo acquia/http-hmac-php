@@ -13,16 +13,18 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
     /**
      * Get the shared test fixtures.
      */
-    public function specFixtureProvider() {
+    public function specFixtureProvider()
+    {
         $fixtures_json = file_get_contents(realpath(__DIR__ . "/acquia_spec_features.json"));
-        $fixtures = json_decode($fixtures_json, TRUE);
+        $fixtures = json_decode($fixtures_json, true);
         return $fixtures['fixtures']['2.0'];
     }
 
     /**
      * @dataProvider specFixtureProvider
      */
-    public function testSpec($input, $expectations) {
+    public function testSpec($input, $expectations)
+    {
         $digest = new Digest();
 
         $headers = [];
@@ -71,7 +73,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $request_signature = $signer->getSignature($signed_request);
         $this->assertEquals($expectations['message_signature'], $request_signature->getSignature());
 
-        // Prove that the digest generates the correct signature. 
+        // Prove that the digest generates the correct signature.
         $digest_message = $digest->getMessage($signer, $signed_request, $input['secret']);
         $this->assertEquals($expectations['signable_message'], $digest_message);
         $digest_signature = $digest->get($signer, $signed_request, $input['secret']);

@@ -114,5 +114,4 @@ interface AuthorizationHeaderInterface
      * @return string
      */
     public function generateNonce();
-
 }
