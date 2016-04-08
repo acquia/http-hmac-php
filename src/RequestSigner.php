@@ -31,8 +31,9 @@ class RequestSigner implements RequestSignerInterface
      */
     protected $defaultContentType = 'application/json; charset=utf-8';
 
-    // @TODO 3.0 documentation/interface
-    // @TODO 3.0 setter?
+    /**
+     * @var \Acquia\Hmac\AuthorizationHeader
+     */
     protected $authorizationHeader;
 
     /**
@@ -44,25 +45,25 @@ class RequestSigner implements RequestSignerInterface
         $this->authorizationHeader = $authorization_header ?: new AuthorizationHeader();
     }
 
-    // @TODO 3.0 Interface/doc/test
+    /**
+     * {@inheritDoc}
+     */
     public function getAuthorizationHeader()
     {
         return $this->authorizationHeader;
     }
 
     /**
-     * @var string $contentType
+     * {@inheritDoc}
      */
-    // @TODO 3.0 Interface/test
-    public function setDefaultContentType($contentType)
+    public function setDefaultContentType($content_type)
     {
-        $this->defaultContentType = $contentType;
+        $this->defaultContentType = $content_type;
     }
 
     /**
-     * @return string
+     * {@inheritDoc}
      */
-    // @TODO 3.0 Interface/test
     public function getDefaultContentType()
     {
         return $this->defaultContentType;

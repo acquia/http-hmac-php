@@ -20,7 +20,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->headers[] = $key;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -29,7 +28,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->headers;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -38,7 +36,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->realm;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -47,7 +44,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->realm = $realm;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -56,7 +52,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->id;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -65,7 +60,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->id = $id;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -78,7 +72,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->nonce;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -87,7 +80,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->nonce = $nonce;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -96,7 +88,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->version;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -105,7 +96,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->version = $version;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -114,7 +104,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         return $this->signature;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -123,7 +112,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $this->signature = $signature;
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */
@@ -162,6 +150,9 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         }
     }
 
+    /**
+     * {inheritDoc}
+     */
     public function createAuthorizationHeader()
     {
         $signed_headers = implode(';', $this->getSignedHeaders());
@@ -174,7 +165,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     }
 
-    // @TODO 3.0 test
     /**
      * {@inheritDoc}
      */

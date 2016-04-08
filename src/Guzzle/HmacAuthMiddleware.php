@@ -28,13 +28,21 @@ class HmacAuthMiddleware
         $this->setSecretKey($secretKey);
     }
 
-    // @TODO 3.0 document
+    /**
+     * Gets the secret key.
+     *
+     * @return string
+     */
     public function getSecretKey()
     {
         return $this->secretKey;
     }
 
-    // @TODO 3.0 document
+    /**
+     * Sets the secret key.
+     *
+     * @param string $secretKey
+     */
     public function setSecretKey($secretKey)
     {
         $this->secretKey = $secretKey;
@@ -55,7 +63,13 @@ class HmacAuthMiddleware
         };
     }
 
-    // @TODO 3.0 document
+    /**
+     * Signs the request with the appropriate headers.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
     public function signRequest(RequestInterface $request)
     {
         return $this->requestSigner->signRequest($request, $this->getSecretKey());

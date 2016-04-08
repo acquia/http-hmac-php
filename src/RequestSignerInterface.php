@@ -6,6 +6,14 @@ use Psr\Http\Message\RequestInterface;
 
 interface RequestSignerInterface
 {
+
+    /**
+     * Gets the AuthorizationHeader object.
+     *
+     * @return \Acquia\Hmac\AuthorizationHeader
+     */
+    public function getAuthorizationHeader();
+
     /**
      * Generates a signature for the request given the secret key and algorithm.
      *
@@ -15,6 +23,20 @@ interface RequestSignerInterface
      * @return string
      */
     public function getDigest(RequestInterface $request, $secretKey);
+
+    /**
+     * Sets the default content type.
+     *
+     * @param string $content_type
+     */
+    public function setDefaultContentType($content_type);
+
+    /**
+     * Gets the default content type.
+     *
+     * @return string
+     */
+    public function getDefaultContentType();
 
     /**
      * Returns the value of the "Authorization" header.
