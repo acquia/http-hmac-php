@@ -12,10 +12,22 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
 
     protected $auth_secret;
 
+    protected $generic_headers;
+
     protected function setUp()
     {
         $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+        $this->generic_headers = array(
+            'Content-Type' => 'text/plain',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        );
     }
 
     public function testSetCustomHeaders()
@@ -63,7 +75,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * @expectedException \Acquia\Hmac\Exception\KeyNotFoundException
      */
     public function testMissingAuthorizationHeader()
     {
@@ -90,21 +102,8 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidRealm()
     {
-        $headers = array();
+        $headers = $this->generic_headers;
         $headers['Authorization'] = 'BadRealm 1:abcd';
-        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
-
-        $signer = new RequestSigner();
-        $signer->getSignature($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\KeyNotFoundException
-     */
-    public function testMissingTimestampHeader()
-    {
-        $headers = array();
-        $headers['Authorization'] = 'Acquia 2:abcd';
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
@@ -116,8 +115,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidTimestampHeader()
     {
-        $headers = array();
-        $headers['Authorization'] = 'Acquia 2:abcd';
+        $headers = $this->generic_headers;
         $headers['X-Authorization-Timestamp'] = 'Acquia 2:abcd';
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
@@ -128,14 +126,44 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Acquia\Hmac\Exception\KeyNotFoundException
      */
-    public function testInvalidSignature()
+    public function testMissingSignature()
     {
-        $headers = array();
-        $headers['Authorization'] = 'Acquia 2:abcd';
-        $headers['Date'] = 'bad-timestamp';
+        $headers = array(
+            'Content-Type' => 'text/plain',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature=""',
+        );
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
+        $signer->getSignature($request);
+    }
+
+    /**
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function testInvalidSignature()
+    {
+        $headers = array(
+            'Content-Type' => 'text/plain',
+            'X-Authorization-Timestamp' => '1432075982',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+            . 'id="' . $this->auth_id . '",'
+            . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+            . 'version="2.0",'
+            . 'headers="",'
+            . 'signature="1===="',
+        );
+        $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
+
+        $signer = new RequestSigner();
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $signer->getSignature($request);
     }
 
@@ -155,6 +183,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
 
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
+        $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
         $signature = $signer->getSignature($request);
 
         $this->assertInstanceOf('Acquia\Hmac\Signature', $signature);

@@ -50,18 +50,6 @@ class RequestSigner implements RequestSignerInterface
       return $this->authorizationHeader;
     }
 
-    // @TODO 3.0 Interface/doc/test
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    // @TODO 3.0 Interface/doc/test
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
     /**
      * @var string $contentType
      */
@@ -117,40 +105,24 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getSignature(RequestInterface $request)
     {
-        // @TODO 3.0 better AuthHeader handling, probably new class
-        $header = $request->getHeaderLine('Authorization');
-        if (!$request->hasHeader('Authorization')) {
-            throw new Exception\MalformedRequestException('Authorization header required');
-        }
+        $id = $this->getAuthorizationHeader()->getId();
+        $signature = $this->getAuthorizationHeader()->getSignature();
+        $timestamp = $this->getTimestamp();
 
-        $id = '';
-        $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
-
-        $signature = '';
-        $signature_match = preg_match('/.*signature="(.*?)"/', $header, $signature_matches);
-
-        if (!$id_match) {
+        if (empty($id)) {
             throw new Exception\KeyNotFoundException('Authorization header requires an id.');
         }
 
-        if (!$signature_match) {
+        if (empty($signature)) {
             throw new Exception\KeyNotFoundException('Authorization header requires a signature.');
         }
-
-        $id = $id_matches[1];
-        $signature = $signature_matches[1];
 
         // Ensure the signature is a base64 encoded string.
         if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $signature)) {
             throw new Exception\MalformedRequestException('Invalid signature in authorization header');
         }
 
-        $timestamp = $this->getTimestamp();
-        if (!$timestamp || !is_numeric($timestamp) || (int) $timestamp < 0) {
-            throw new Exception\MalformedRequestException('Timestamp not valid');
-        }
-
-        return new Signature(stripslashes($id), $signature, $timestamp);
+        return new Signature($id, $signature, $timestamp);
     }
 
     /**

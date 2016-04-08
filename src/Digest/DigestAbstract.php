@@ -45,7 +45,8 @@ abstract class DigestAbstract implements DigestInterface
     public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
         $message = $this->getMessage($requestSigner, $request, $secretKey);
-        // @TODO 3.0 we need to accept the secret key as a base64 encoded string and decode before creating the hash.
+        // The Acquia HMAC spec requires that we use MIME base64 encoded
+        // secrets, but PHP requires them to be decoded before signing.
         $digest = hash_hmac($this->algorithm, $message, base64_decode($secretKey), true);
         return base64_encode($digest);
     }

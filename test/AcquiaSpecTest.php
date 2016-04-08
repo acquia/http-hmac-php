@@ -80,7 +80,6 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         // Prove that the authenticator can authenticate the request.
         $signer = new RequestSigner();
         $signer->setTimestamp($input['timestamp']);
-        $signer->getAuthorizationHeader()->parseAuthorizationHeader($signed_auth_header);
         $key_loader = new DummyKeyLoader();
         $key_loader->addKey($input['id'], $input['secret']);
         $authenticator = new RequestAuthenticator($signer, time() + 10);

@@ -31,6 +31,8 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
      */
     public function authenticate(RequestInterface $request, KeyLoaderInterface $keyLoader)
     {
+        $authorization_header = $request->getHeaderLine('Authorization');
+        $this->requestSigner->getAuthorizationHeader()->parseAuthorizationHeader($authorization_header);
         // Get the signature passed through the HTTP request.
         $passedSignature = $this->requestSigner->getSignature($request);
 

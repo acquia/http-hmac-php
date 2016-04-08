@@ -40,14 +40,15 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 $requestSigner = new RequestSigner();
-$requestSigner->setRealm('CIStore');
-$requestSigner->addCustomHeader('X-Custom-1');
-$requestSigner->addCustomHeader('X-Custom-2');
+$requestSigner->getAuthorizationHeader()->setId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
+$requestSigner->getAuthorizationHeader()->setRealm('CIStore');
+$requestSigner->getAuthorizationHeader()->addSignedHeader('X-Custom-1');
+$requestSigner->getAuthorizationHeader()->addSignedHeader('X-Custom-2');
 
 // Guzzle middleware will sign the request by generating the required headers.
 // You must provide the ID and secret. According to the Acquia HMAC 2.0 spec,
 // the ID is an arbitrary string and the secret is a base64 encoded string.
-$middleware = new HmacAuthMiddleware($requestSigner, 'auth_id', base64_encode('secret'));
+$middleware = new HmacAuthMiddleware($requestSigner, base64_encode('secret'));
 
 $stack = HandlerStack::create();
 $stack->push($middleware);
@@ -75,9 +76,12 @@ $client->get('http://example.com/resource', $options);
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
 
-$authenticator = new RequestAuthenticator(new RequestSigner(), '+15 minutes');
-
 // $request implements PSR-7's \Psr\Http\Message\RequestInterface
+$authorization_header = $request->getHeaderLine('Authorization');
+
+$signer = new RequestSigner();
+$authenticator = new RequestAuthenticator($signer, '+15 minutes');
+
 // $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
 $key = $authenticator->authenticate($request, $keyLoader);
 

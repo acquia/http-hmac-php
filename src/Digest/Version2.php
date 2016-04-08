@@ -7,18 +7,14 @@ use Acquia\Hmac\RequestSignerInterface;
 use Acquia\Hmac\AuthorizationHeaderInterface;
 use Psr\Http\Message\RequestInterface;
 
-// @TODO 3.0 This class should be Version2
 class Version2 extends DigestAbstract
 {
     /**
      * {@inheritDoc}
      */
-    // @TODO 3.0 make this public and test it with the fixtures
     public function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
         $parts = array(
-            // @TODO 3.0 Message format has changed
-            // @TODO 3.0 This will also require changes to the RequestInterface:
             $this->getMethod($request),
             $this->getHost($request),
             $this->getPath($request),
@@ -27,7 +23,7 @@ class Version2 extends DigestAbstract
         );
 
         // Add in the signed headers.
-        $auth_header_params = $this->getAuthorizationHeaderParameters($requestSigner, $request);
+        $auth_header_params = $this->getSignedHeaders($requestSigner, $request);
         if (!empty($auth_header_params)) {
             $parts[] = $auth_header_params;
         }
@@ -52,13 +48,19 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    protected function getMethod(RequestInterface$request)
+    protected function getMethod(RequestInterface $request)
     {
         return strtoupper($request->getMethod());
     }
 
-    // @TODO 3.0 Document
-    protected function getBody(RequestInterface$request)
+    /**
+     * Returns the request body.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return string
+     */
+    protected function getBody(RequestInterface $request)
     {
         return $request->getBody();
     }
@@ -70,13 +72,8 @@ class Version2 extends DigestAbstract
      *
      * @return string
      */
-    public function getHashedBody(RequestInterface$request)
+    public function getHashedBody(RequestInterface $request)
     {
-        // @TODO 3.0 base64 encoded SHA-256 digest of the raw body of the HTTP request,
-        // @TODO 3.0 Send the X-Authorization-Content-SHA256 header with requests.
-        // for POST, PUT, PATCH, DELETE or other requests that may have a body. Omit if
-        // Content-Length is 0. This should be identical to the string sent as the
-        // X-Authorization-Content-SHA256 header.
         $digest = base64_encode(hash('sha256', $request->getBody(), true));
         return $digest;
     }
@@ -95,8 +92,14 @@ class Version2 extends DigestAbstract
         return is_null($type) ? '' : $type;
     }
 
-    // @TODO 3.0 Document
-    public function getHost(RequestInterface$request)
+    /**
+     * Returns host and port if available.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return string
+     */
+    public function getHost(RequestInterface $request)
     {
         $host = $request->getUri()->getHost();
         if ($port = $request->getUri()->getPort()) {
@@ -105,21 +108,42 @@ class Version2 extends DigestAbstract
         return $host;
     }
 
-    // @TODO 3.0 Document
-    public function getPath(RequestInterface$request)
+    /**
+     * Returns path of the request.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return string
+     */
+    public function getPath(RequestInterface $request)
     {
         return $request->getUri()->getPath();
     }
 
-    // @TODO 3.0 Document
-    public function getQueryParameters(RequestInterface$request)
+    /**
+     * Returns query string parameters of the request.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return string
+     */
+    public function getQueryParameters(RequestInterface $request)
     {
         return $request->getUri()->getQuery();
     }
 
-    // @TODO 3.0 Document
-    // @TODO 3.0 Interface?
-    public function getAuthorizationHeaderParameters(RequestSignerInterface $requestSigner, RequestInterface $request)
+    /**
+     * Returns the signed headers and their values according to the spec.
+     *
+     * This is a newline-delimited list of the signed request headers and their
+     * values in the format "header:value\n".
+     *
+     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
+     * @param \Psr\Http\Message\RequestInterface $request
+     *
+     * @return string
+     */
+    public function getSignedHeaders(RequestSignerInterface $requestSigner, RequestInterface $request)
     {
         $header_message = '';
         foreach ($requestSigner->getAuthorizationHeader()->getSignedHeaders() as $key) {
@@ -131,8 +155,16 @@ class Version2 extends DigestAbstract
         return trim($header_message, "\n");
     }
 
-    // @TODO 3.0 Document
-    // @TODO 3.0 Interface?
+    /**
+     * Returns the authorization headers according to the spec.
+     *
+     * This is a commma-delimited list of ID, nonce, realm and version with
+     * their values.
+     *
+     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
+     *
+     * @return string
+     */
     public function getAuthorizationHeaders(RequestSignerInterface $signer)
     {
         return sprintf(
