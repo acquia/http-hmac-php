@@ -6,7 +6,7 @@ use Acquia\Hmac\KeyLoaderInterface;
 
 class DummyKeyLoader implements KeyLoaderInterface
 {
-    protected $keys = array();
+    protected $keys = [];
 
     public function __construct(array $keys = [])
     {

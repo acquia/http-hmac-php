@@ -18,7 +18,7 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $auth = new AuthorizationHeader();
         $auth->parseAuthorizationHeader($this->header);
 
-        $this->assertEquals($auth->getSignedHeaders(), array('X-Custom-Signer1', 'X-Custom-Signer2'));
+        $this->assertEquals($auth->getSignedHeaders(), ['X-Custom-Signer1', 'X-Custom-Signer2']);
         $this->assertEquals($auth->getId(), 'e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
         $this->assertEquals($auth->getNonce(), 'a9938d07-d9f0-480c-b007-f1e956bcd027');
         $this->assertEquals($auth->getRealm(), 'CIStore');
@@ -28,13 +28,13 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
 
     public function requiredFieldsProvider()
     {
-        return array(
-          array('id'),
-          array('nonce'),
-          array('realm'),
-          array('signature'),
-          array('version'),
-        );
+        return [
+          ['id'],
+          ['nonce'],
+          ['realm'],
+          ['signature'],
+          ['version'],
+        ];
     }
 
     /**

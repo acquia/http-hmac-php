@@ -37,7 +37,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -46,7 +46,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
@@ -66,7 +66,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
         $signer = new RequestSigner();
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -75,7 +75,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="bRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
@@ -92,7 +92,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -101,7 +101,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, '10 minutes');
@@ -121,7 +121,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->setTimestamp($timestamp);
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => $timestamp,
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -130,7 +130,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, '10 minutes');
@@ -144,7 +144,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $signer = new RequestSigner();
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1232075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -153,7 +153,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);

@@ -14,13 +14,13 @@ class Version2 extends DigestAbstract
      */
     public function getMessage(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey)
     {
-        $parts = array(
+        $parts = [
             $this->getMethod($request),
             $this->getHost($request),
             $this->getPath($request),
             $this->getQueryParameters($request),
             $this->getAuthorizationHeaders($requestSigner, $request),
-        );
+        ];
 
         // Add in the signed headers.
         $auth_header_params = $this->getSignedHeaders($requestSigner, $request);

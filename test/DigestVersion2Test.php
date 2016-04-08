@@ -43,7 +43,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet%20service",'
@@ -52,7 +52,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="P9D+Oc8QDU0puyGuqJHvrneek02g0F5D0+2qrXmSOOA"',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=20', $headers);
 
         $digest = new Digest();
@@ -83,7 +83,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $method = 'POST';
         $path = '/v1.0/task';
         $body = '{"method":"hi.bob","params":["5","4","8"]}';
-        $headers = array(
+        $headers = [
             'Content-Type' => 'application/json',
             'Content-Length' => strlen($body),
             'X-Authorization-Timestamp' => '1432075982',
@@ -93,7 +93,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM"',
-        );
+        ];
         $request = DummyRequest::generate($method, 'https://example.acquiapipet.net', $path, '', $headers, $body);
         $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
         $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
@@ -123,7 +123,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $method = 'POST';
         $path = '/register';
         $body = '{"method":"hi.bob","params":["5","4","8"]}';
-        $headers = array(
+        $headers = [
             'Content-Type' => 'application/json',
             'Content-Length' => strlen($body),
             'X-Authorization-Timestamp' => '1449578521',
@@ -135,7 +135,7 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="Custom1;Custom2",'
             . 'signature="ko7P82BXY98fFVuCStnB+xo7zxJGqMC9rTW0EpDz+do="',
-        );
+        ];
         $request = DummyRequest::generate($method, $host, $path, '', $headers, $body);
         $request = $request->withHeader('X-Authorization-Content-SHA256', $signer->getHashedBody($request));
 

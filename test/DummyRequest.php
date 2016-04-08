@@ -11,7 +11,7 @@ class DummyRequest extends Request
         $host = 'https://example.acquiapipet.net',
         $path = '/v1.0/task-status/133',
         $query = 'limit=10',
-        $headers = array(),
+        $headers = [],
         $body = null
     ) {
         $query_string = is_null($query) ? '' : '?' . $query;

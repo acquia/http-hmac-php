@@ -24,7 +24,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * @var array
      */
-    protected $customHeaders = array();
+    protected $customHeaders = [];
 
     /**
      * @var string

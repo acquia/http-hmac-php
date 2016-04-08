@@ -18,7 +18,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
     {
         $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
-        $this->generic_headers = array(
+        $this->generic_headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -27,44 +27,44 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
     }
 
     public function testSetCustomHeaders()
     {
-        $headers = array('Custom1', 'Custom2');
+        $headers = ['Custom1', 'Custom2'];
 
         $signer = new RequestSigner();
         $signer->getAuthorizationHeader()->addSignedHeader('Custom1');
         $signer->getAuthorizationHeader()->addSignedHeader('Custom2');
 
-        $headers = array(
+        $headers = [
             'Custom1' => 'Value1',
             'Custom2' => 'Value2',
             'Custom3' => 'Value3',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $expected = array('Custom1', 'Custom2');
+        $expected = ['Custom1', 'Custom2'];
 
         $this->assertEquals($expected, $signer->getAuthorizationHeader()->getSignedHeaders($request));
     }
 
     public function testAddCustomHeader()
     {
-        $headers = array('Custom1' => 'Value1');
+        $headers = ['Custom1' => 'Value1'];
 
         $signer = new RequestSigner();
         $signer->getAuthorizationHeader()->addSignedHeader('Custom1');
 
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $this->assertEquals(array('Custom1'), $signer->getAuthorizationHeader()->getSignedHeaders($request));
+        $this->assertEquals(['Custom1'], $signer->getAuthorizationHeader()->getSignedHeaders($request));
     }
 
     public function testGetContentType()
     {
-        $headers = array('Content-Type' => 'text/plain');
+        $headers = ['Content-Type' => 'text/plain'];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
@@ -86,7 +86,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidAuthorizationHeader()
     {
-        $headers = array();
+        $headers = [];
         $headers['Authorization'] = 'invalid-header';
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
@@ -125,7 +125,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
      */
     public function testMissingSignature()
     {
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -134,7 +134,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature=""',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
@@ -147,7 +147,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidSignature()
     {
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -156,7 +156,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="1===="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
@@ -166,7 +166,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
 
     public function testSignature()
     {
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -175,7 +175,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $signer = new RequestSigner();
@@ -194,7 +194,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -203,7 +203,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
         $signer->getAuthorizationHeader()->parseAuthorizationHeader($headers['Authorization']);
@@ -217,7 +217,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $signer->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
         $signer->setTimestamp('1432075982');
 
-        $headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -226,7 +226,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
             . 'version="2.0",'
             . 'headers="",'
             . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
-        );
+        ];
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
         $expected = 'acquia-http-hmac realm="Pipet%20service",'
@@ -286,7 +286,7 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($signer->getAuthorizationHeader()->getSignature(), $test_signature);
         $this->assertEquals($signer->getHeaderSignature(), $test_signature);
 
-        $test_headers = array('one', 'two');
+        $test_headers = ['one', 'two'];
         $signer->addSignedHeader($test_headers[0]);
         $signer->getAuthorizationHeader()->addSignedHeader($test_headers[1]);
         $this->assertEquals($signer->getAuthorizationHeader()->getSignedHeaders(), $test_headers);
