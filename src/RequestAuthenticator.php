@@ -27,7 +27,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     }
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function authenticate(RequestInterface $request, KeyLoaderInterface $keyLoader)
     {

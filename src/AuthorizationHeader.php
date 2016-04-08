@@ -13,7 +13,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     protected $headers = [];
 
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function addSignedHeader($key) {
         $this->headers[] = $key;
@@ -21,7 +21,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getSignedHeaders() {
         return $this->headers;
@@ -29,7 +29,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getRealm()
     {
@@ -38,7 +38,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function setRealm($realm)
     {
@@ -47,7 +47,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getId()
     {
@@ -56,7 +56,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function setId($id)
     {
@@ -65,7 +65,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getNonce()
     {
@@ -78,7 +78,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function setNonce($nonce)
     {
@@ -87,7 +87,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getVersion()
     {
@@ -96,7 +96,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function setVersion($version)
     {
@@ -105,7 +105,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function getSignature()
     {
@@ -114,7 +114,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function setSignature($signature)
     {
@@ -123,7 +123,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function parseAuthorizationHeader($header)
     {
@@ -174,7 +174,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
 
     // @TODO 3.0 test
     /**
-     * {inheritDoc}
+     * {@inheritDoc}
      */
     public function generateNonce()
     {
