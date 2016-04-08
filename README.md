@@ -20,7 +20,7 @@ by adding it as a dependency to your project's composer.json file.
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "*"
+        "acquia/http-hmac-php": "~3.0.0"
     }
 }
 ```
