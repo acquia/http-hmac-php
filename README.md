@@ -40,10 +40,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
 $requestSigner = new RequestSigner();
-$requestSigner->getAuthorizationHeader()->setId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
-$requestSigner->getAuthorizationHeader()->setRealm('CIStore');
-$requestSigner->getAuthorizationHeader()->addSignedHeader('X-Custom-1');
-$requestSigner->getAuthorizationHeader()->addSignedHeader('X-Custom-2');
+$requestSigner->setHeaderId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
+$requestSigner->setHeaderRealm('CIStore');
+$requestSigner->addSignedHeader('X-Custom-1');
+$requestSigner->addSignedHeader('X-Custom-2');
 
 // Guzzle middleware will sign the request by generating the required headers.
 // You must provide the ID and secret. According to the Acquia HMAC 2.0 spec,

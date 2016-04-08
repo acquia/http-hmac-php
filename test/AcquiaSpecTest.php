@@ -30,9 +30,9 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $headers = [];
 
         $signer = new RequestSigner();
-        $signer->getAuthorizationHeader()->setId($input['id']);
-        $signer->getAuthorizationHeader()->setRealm($input['realm']);
-        $signer->getAuthorizationHeader()->setNonce($input['nonce']);
+        $signer->setHeaderId($input['id']);
+        $signer->setHeaderRealm($input['realm']);
+        $signer->setHeaderNonce($input['nonce']);
         $signer->setTimestamp($input['timestamp']);
         $signer->setDefaultContentType($input['content_type']);
 
@@ -41,7 +41,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         }
 
         foreach ($input['signed_headers'] as $key) {
-            $signer->getAuthorizationHeader()->addSignedHeader($key);
+            $signer->addSignedHeader($key);
         }
 
         $body = !empty($input['content_body']) ? $input['content_body'] : null;

@@ -37,12 +37,13 @@ class RequestSigner implements RequestSignerInterface
     protected $authorizationHeader;
 
     /**
+     * @param \Acquia\Hmac\AuthorizationHeader
      * @param \Acquia\Hmac\Digest\DigestInterface $digest
      */
-    public function __construct(Digest\DigestInterface $digest = null, AuthorizationHeaderInterface $authorization_header = null)
+    public function __construct(AuthorizationHeaderInterface $authorization_header = null, Digest\DigestInterface $digest = null)
     {
-        $this->digest = $digest ?: new Digest\Version2();
         $this->authorizationHeader = $authorization_header ?: new AuthorizationHeader();
+        $this->digest = $digest ?: new Digest\Version2();
     }
 
     /**
@@ -51,6 +52,102 @@ class RequestSigner implements RequestSignerInterface
     public function getAuthorizationHeader()
     {
         return $this->authorizationHeader;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addSignedHeader($key)
+    {
+        return $this->getAuthorizationHeader()->addSignedHeader($key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSignedHeaders()
+    {
+        return $this->getAuthorizationHeader()->getSignedHeaders();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHeaderRealm()
+    {
+        return $this->getAuthorizationHeader()->getRealm();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setHeaderRealm($realm)
+    {
+        return $this->getAuthorizationHeader()->setRealm($realm);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHeaderId()
+    {
+        return $this->getAuthorizationHeader()->getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setHeaderId($id)
+    {
+        return $this->getAuthorizationHeader()->setId($id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHeaderNonce()
+    {
+        return $this->getAuthorizationHeader()->getNonce();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setHeaderNonce($nonce)
+    {
+        return $this->getAuthorizationHeader()->setNonce($nonce);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHeaderVersion()
+    {
+        return $this->getAuthorizationHeader()->getVersion();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setHeaderVersion($version)
+    {
+        return $this->getAuthorizationHeader()->setVersion($version);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getHeaderSignature()
+    {
+        return $this->getAuthorizationHeader()->getSignature();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setHeaderSignature($signature)
+    {
+        return $this->getAuthorizationHeader()->setSignature($signature);
     }
 
     /**
@@ -69,12 +166,11 @@ class RequestSigner implements RequestSignerInterface
         return $this->defaultContentType;
     }
 
-    // @TODO 3.0 getters/setters at top.
-
-    // @TODO 3.0 Interface/test
+    /**
+     * {@inheritDoc}
+     */
     public function signRequest(RequestInterface $request, $secretKey)
     {
-        // @TODO 3.0 do we still need getters/setters for $id?
         if (!$request->hasHeader('X-Authorization-Timestamp')) {
             $request = $request->withHeader('X-Authorization-Timestamp', $this->getTimestamp());
         }
@@ -137,8 +233,9 @@ class RequestSigner implements RequestSignerInterface
         return $this->digest->get($this, $request, $secretKey);
     }
 
-    // @TODO 3.0 Interface
-    // @TODO 3.0 Test
+    /**
+     * {@inheritDoc}
+     */
     public function getHashedBody(RequestInterface $request)
     {
         $hash = '';
@@ -155,7 +252,6 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getAuthorization(RequestInterface $request, $id, $secretKey)
     {
-        // @TODO 3.0 creating the signature probably belongs elsewhere.
         $this->authorizationHeader->setSignature($this->getDigest($request, $secretKey));
         return $this->authorizationHeader->createAuthorizationHeader();
     }

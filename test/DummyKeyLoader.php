@@ -16,7 +16,9 @@ class DummyKeyLoader implements KeyLoaderInterface
         );
     }
 
-    // @TODO 3.0 Interface?
+    /**
+     * {@inheritDoc}
+     */
     public function addKey($id, $secret)
     {
         $this->keys[$id] = $secret;

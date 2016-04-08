@@ -74,7 +74,7 @@ class Version2 extends DigestAbstract
      */
     public function getHashedBody(RequestInterface $request)
     {
-        $digest = base64_encode(hash('sha256', $request->getBody(), true));
+        $digest = base64_encode(hash($this->getAlgorithm(), $request->getBody(), true));
         return $digest;
     }
 

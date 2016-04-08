@@ -7,7 +7,6 @@ use Acquia\Hmac\Digest\Version2 as Digest;
 
 class DigestVersion2Test extends \PHPUnit_Framework_TestCase
 {
-    // @TODO 3.0 replace this?
     const EXPECTED_HASH = 'P9D+Oc8QDU0puyGuqJHvrneek02g0F5D0+2qrXmSOOA=';
 
     protected $auth_id;
@@ -71,11 +70,6 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         // Test case insensitive content type.
         $request->headers['Content-Type'] = 'TeXt/PlAiN';
         $this->assertEquals(self::EXPECTED_HASH, $digest->get($signer, $request, $this->auth_secret));
-
-        // Test changing the algorithm
-        $digest->setAlgorithm('sha1');
-        // @TODO 3.0 why does this not match?
-        $this->assertNotEquals(self::EXPECTED_HASH, $digest->get($signer, $request, $this->auth_secret));
     }
 
     public function testPostMessage()
@@ -84,7 +78,6 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
         $signer->setTimestamp(1432075982);
         $digest = new Digest();
 
-        // @TODO 3.0 add custom headers into the message.
         $secretKey = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
 
         $method = 'POST';
@@ -120,7 +113,6 @@ class DigestVersion2Test extends \PHPUnit_Framework_TestCase
 
         // Test changing the algorithm
         $digest->setAlgorithm('sha1');
-        // @TODO 3.0 why does this not match?
         $this->assertNotEquals('XDBaXgWFCY3aAgQvXyGXMbw9Vds2WPKJe2yP+1eXQgM=', $digest->get($signer, $request, $secretKey));
 
         $signer = new RequestSigner();
