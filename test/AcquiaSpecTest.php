@@ -9,6 +9,22 @@ use GuzzleHttp\Psr7\Request;
 
 class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var array
+     *   A set of sample key-secret pairs for testing.
+     */
+    protected $keys;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setUp()
+    {
+        $this->keys = [
+            'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
+            '615d6517-1cea-4aa3-b48e-96d83c16c4dd' => 'TXkgU2VjcmV0IEtleSBUaGF0IGlzIFZlcnkgU2VjdXJl',
+        ];
+    }
 
     /**
      * Get the shared test fixtures.
@@ -82,8 +98,9 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         // Prove that the authenticator can authenticate the request.
         $signer = new RequestSigner();
         $signer->setTimestamp($input['timestamp']);
-        $key_loader = new DummyKeyLoader();
-        $key_loader->addKey($input['id'], $input['secret']);
+        $key_loader = new DummyKeyLoader([
+                $input['id'] => $input['secret'],
+        ] + $this->keys);
         $authenticator = new RequestAuthenticator($signer, time() + 10);
         $key = $authenticator->authenticate($signed_request, $key_loader);
         $this->assertEquals($key->getId(), $input['id']);

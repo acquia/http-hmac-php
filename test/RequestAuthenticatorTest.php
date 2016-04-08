@@ -12,14 +12,28 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     protected $auth_secret;
 
+    /**
+     * @var array
+     *   A set of sample key-secret pairs for testing.
+     */
+    protected $keys;
+
+    /**
+     * {@inheritDoc}
+     */
     protected function setUp()
     {
-        $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
-        $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+        $this->keys = [
+            'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
+            '615d6517-1cea-4aa3-b48e-96d83c16c4dd' => 'TXkgU2VjcmV0IEtleSBUaGF0IGlzIFZlcnkgU2VjdXJl',
+        ];
     }
 
     public function testValidSignature()
     {
+        $auth_secret = reset($this->keys);
+        $auth_id = key($this->keys);
+
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
@@ -27,7 +41,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
-            . 'id="' . $this->auth_id . '",'
+            . 'id="' . $auth_id . '",'
             . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
             . 'version="2.0",'
             . 'headers="",'
@@ -36,11 +50,11 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = DummyRequest::generate('GET', 'https://example.acquiapipet.net', '/v1.0/task-status/133', 'limit=10', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
-        $key = $authenticator->authenticate($request, new DummyKeyLoader());
+        $key = $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
 
         $this->assertInstanceOf('Acquia\Hmac\Test\DummyKey', $key);
-        $this->assertEquals($this->auth_id, $key->getId());
-        $this->assertEquals($this->auth_secret, $key->getSecret());
+        $this->assertEquals($auth_id, $key->getId());
+        $this->assertEquals($auth_secret, $key->getSecret());
     }
 
     /**
@@ -48,13 +62,15 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidSignature()
     {
+        $auth_id = key($this->keys);
+
         $signer = new RequestSigner();
 
         $headers = array(
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
-            . 'id="' . $this->auth_id . '",'
+            . 'id="' . $auth_id . '",'
             . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
             . 'version="2.0",'
             . 'headers="",'
@@ -63,7 +79,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, 0);
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
     }
 
     /**
@@ -71,6 +87,8 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testExpiredRequest()
     {
+        $auth_id = key($this->keys);
+
         $signer = new RequestSigner();
         $signer->setTimestamp(1432075982);
 
@@ -78,7 +96,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => '1432075982',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
-            . 'id="' . $this->auth_id . '",'
+            . 'id="' . $auth_id . '",'
             . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
             . 'version="2.0",'
             . 'headers="",'
@@ -87,7 +105,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, '10 minutes');
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
     }
 
     /**
@@ -95,6 +113,8 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFutureRequest()
     {
+        $auth_id = key($this->keys);
+
         $time = new \DateTime('+11 minutes');
         $timestamp = (string) $time->getTimestamp();
 
@@ -105,7 +125,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
             'Content-Type' => 'text/plain',
             'X-Authorization-Timestamp' => $timestamp,
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
-            . 'id="' . $this->auth_id . '",'
+            . 'id="' . $auth_id . '",'
             . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
             . 'version="2.0",'
             . 'headers="",'
@@ -114,7 +134,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
         $authenticator = new RequestAuthenticator($signer, '10 minutes');
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
     }
 
     /**
@@ -136,7 +156,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
         $request = DummyRequest::generate('GET', 'https://example.com', '/test', '', $headers);
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), 0);
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator = new RequestAuthenticator($signer, 0);
+        $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
     }
 }
