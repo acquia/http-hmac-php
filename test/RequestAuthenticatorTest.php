@@ -2,6 +2,7 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
 
@@ -52,7 +53,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $authenticator = new RequestAuthenticator($signer, 0);
         $key = $authenticator->authenticate($request, new DummyKeyLoader($this->keys));
 
-        $this->assertInstanceOf('Acquia\Hmac\Test\DummyKey', $key);
+        $this->assertInstanceOf(KeyInterface::class, $key);
         $this->assertEquals($auth_id, $key->getId());
         $this->assertEquals($auth_secret, $key->getSecret());
     }

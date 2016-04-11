@@ -2,6 +2,7 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\Key;
 use Acquia\Hmac\KeyLoaderInterface;
 
 class DummyKeyLoader implements KeyLoaderInterface
@@ -22,6 +23,6 @@ class DummyKeyLoader implements KeyLoaderInterface
             return false;
         }
 
-        return new DummyKey($id, $this->keys[$id]);
+        return new Key($id, $this->keys[$id]);
     }
 }
