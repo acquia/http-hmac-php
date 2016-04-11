@@ -72,16 +72,6 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
 
 
         if ($signature !== $compareSignature) {
-            print PHP_EOL . implode(PHP_EOL, [
-                '----------------------------',
-                'Authent timestamp: ' . $request->getHeaderLine('X-Authorization-Timestamp'),
-                'Compare timestamp: ' . $compareRequest->getHeaderLine('X-Authorization-Timestamp'),
-                (string) $authHeader,
-                (string) $compareAuthHeader,
-                '----------------------------',
-            ]);
-
-
             throw new InvalidSignatureException('Signature not valid');
         }
 

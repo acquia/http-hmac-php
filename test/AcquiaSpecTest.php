@@ -52,6 +52,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
 
         $headers = [
             'X-Authorization-Timestamp' => $input['timestamp'],
+            'Content-Type' => $input['content_type'],
         ];
         foreach ($input['headers'] as $header => $value) {
             $headers[$header] = $value;

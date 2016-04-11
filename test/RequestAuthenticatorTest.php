@@ -37,10 +37,11 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $authId = key($this->keys);
         $authSecret = reset($this->keys);
+        $timestamp = 1432075982;
 
         $headers = [
             'Content-Type' => 'text/plain',
-            'X-Authorization-Timestamp' => time(),
+            'X-Authorization-Timestamp' => $timestamp,
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
                 . 'id="' . $authId . '",'
                 . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
@@ -51,10 +52,9 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = new Request('GET',
             'https://example.acquiapipet.net/v1.0/task-status/133?limit=10',
             $headers);
-        $authHeader = AuthorizationHeader::createFromRequest($request);
 
         $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
-            $authHeader);
+            null, $timestamp);
 
         $key = $authenticator->authenticate($request);
 
@@ -91,7 +91,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $authHeader = new AuthorizationHeader($realm, $id, $nonce, $version,
             $headers, 'bad-sig');
 
-        $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys),
+        $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
             $authHeader);
         $authenticator->authenticate($request);
     }
@@ -118,7 +118,7 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = new Request('GET', 'https://example.com/test', $headers);
         $authHeader = AuthorizationHeader::createFromRequest($request);
 
-        $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys),
+        $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
             $authHeader);
         $authenticator->authenticate($request);
     }
