@@ -2,12 +2,23 @@
 
 namespace Acquia\Hmac\Guzzle;
 
+use Acquia\Hmac\Exception\MalformedResponseException;
 use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\ResponseAuthenticator;
+use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class HmacAuthMiddleware
 {
+    /**
+     * @var \Acquia\Hmac\KeyInterface
+     *  The key with which to sign requests and responses.
+     */
+    protected $key;
+
     /**
      * @var \Acquia\Hmac\RequestSignerInterface
      */
@@ -19,6 +30,7 @@ class HmacAuthMiddleware
      */
     public function __construct(KeyInterface $key, $realm = 'Acquia')
     {
+        $this->key = $key;
         $this->requestSigner = new RequestSigner($key, $realm);
     }
 
@@ -32,8 +44,19 @@ class HmacAuthMiddleware
     public function __invoke(callable $handler)
     {
         return function ($request, array $options) use ($handler) {
+
             $request = $this->signRequest($request);
-            return $handler($request, $options);
+
+            $promise = function (ResponseInterface $response) use ($request) {
+
+                $authenticator = new ResponseAuthenticator($request, $this->key);
+
+                if (!$authenticator->isAuthentic($response)) {
+                    throw new MalformedResponseException('Could not verify the authenticity of the response.');
+                }
+            };
+
+            return $handler($request, $options)->then($promise);
         };
     }
 

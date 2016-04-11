@@ -7,10 +7,12 @@ use Acquia\Hmac\Digest\Digest;
 use Acquia\Hmac\Key;
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\ResponseSigner;
 use Acquia\Hmac\Test\Mocks\MockKeyLoader;
 use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
 {
@@ -70,9 +72,9 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $authHeaderBuilder->setCustomHeaders($input['signed_headers']);
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $signer = new MockRequestSigner($key, $realm, $digest, $authHeader);
+        $requestSigner = new MockRequestSigner($key, $realm, $digest, $authHeader);
 
-        $signedRequest = $signer->signRequest($request, $input['signed_headers']);
+        $signedRequest = $requestSigner->signRequest($request, $input['signed_headers']);
 
         $signedAuthHeader = $signedRequest->getHeaderLine('Authorization');
 
@@ -94,5 +96,14 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $compareKey = $authenticator->authenticate($signedRequest);
 
         $this->assertEquals($compareKey->getId(), $input['id']);
+
+        // Prove that the response signer generates the correct signature.
+        $response = new Response(200, [], $expectations['response_body']);
+        $responseSigner = new ResponseSigner($key, $signedRequest);
+
+        $response = $responseSigner->signResponse($response);
+
+        $this->assertTrue($response->hasHeader('X-Server-Authorization-HMAC-SHA256'));
+        $this->assertEquals($expectations['response_signature'], $response->getHeaderLine('X-Server-Authorization-HMAC-SHA256'));
     }
 }

@@ -24,6 +24,8 @@ class MockHmacAuthMiddleware extends HmacAuthMiddleware
      */
     public function __construct(KeyInterface $key, $realm, AuthorizationHeader $authHeader)
     {
+        parent::__construct($key, $realm);
+
         $this->requestSigner = new MockRequestSigner($key, $realm, new Digest(), $authHeader);
     }
 }

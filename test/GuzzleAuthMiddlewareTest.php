@@ -84,17 +84,60 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures the middleware throws an exception if the response is missing the right header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
+     */
+    public function testMissingRequiredResponseHeader()
+    {
+        $stack = new HandlerStack();
+        $stack->setHandler(new MockHandler([new Response(200)]));
+        $stack->push(new HmacAuthMiddleware($this->authKey));
+
+        $client = new Client([
+            'handler' => $stack,
+        ]);
+
+        $client->get('http://example.com');
+    }
+
+    /**
+     * Ensures the middleware throws an exception if the response can't be authenticated.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
+     */
+    public function testInauthenticResponse()
+    {
+        $headers = [
+            'X-Server-Authorization-HMAC-SHA256' => 'bad-signature',
+        ];
+
+        $response = new Response(200, $headers);
+
+        $stack = new HandlerStack();
+
+        $stack->setHandler(new MockHandler([$response]));
+        $stack->push(new HmacAuthMiddleware($this->authKey));
+
+        $client = new Client([
+            'handler' => $stack,
+        ]);
+
+        $client->get('http://example.com');
+    }
+    
+    /**
      * Ensures the HTTP HMAC middleware registers correctly.
      */
     public function testRegisterPlugin()
     {
         $realm = 'Pipet service';
 
-        $headers = [
+        $requestHeaders = [
             'X-Authorization-Timestamp' => '1432075982',
         ];
 
-        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $requestHeaders);
         $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->authKey);
         $authHeaderBuilder->setRealm($realm);
         $authHeaderBuilder->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
@@ -106,8 +149,14 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $container = [];
         $history = Middleware::history($container);
 
+        $responseHeaders = [
+            'X-Server-Authorization-HMAC-SHA256' => 'LusIUHmqt9NOALrQ4N4MtXZEFE03MjcDjziK+vVqhvQ=',
+        ];
+
+        $response = new Response(200, $responseHeaders);
+
         $stack = new HandlerStack();
-        $stack->setHandler(new MockHandler([new Response(200)]));
+        $stack->setHandler(new MockHandler([$response]));
         $stack->push($middleware);
         $stack->push($history);
 
@@ -116,9 +165,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
             'handler' => $stack,
         ]);
 
-        $client->request('GET', '/v1.0/task-status/133', [
-          'query' => ['limit' => '10'],
-        ]);
+        $client->send($request);
 
         $transaction = reset($container);
         $request = $transaction['request'];
