@@ -2,8 +2,10 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\AuthorizationHeaderBuilder;
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
-use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\Key;
+use Acquia\Hmac\Test\Mocks\MockHmacAuthMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -11,37 +13,31 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
+/**
+ * Tests the HTTP HMAC Guzzle middleware.
+ */
 class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 {
-    protected $auth_id;
-
-    protected $auth_secret;
+    /**
+     * @var \Acquia\Hmac\KeyInterface
+     *   A sample key.
+     */
+    protected $authKey;
 
     protected function setUp()
     {
-        $this->auth_id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
-        $this->auth_secret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+        $authId = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+
+        $this->authKey = new Key($authId, $authSecret);
     }
 
     /**
-     * @return \Acquia\Hmac\Guzzle\HmacAuthMiddleware
+     * Ensures the HTTP HMAC middleware timestamps requests correctly.
      */
-    public function getMiddleware(RequestSigner $requestSigner = null, $secret = null)
-    {
-        if (empty($requestSigner)) {
-            $requestSigner = new RequestSigner();
-        }
-
-        if (empty($secret)) {
-            $secret = $this->auth_secret;
-        }
-       
-        return new HmacAuthMiddleware($requestSigner, $secret);
-    }
-
     public function testSetDefaultDateHeader()
     {
-        $middleware = $this->getMiddleware();
+        $middleware = new HmacAuthMiddleware($this->authKey);
 
         $uri = 'http://example.com/resource/1?key=value';
         $request = $middleware->signRequest(new Request('GET', $uri, []));
@@ -55,19 +51,27 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($difference < 10);
     }
 
+    /**
+     * Ensures the HTTP HMAC middleware signs requests correctly.
+     */
     public function testAuthorizationHeader()
     {
-        $requestSigner = new RequestSigner();
-        $requestSigner->getAuthorizationHeader()->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
-        $requestSigner->getAuthorizationHeader()->setRealm('Pipet service');
-        $requestSigner->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
-        $requestSigner->setTimestamp('1432075982');
+        $realm = 'Pipet service';
 
-        $middleware = $this->getMiddleware($requestSigner, $this->auth_secret);
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+        ];
 
-        $uri = 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10';
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->authKey);
+        $authHeaderBuilder->setRealm($realm);
+        $authHeaderBuilder->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $authHeaderBuilder->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $request = $middleware->signRequest(new Request('GET', $uri));
+        $middleware = new MockHmacAuthMiddleware($this->authKey, $realm, $authHeader);
+
+        $request = $middleware->signRequest($request);
 
         $expected = 'acquia-http-hmac realm="Pipet%20service",'
                     . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
@@ -75,18 +79,29 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
                     . 'version="2.0",'
                     . 'headers="",'
                     . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
+
         $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
     }
 
+    /**
+     * Ensures the HTTP HMAC middleware registers correctly.
+     */
     public function testRegisterPlugin()
     {
-        $requestSigner = new RequestSigner();
-        $requestSigner->getAuthorizationHeader()->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
-        $requestSigner->getAuthorizationHeader()->setRealm('Pipet service');
-        $requestSigner->getAuthorizationHeader()->setNonce('d1954337-5319-4821-8427-115542e08d10');
-        $requestSigner->setTimestamp('1432075982');
+        $realm = 'Pipet service';
 
-        $middleware = $this->getMiddleware($requestSigner, $this->auth_secret);
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+        ];
+
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->authKey);
+        $authHeaderBuilder->setRealm($realm);
+        $authHeaderBuilder->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
+        $authHeaderBuilder->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $authHeader = $authHeaderBuilder->getAuthorizationHeader();
+
+        $middleware = new MockHmacAuthMiddleware($this->authKey, $realm, $authHeader);
 
         $container = [];
         $history = Middleware::history($container);
@@ -114,7 +129,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
                     . 'version="2.0",'
                     . 'headers="",'
                     . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
-        $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
 
+        $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace Acquia\Hmac\Test;
+namespace Acquia\Hmac\Test\Mocks;
 
 use Acquia\Hmac\Key;
 use Acquia\Hmac\KeyLoaderInterface;
 
-class DummyKeyLoader implements KeyLoaderInterface
+class MockKeyLoader implements KeyLoaderInterface
 {
     protected $keys = [];
 

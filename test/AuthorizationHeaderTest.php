@@ -3,58 +3,103 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
+use GuzzleHttp\Psr7\Request;
 
+/**
+ * Tests the AuthorizationHeader class.
+ */
 class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var string
+     *   A sample Authorization header.
+     */
     protected $header;
 
+    /**
+     * {@inheritDoc}
+     */
     protected function setUp()
     {
         $this->header = 'acquia-http-hmac headers="X-Custom-Signer1;X-Custom-Signer2",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",realm="CIStore",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c=",version="2.0"';
     }
 
-    public function testParseAuthorizationHeader()
+    /**
+     * Ensures the getters work as expected.
+     */
+    public function testGetters()
     {
-        $auth = new AuthorizationHeader();
-        $auth->parseAuthorizationHeader($this->header);
+        $realm = 'Pipet service';
+        $id = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $nonce = 'd1954337-5319-4821-8427-115542e08d10';
+        $version = '2.0';
+        $headers = ['X-Custom-Signer1', 'X-Custom-Signer2'];
+        $signature = 'MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc=';
 
-        $this->assertEquals($auth->getSignedHeaders(), ['X-Custom-Signer1', 'X-Custom-Signer2']);
-        $this->assertEquals($auth->getId(), 'e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
-        $this->assertEquals($auth->getNonce(), 'a9938d07-d9f0-480c-b007-f1e956bcd027');
-        $this->assertEquals($auth->getRealm(), 'CIStore');
-        $this->assertEquals($auth->getSignature(), '0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c=');
-        $this->assertEquals($auth->getVersion(), '2.0');
-    }
+        $authHeader = new AuthorizationHeader($realm, $id, $nonce, $version, $headers, $signature);
 
-    public function requiredFieldsProvider()
-    {
-        return [
-          ['id'],
-          ['nonce'],
-          ['realm'],
-          ['signature'],
-          ['version'],
-        ];
+        $this->assertEquals($realm, $authHeader->getRealm());
+        $this->assertEquals($id, $authHeader->getId());
+        $this->assertEquals($nonce, $authHeader->getNonce());
+        $this->assertEquals($version, $authHeader->getVersion());
+        $this->assertEquals($headers, $authHeader->getCustomHeaders());
+        $this->assertEquals($signature, $authHeader->getSignature());
     }
 
     /**
+     * Ensures an authorization header can be created from a request.
+     */
+    public function testCreateFromRequest()
+    {
+        $headers = [
+            'Authorization' => $this->header,
+        ];
+        $request = new Request('GET', 'http://example.com', $headers);
+
+        $authHeader = AuthorizationHeader::createFromRequest($request);
+
+        $this->assertEquals((string) $authHeader, 'acquia-http-hmac realm="CIStore",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",version="2.0",headers="X-Custom-Signer1;X-Custom-Signer2",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c="');
+    }
+
+    /**
+     * Ensures an exception is thrown if a request does not have an Authorization header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function testCreateFromRequestNoAuthorizationHeader()
+    {
+        $request = new Request('GET', 'http://example.com');
+
+        AuthorizationHeader::createFromRequest($request);
+    }
+
+    /**
+     * Ensures an exception is thrown when a required field is missing.
+     *
      * @dataProvider requiredFieldsProvider
      * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
     public function testParseAuthorizationHeaderRequiredFields($field)
     {
-        $auth = new AuthorizationHeader();
-        $auth->parseAuthorizationHeader(preg_replace('/' . $field . '=/', '', $this->header));
+        $headers = [
+            'Authorization' => preg_replace('/' . $field . '=/', '', $this->header),
+        ];
+        $request = new Request('GET', 'http://example.com', $headers);
+
+        AuthorizationHeader::createFromRequest($request);
     }
 
-    public function testCreateAuthorizationHeader()
+    /**
+     * Provides a list of required authorization haeder fields.
+     */
+    public function requiredFieldsProvider()
     {
-        $auth = new AuthorizationHeader();
-        $auth->parseAuthorizationHeader($this->header);
-        $header = $auth->createAuthorizationHeader();
-        // @TODO 3.0 golang creates the headers="" delimited by %13B which is a
-        // url encoded ";". We expect the requests to come through as ";". We
-        // should reconcile this behavior.
-        $this->assertEquals($header, 'acquia-http-hmac realm="CIStore",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",version="2.0",headers="X-Custom-Signer1;X-Custom-Signer2",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c="');
+        return [
+            ['id'],
+            ['nonce'],
+            ['realm'],
+            ['signature'],
+            ['version'],
+        ];
     }
 }

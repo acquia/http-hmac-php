@@ -2,9 +2,11 @@
 
 namespace Acquia\Hmac;
 
+use Acquia\Hmac\Exception\MalformedRequestException;
+use Psr\Http\Message\RequestInterface;
+
 class AuthorizationHeader implements AuthorizationHeaderInterface
 {
-
     protected $realm = 'Acquia';
     protected $id;
     protected $nonce;
@@ -13,19 +15,63 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     protected $headers = [];
 
     /**
-     * {@inheritDoc}
+     * Initializes the authorization header with the required fields.
+     *
+     * @param string $realm
+     *   The realm/provider.
+     * @param string $id
+     *   The API key's unique identifier.
+     * @param string $nonce
+     *   The nonce, a hex-based v1 or v4 UUID.
+     * @param string $version
+     *   The version of the HTTP HMAC spec.
+     * @param string[] $headers
+     *   A list of custom headers included in the signature.
+     * @param string $signature
+     *   The Base64-encoded signature of the request.
      */
-    public function addSignedHeader($key)
+    public function __construct($realm, $id, $nonce, $version, array $headers, $signature)
     {
-        $this->headers[] = $key;
+        $this->realm = $realm;
+        $this->id = $id;
+        $this->nonce = $nonce;
+        $this->version = $version;
+        $this->headers = $headers;
+        $this->signature = $signature;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getSignedHeaders()
+    public static function createFromRequest(RequestInterface $request)
     {
-        return $this->headers;
+        if (!$request->hasHeader('Authorization')) {
+            throw new MalformedRequestException('Authorization header is required.');
+        }
+
+        $header = $request->getHeaderLine('Authorization');
+
+        $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
+        $realm_match = preg_match('/.*realm="(.*?)"/', $header, $realm_matches);
+        $nonce_match = preg_match('/.*nonce="(.*?)"/', $header, $nonce_matches);
+        $version_match = preg_match('/.*version="(.*?)"/', $header, $version_matches);
+        $signature_match = preg_match('/.*signature="(.*?)"/', $header, $signature_matches);
+        $headers_match = preg_match('/.*headers="(.*?)"/', $header, $headers_matches);
+
+        if (!$id_match || !$realm_match || !$nonce_match || !$version_match || !$signature_match) {
+            throw new MalformedRequestException('Authorization header requires a realm, id, version, nonce and a signature.');
+        }
+
+        $customHeaders = !empty($headers_matches[1]) ? explode('%3B', $headers_matches[1]) : [];
+
+        return new static(
+            rawurldecode($realm_matches[1]),
+            $id_matches[1],
+            $nonce_matches[1],
+            $version_matches[1],
+            $customHeaders,
+            $signature_matches[1]
+        );
     }
 
     /**
@@ -39,14 +85,6 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function setRealm($realm)
-    {
-        $this->realm = $realm;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getId()
     {
         return $this->id;
@@ -55,29 +93,9 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getNonce()
     {
-        if (empty($this->nonce)) {
-            $this->setNonce($this->generateNonce());
-        }
-
         return $this->nonce;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setNonce($nonce)
-    {
-        $this->nonce = $nonce;
     }
 
     /**
@@ -91,9 +109,9 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function setVersion($version)
+    public function getCustomHeaders()
     {
-        $this->version = $version;
+        return $this->headers;
     }
 
     /**
@@ -107,87 +125,13 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     /**
      * {@inheritDoc}
      */
-    public function setSignature($signature)
+    public function __toString()
     {
-        $this->signature = $signature;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function parseAuthorizationHeader($header)
-    {
-        $id = '';
-        $id_match = preg_match('/.*id="(.*?)"/', $header, $id_matches);
-
-        $realm = '';
-        $realm_match = preg_match('/.*realm="(.*?)"/', $header, $realm_matches);
-
-        $nonce = '';
-        $nonce_match = preg_match('/.*nonce="(.*?)"/', $header, $nonce_matches);
-
-        $version = '';
-        $version_match = preg_match('/.*version="(.*?)"/', $header, $version_matches);
-
-        $signature = '';
-        $signature_match = preg_match('/.*signature="(.*?)"/', $header, $signature_matches);
-
-        $headers = '';
-        $headers_match = preg_match('/.*headers="(.*?)"/', $header, $headers_matches);
-
-        if (!$id_match || !$realm_match || !$nonce_match || !$version_match || !$signature_match) {
-            throw new Exception\MalformedRequestException('Authorization header requires a realm, id, version, nonce and a signature.');
-        }
-        $this->setId($id_matches[1]);
-        $this->setRealm(rawurldecode($realm_matches[1]));
-        $this->setNonce($nonce_matches[1]);
-        $this->setVersion($version_matches[1]);
-        $this->setSignature($signature_matches[1]);
-        if (!empty($headers_matches[1])) {
-            foreach (explode(';', $headers_matches[1]) as $signed_header) {
-                $this->addSignedHeader($signed_header);
-            }
-        }
-    }
-
-    /**
-     * {inheritDoc}
-     */
-    public function createAuthorizationHeader()
-    {
-        $signed_headers = implode(';', $this->getSignedHeaders());
         return 'acquia-http-hmac realm="' . rawurlencode($this->realm) . '",'
-        . 'id="' . $this->getId() . '",'
-        . 'nonce="' . $this->getNonce() . '",'
-        . 'version="' . $this->getVersion() . '",'
-        . 'headers="' . $signed_headers . '",'
-        . 'signature="' . $this->getSignature() . '"';
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function generateNonce()
-    {
-        return sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            // 32 bits for "time_low"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            // 16 bits for "time_mid"
-            mt_rand(0, 0xffff),
-            // 16 bits for "time_hi_and_version",
-            // four most significant bits holds version number 4
-            mt_rand(0, 0x0fff) | 0x4000,
-            // 16 bits, 8 bits for "clk_seq_hi_res",
-            // 8 bits for "clk_seq_low",
-            // two most significant bits holds zero and one for variant DCE1.1
-            mt_rand(0, 0x3fff) | 0x8000,
-            // 48 bits for "node"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
-        );
+        . 'id="' . $this->id . '",'
+        . 'nonce="' . $this->nonce . '",'
+        . 'version="' . $this->version . '",'
+        . 'headers="' . implode('%3B', $this->headers) . '",'
+        . 'signature="' . $this->signature . '"';
     }
 }

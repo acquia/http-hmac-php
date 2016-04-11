@@ -2,116 +2,69 @@
 
 namespace Acquia\Hmac;
 
+use Psr\Http\Message\RequestInterface;
+
 interface AuthorizationHeaderInterface
 {
     /**
-     * Adds a header name to be used to create the digest.
+     * Creates an authoriation header from a request.
      *
-     * @param string $key
+     * @return static
      */
-    public function addSignedHeader($key);
+    public static function createFromRequest(RequestInterface $request);
 
     /**
-     * Gets all of the header names used to create the digest.
+     * Retrieves the string representation of the authorization header.
      *
      * @return string
      */
-    public function getSignedHeaders();
+    public function __toString();
 
     /**
-     * Gets the realm.
+     * Retrives the realm field of the authorization header.
      *
      * @return string
+     *   The realm/provider.
      */
     public function getRealm();
 
     /**
-     * Sets the realm.
-     *
-     * @param string $realm
-     */
-    public function setRealm($realm);
-
-    /**
-     * Gets the ID.
+     * Retrives the ID field of the authorization header.
      *
      * @return string
+     *   The API key's unique identifier.
      */
     public function getId();
 
     /**
-     * Sets the ID.
-     *
-     * @param string $id
-     */
-    public function setId($id);
-
-    /**
-     * Gets the nonce.
+     * Retrives the nonce field of the authorization header.
      *
      * @return string
+     *   The nonce.
      */
     public function getNonce();
- 
-    /**
-     * Sets the nonce.
-     *
-     * @param string $nonce
-     */
-    public function setNonce($nonce);
 
     /**
-     * Gets the version.
+     * Retrives the version field of the authorization header.
      *
      * @return string
+     *   The version of the HTTP HMAC spec.
      */
     public function getVersion();
 
     /**
-     * Sets the version.
+     * Retrives the list of custom headers signed in the authorization header.
      *
-     * @param string $version
+     * @return string[]
+     *   The list of custom headers.
      */
-    public function setVersion($version);
+    public function getCustomHeaders();
 
     /**
-     * Gets the signature.
+     * Retrieves the signature of the request.
      *
      * @return string
+     *   The Base64-encoded signature of the request.
      */
     public function getSignature();
-
-    /**
-     * Sets the signature.
-     *
-     * @param string $signature
-     */
-    public function setSignature($signature);
-
-    /**
-     * Parses the provided authorization header string.
-     *
-     * This should be a valid Acquia HMAC 2.0 Authorization header. It will
-     * populate all of the internal properties of this object.
-     *
-     * @param string $header
-     */
-    public function parseAuthorizationHeader($header);
-
-    /**
-     * Creates the Acquia HMAC 2.0 Authorization header.
-     *
-     * This uses the internal properties, so they must first be populated via
-     * setters or via ::parseAuthorizationHeader().
-     *
-     * @return string
-     */
-    public function createAuthorizationHeader();
-
-    /**
-     * Generates a compatible UUID V4 nonce.
-     *
-     * @return string
-     */
-    public function generateNonce();
 }

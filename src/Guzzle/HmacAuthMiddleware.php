@@ -2,7 +2,8 @@
 
 namespace Acquia\Hmac\Guzzle;
 
-use Acquia\Hmac\RequestSignerInterface;
+use Acquia\Hmac\KeyInterface;
+use Acquia\Hmac\RequestSigner;
 use Psr\Http\Message\RequestInterface;
 
 class HmacAuthMiddleware
@@ -13,39 +14,12 @@ class HmacAuthMiddleware
     protected $requestSigner;
 
     /**
-     * @var string
+     * @param \Acquia\Hmac\KeyInterface $key
+     * @param string $realm
      */
-    protected $secretKey;
-
-    /**
-     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param string $id
-     * @param string $secretKey
-     */
-    public function __construct(RequestSignerInterface $requestSigner, $secretKey)
+    public function __construct(KeyInterface $key, $realm = 'Acquia')
     {
-        $this->requestSigner = $requestSigner;
-        $this->setSecretKey($secretKey);
-    }
-
-    /**
-     * Gets the secret key.
-     *
-     * @return string
-     */
-    public function getSecretKey()
-    {
-        return $this->secretKey;
-    }
-
-    /**
-     * Sets the secret key.
-     *
-     * @param string $secretKey
-     */
-    public function setSecretKey($secretKey)
-    {
-        $this->secretKey = $secretKey;
+        $this->requestSigner = new RequestSigner($key, $realm);
     }
 
     /**
@@ -72,6 +46,6 @@ class HmacAuthMiddleware
      */
     public function signRequest(RequestInterface $request)
     {
-        return $this->requestSigner->signRequest($request, $this->getSecretKey());
+        return $this->requestSigner->signRequest($request);
     }
 }

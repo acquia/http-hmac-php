@@ -2,19 +2,29 @@
 
 namespace Acquia\Hmac\Digest;
 
-use Acquia\Hmac\RequestSignerInterface;
-use Psr\Http\Message\RequestInterface;
-
 interface DigestInterface
 {
     /**
      * Returns the signature.
      *
-     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param \Psr\Http\Message\RequestInterface $request
+     * @param string $message
+     *   The message to sign.
      * @param string $secretKey
+     *   The key with which to sign the message.
      *
      * @return string
+     *   The signed message.
      */
-    public function get(RequestSignerInterface $requestSigner, RequestInterface $request, $secretKey);
+    public function sign($message, $secretKey);
+
+    /**
+     * Hashes a string based using the digest's algorithm.
+     *
+     * @param string $message
+     *   The message to hash.
+     *
+     * @param string
+     *   The hashed message.
+     */
+    public function hash($message);
 }

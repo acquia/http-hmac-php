@@ -2,9 +2,14 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Digest\Digest;
+use Acquia\Hmac\Key;
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
-use Acquia\Hmac\Digest\Version2 as Digest;
+use Acquia\Hmac\Test\Mocks\MockKeyLoader;
+use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
+use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
 
 class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
@@ -41,68 +46,52 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
      */
     public function testSpec($input, $expectations)
     {
+        $key = new Key($input['id'], $input['secret']);
         $digest = new Digest();
+        $realm = $input['realm'];
 
-        $headers = [];
-
-        $signer = new RequestSigner();
-        $signer->setHeaderId($input['id']);
-        $signer->setHeaderRealm($input['realm']);
-        $signer->setHeaderNonce($input['nonce']);
-        $signer->setTimestamp($input['timestamp']);
-        $signer->setDefaultContentType($input['content_type']);
-
-        foreach ($input['headers'] as $key => $value) {
-            $headers[$key] = $value;
-        }
-
-        foreach ($input['signed_headers'] as $key) {
-            $signer->addSignedHeader($key);
+        $headers = [
+            'X-Authorization-Timestamp' => $input['timestamp'],
+        ];
+        foreach ($input['headers'] as $header => $value) {
+            $headers[$header] = $value;
         }
 
         $body = !empty($input['content_body']) ? $input['content_body'] : null;
+
         $request = new Request($input['method'], $input['url'], $headers, $body);
 
-        // Generate the Authorization header.
-        $auth_header = $signer->getAuthorization(
-            $request,
-            $input['id'],
-            $input['secret'],
-            $input['nonce']
-        );
-        $request = $request->withHeader('Authorization', $auth_header);
-        $signed_request = $signer->signRequest($request, $input['secret']);
-        $signature = $signer->getSignature($signed_request);
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $key);
+        $authHeaderBuilder->setRealm($input['realm']);
+        $authHeaderBuilder->setId($input['id']);
+        $authHeaderBuilder->setNonce($input['nonce']);
+        $authHeaderBuilder->setVersion('2.0');
+        $authHeaderBuilder->setCustomHeaders($input['signed_headers']);
+        $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        // Prove that the signature is valid.
-        $this->assertEquals($expectations['message_signature'], (string) $signature);
+        $signer = new MockRequestSigner($key, $realm, $digest, $authHeader);
 
-        // Prove that the Authorization headers have all expected values.
-        $signed_auth_header = $signed_request->getHeaderLine('Authorization');
-        $this->assertContains('id="' . $input['id'] . '"', $signed_auth_header);
-        $this->assertContains('nonce="' . $input['nonce'] . '"', $signed_auth_header);
-        $this->assertContains('realm="' . rawurlencode($input['realm']) . '"', $signed_auth_header);
-        $this->assertContains('signature="' . $signature . '"', $signed_auth_header);
-        $this->assertContains('version="2.0"', $signed_auth_header);
+        $signedRequest = $signer->signRequest($request, $input['signed_headers']);
 
-        // Prove that the signer generates the correct signature.
-        $request_signature = $signer->getSignature($signed_request);
-        $this->assertEquals($expectations['message_signature'], $request_signature->getSignature());
+        $signedAuthHeader = $signedRequest->getHeaderLine('Authorization');
+
+        $this->assertContains('id="' . $input['id'] . '"', $signedAuthHeader);
+        $this->assertContains('nonce="' . $input['nonce'] . '"', $signedAuthHeader);
+        $this->assertContains('realm="' . rawurlencode($input['realm']) . '"', $signedAuthHeader);
+        $this->assertContains('signature="' . $expectations['message_signature'] . '"', $signedAuthHeader);
+        $this->assertContains('version="2.0"', $signedAuthHeader);
 
         // Prove that the digest generates the correct signature.
-        $digest_message = $digest->getMessage($signer, $signed_request, $input['secret']);
-        $this->assertEquals($expectations['signable_message'], $digest_message);
-        $digest_signature = $digest->get($signer, $signed_request, $input['secret']);
-        $this->assertEquals($expectations['message_signature'], $digest_signature);
+        $signedMessage = $digest->sign($expectations['signable_message'], $input['secret']);
+        $this->assertEquals($expectations['message_signature'], $signedMessage);
 
         // Prove that the authenticator can authenticate the request.
-        $signer = new RequestSigner();
-        $signer->setTimestamp($input['timestamp']);
-        $key_loader = new DummyKeyLoader([
+        $keyLoader = new MockKeyLoader([
                 $input['id'] => $input['secret'],
         ] + $this->keys);
-        $authenticator = new RequestAuthenticator($signer, time() + 10);
-        $key = $authenticator->authenticate($signed_request, $key_loader);
-        $this->assertEquals($key->getId(), $input['id']);
+        $authenticator = new MockRequestAuthenticator($keyLoader, null, $input['timestamp']);
+        $compareKey = $authenticator->authenticate($signedRequest);
+
+        $this->assertEquals($compareKey->getId(), $input['id']);
     }
 }
