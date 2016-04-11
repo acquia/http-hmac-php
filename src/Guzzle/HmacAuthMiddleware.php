@@ -25,12 +25,19 @@ class HmacAuthMiddleware
     protected $requestSigner;
 
     /**
+     * @var array
+     */
+    protected $customHeaders = [];
+
+    /**
      * @param \Acquia\Hmac\KeyInterface $key
      * @param string $realm
+     * @param array $customHeaders
      */
-    public function __construct(KeyInterface $key, $realm = 'Acquia')
+    public function __construct(KeyInterface $key, $realm = 'Acquia', array $customHeaders = [])
     {
         $this->key = $key;
+        $this->customHeaders = $customHeaders;
         $this->requestSigner = new RequestSigner($key, $realm);
     }
 
@@ -69,6 +76,6 @@ class HmacAuthMiddleware
      */
     public function signRequest(RequestInterface $request)
     {
-        return $this->requestSigner->signRequest($request);
+        return $this->requestSigner->signRequest($request, $this->customHeaders);
     }
 }

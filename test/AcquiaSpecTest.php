@@ -50,7 +50,6 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
     {
         $key = new Key($input['id'], $input['secret']);
         $digest = new Digest();
-        $realm = $input['realm'];
 
         $headers = [
             'X-Authorization-Timestamp' => $input['timestamp'],
@@ -72,7 +71,7 @@ class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
         $authHeaderBuilder->setCustomHeaders($input['signed_headers']);
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $requestSigner = new MockRequestSigner($key, $realm, $digest, $authHeader);
+        $requestSigner = new MockRequestSigner($key, $input['realm'], $digest, $authHeader);
 
         $signedRequest = $requestSigner->signRequest($request, $input['signed_headers']);
 

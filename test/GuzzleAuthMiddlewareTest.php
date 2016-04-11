@@ -56,29 +56,34 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
      */
     public function testAuthorizationHeader()
     {
-        $realm = 'Pipet service';
+        $realm = 'CIStore';
 
         $headers = [
             'X-Authorization-Timestamp' => '1432075982',
+            'X-Custom-Signer1' => 'custom-1',
+            'X-Custom-Signer2' => 'custom-2',
         ];
 
-        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
-        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->authKey);
+        $authKey = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
+
+        $request = new Request('GET', 'https://example.pipeline.io/api/v1/ci/pipelines', $headers);
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $authKey);
         $authHeaderBuilder->setRealm($realm);
-        $authHeaderBuilder->setId('efdde334-fe7b-11e4-a322-1697f925ec7b');
-        $authHeaderBuilder->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $authHeaderBuilder->setId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
+        $authHeaderBuilder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
+        $authHeaderBuilder->setCustomHeaders(['X-Custom-Signer1', 'X-Custom-Signer2']);
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $middleware = new MockHmacAuthMiddleware($this->authKey, $realm, $authHeader);
+        $middleware = new MockHmacAuthMiddleware($authKey, $realm, ['X-Custom-Signer1', 'X-Custom-Signer2'], $authHeader);
 
         $request = $middleware->signRequest($request);
 
-        $expected = 'acquia-http-hmac realm="Pipet%20service",'
-                    . 'id="efdde334-fe7b-11e4-a322-1697f925ec7b",'
-                    . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+        $expected = 'acquia-http-hmac realm="CIStore",'
+                    . 'id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",'
+                    . 'nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",'
                     . 'version="2.0",'
-                    . 'headers="",'
-                    . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="';
+                    . 'headers="X-Custom-Signer1%3BX-Custom-Signer2",'
+                    . 'signature="yoHiYvx79ssSDIu3+OldpbFs8RsjrMXgRoM89d5t+zA="';
 
         $this->assertEquals($expected, $request->getHeaderLine('Authorization'));
     }
@@ -144,7 +149,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $authHeaderBuilder->setNonce('d1954337-5319-4821-8427-115542e08d10');
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $middleware = new MockHmacAuthMiddleware($this->authKey, $realm, $authHeader);
+        $middleware = new MockHmacAuthMiddleware($this->authKey, $realm, [], $authHeader);
 
         $container = [];
         $history = Middleware::history($container);

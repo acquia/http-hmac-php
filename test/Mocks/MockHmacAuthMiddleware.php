@@ -19,10 +19,12 @@ class MockHmacAuthMiddleware extends HmacAuthMiddleware
      *   The key to sign requests with.
      * @param string $realm
      *   The API realm/provider.
+     * @param array $customHeaders
+     *   Custom headers to use in the signature.
      * @param \Acquia\Hmac\AuthorizationHeaderInterface $authHeader
      *   The custom authorization header.
      */
-    public function __construct(KeyInterface $key, $realm, AuthorizationHeader $authHeader)
+    public function __construct(KeyInterface $key, $realm, array $customHeaders, AuthorizationHeader $authHeader)
     {
         parent::__construct($key, $realm);
 
