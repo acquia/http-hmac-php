@@ -61,6 +61,8 @@ class HmacAuthMiddleware
                 if (!$authenticator->isAuthentic($response)) {
                     throw new MalformedResponseException('Could not verify the authenticity of the response.');
                 }
+
+                return $response;
             };
 
             return $handler($request, $options)->then($promise);
