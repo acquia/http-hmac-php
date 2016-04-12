@@ -102,8 +102,7 @@ class RequestSigner implements RequestSignerInterface
     {
         if ($request->hasHeader('Authorization')) {
             $authHeader = AuthorizationHeader::createFromRequest($request);
-        }
-        else {
+        } else {
             $authHeader = $this->buildAuthorizationHeader($request, $customHeaders);
         }
 

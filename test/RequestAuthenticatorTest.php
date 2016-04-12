@@ -49,12 +49,17 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
                 . 'headers="",'
                 . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         ];
-        $request = new Request('GET',
+        $request = new Request(
+            'GET',
             'https://example.acquiapipet.net/v1.0/task-status/133?limit=10',
-            $headers);
+            $headers
+        );
 
-        $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
-            null, $timestamp);
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            null,
+            $timestamp
+        );
 
         $key = $authenticator->authenticate($request);
 
@@ -88,11 +93,19 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         ];
         $request = new Request('GET', 'https://example.com/test', $headers);
 
-        $authHeader = new AuthorizationHeader($realm, $id, $nonce, $version,
-            $headers, 'bad-sig');
+        $authHeader = new AuthorizationHeader(
+            $realm,
+            $id,
+            $nonce,
+            $version,
+            $headers,
+            'bad-sig'
+        );
 
-        $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
-            $authHeader);
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            $authHeader
+        );
         $authenticator->authenticate($request);
     }
 
@@ -118,8 +131,10 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = new Request('GET', 'https://example.com/test', $headers);
         $authHeader = AuthorizationHeader::createFromRequest($request);
 
-        $authenticator = new MockRequestAuthenticator(new MockKeyLoader($this->keys),
-            $authHeader);
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            $authHeader
+        );
         $authenticator->authenticate($request);
     }
 

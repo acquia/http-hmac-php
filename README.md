@@ -20,7 +20,7 @@ by adding it as a dependency to your project's composer.json file.
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "~3.0.0"
+        "acquia/http-hmac-php": "~3.0.0-beta"
     }
 }
 ```
@@ -36,74 +36,73 @@ for more detailed installation and usage instructions.
 
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Digest\Digest;
+use Acquia\Hmac\Key;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
-$requestSigner = new RequestSigner();
-$requestSigner->setHeaderId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
-$requestSigner->setHeaderRealm('CIStore');
-$requestSigner->addSignedHeader('X-Custom-1');
-$requestSigner->addSignedHeader('X-Custom-2');
+// Optionally, you can provide signed headers to generate the digest. The header keys need to be provided to the middleware below.
+$options = [
+  'headers' => [
+    'X-Custom-1' => 'value1',
+    'X-Custom-2' => 'value2',
+  ],
+];
 
-// Guzzle middleware will sign the request by generating the required headers.
-// You must provide the ID and secret. According to the Acquia HMAC 2.0 spec,
-// the ID is an arbitrary string and the secret is a base64 encoded string.
-$middleware = new HmacAuthMiddleware($requestSigner, base64_encode('secret'));
+// A key consists of your UUID and a MIME base64 encoded shared secret.
+$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
 
+// Provide your key, realm and optional signed headers.
+$middleware = new HmacAuthMiddleware($key, 'CIStore', array_keys($options['headers']));
+
+// Register the middleware.
 $stack = HandlerStack::create();
 $stack->push($middleware);
 
+// Create a client.
 $client = new Client([
     'handler' => $stack,
 ]);
 
-// Signed headers must be provided if added above. These will be used to
-// generate the signature hash.
-$options = [
-  'headers' => [
-    'X-Custom-1' => 'some custom value',
-    'X-Custom-2' => 'another custom value',
-  ],
-];
-
-$client->get('http://example.com/resource', $options);
+// Request.
+$result = $client->get('https://service.acquia.io/api/v1/widget', $options);
+var_dump($result);
 ```
 
 ### Authenticate the request using PSR-7-compatible requests
 
 ```php
-// @TODO 3.0 This needs to be verified.
 use Acquia\Hmac\RequestAuthenticator;
-use Acquia\Hmac\RequestSigner;
-
-// $request implements PSR-7's \Psr\Http\Message\RequestInterface
-$authorization_header = $request->getHeaderLine('Authorization');
-
-$signer = new RequestSigner();
-$authenticator = new RequestAuthenticator($signer, '+15 minutes');
+use Acquia\Hmac\ResponseSigner;
 
 // $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
-$key = $authenticator->authenticate($request, $keyLoader);
+$authenticator = new RequestAuthenticator($keyLoader);
 
+// $request implements PSR-7's \Psr\Http\Message\RequestInterface
+// An exception will be thrown if it cannot authenticate.
+$key = $authenticator->authenticate($request);
+
+$signer = new ResponseSigner($key, $request)
+$signedResponse = $signer->signResponse($response);
 ```
 
 To convert a HTTP Foundation request (used in Symfony-powered apps like Silex) to PSR-7, use Symfony's [PSR-7 bridge](http://symfony.com/doc/current/cookbook/psr7.html):
  
 ```php
-// @TODO 3.0 This needs to be verified.
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory
 
-$authenticator = new RequestAuthenticator(new RequestSigner(), '+15 minutes');
+// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
+$authenticator = new RequestAuthenticator($keyLoader);
 
 // $request is an HTTP Foundation request
 $psr7Factory = new DiactorosFactory();
 $psr7Request = $psr7Factory->createRequest($request);
 
 // $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
-$key = $authenticator->authenticate($psr7Request, $keyLoader);
-
+$key = $authenticator->authenticate($psr7Request);
 ```
  
 ## Contributing and Development
@@ -117,8 +116,13 @@ All code should adhere to the following standards:
 * [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md)
 * [PSR-7](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-7-http-message.md)
 
-It is recommend to use the [PHP Coding Standards Fixer](https://github.com/fabpot/PHP-CS-Fixer)
-tool to ensure that code adheres to the coding standards mentioned above.
+Use [PHP_CodeSniffer](https://github.com/squizlabs/php_codesniffer) to validate coding style and automatically fix problems according to the PSR-2 standard:
+```
+$ vendor/bin/phpcs --standard=PSR2 --runtime-set ignore_warnings_on_exit true --colors src/.
+$ vendor/bin/phpcs --standard=PSR2 --runtime-set ignore_warnings_on_exit true --colors test/.
+$ vendor/bin/phpcbf --standard=PSR2 src/.
+$ vendor/bin/phpcbf --standard=PSR2 test/.
+```
 
 Refer to [PHP Project Starter's documentation](https://github.com/cpliakas/php-project-starter#using-apache-ant)
 for the Apache Ant targets supported by this project.

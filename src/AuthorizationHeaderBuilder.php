@@ -248,7 +248,7 @@ class AuthorizationHeaderBuilder
         $body = $this->request->getBody();
 
         if ($body->getSize()) {
-            if($this->request->hasHeader('Content-Type')) {
+            if ($this->request->hasHeader('Content-Type')) {
                 $parts[] = $this->request->getHeaderLine('Content-Type');
             }
 
