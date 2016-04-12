@@ -79,20 +79,6 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     }
 
     /**
-     * Retrieves the request signer.
-     *
-     * @param \Acquia\Hmac\KeyInterface $key
-     *   The key with which to sign requests.
-     *
-     * @return \Acquia\Hmac\RequestSignerInterface
-     *   The request signer.
-     */
-    protected function getRequestSigner(KeyInterface $key)
-    {
-        return new RequestSigner($key);
-    }
-
-    /**
      * Retrieves the current timestamp.
      *
      * This is provided as a method to allow mocking during unit tests.

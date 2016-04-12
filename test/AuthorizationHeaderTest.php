@@ -3,6 +3,9 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
+use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Exception\MalformedRequestException;
+use Acquia\Hmac\Key;
 use GuzzleHttp\Psr7\Request;
 
 /**
@@ -101,5 +104,58 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
             ['signature'],
             ['version'],
         ];
+    }
+
+    /**
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function testAuthorizationHeaderBuilderRequiresFields() {
+        $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+            'Content-Type' => 'application/json',
+        ];
+        $request = new Request('POST', 'http://example.com?test=true', $headers, 'body text');
+        $builder = new AuthorizationHeaderBuilder($request, $key);
+        $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
+        $builder->setVersion('2.0');
+        $header = $builder->getAuthorizationHeader();
+    }
+
+    /**
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function testAuthorizationHeaderBuilderRequiresTimestamp() {
+        $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
+        $headers = [
+            'Content-Type' => 'application/json',
+        ];
+        $request = new Request('POST', 'http://example.com?test=true', $headers, 'body text');
+        $builder = new AuthorizationHeaderBuilder($request, $key);
+        $builder->setId($key->getId());
+        $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
+        $builder->setVersion('2.0');
+        $header = $builder->getAuthorizationHeader();
+    }
+
+    public function testAuthorizationHeaderBuilder() {
+        $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+            'Content-Type' => 'application/json',
+        ];
+        $request = new Request('POST', 'http://example.com?test=true', $headers, 'body text');
+        $builder = new AuthorizationHeaderBuilder($request, $key);
+        $builder->setId($key->getId());
+        $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
+        $builder->setVersion('2.0');
+
+        $header = $builder->getAuthorizationHeader();
+        $this->assertEquals($header->getId(), $key->getId());
+        $this->assertEquals($header->getSignature(), 'f9G/Xu339hw1z2zHTOrHKNv1kWqvYHYI9Nu/phO5dPY=');
+
+        $builder->setSignature('test');
+        $header = $builder->getAuthorizationHeader();
+        $this->assertEquals($header->getSignature(), 'test');
     }
 }

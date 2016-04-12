@@ -74,6 +74,10 @@ class RequestSignerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->timestamp, $signedRequest->getHeaderLine('X-Authorization-Timestamp'));
         $this->assertTrue($signedRequest->hasHeader('Authorization'));
         $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedRequest->getHeaderLine('Authorization'));
+
+        // Ensure that we can get the AuthorizationHeader back from the request.
+        $signedAuthRequest = $signer->getAuthorizedRequest($signedRequest);
+        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedAuthRequest->getHeaderLine('Authorization'));
     }
 
     /**

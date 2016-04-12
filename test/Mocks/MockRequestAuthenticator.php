@@ -46,18 +46,6 @@ class MockRequestAuthenticator extends RequestAuthenticator
     /**
      * {@inheritDoc}
      */
-    protected function getRequestSigner(KeyInterface $key)
-    {
-        if ($this->authHeader) {
-            return new MockRequestSigner($key, 'Acquia', new Digest(), $this->authHeader);
-        }
-
-        return parent::getRequestSigner($key);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     protected function getCurrentTimestamp()
     {
         return $this->timestamp;
