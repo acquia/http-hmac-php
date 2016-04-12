@@ -71,7 +71,7 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $authHeaderBuilder->setRealm($realm);
         $authHeaderBuilder->setId('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059');
         $authHeaderBuilder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
-        $authHeaderBuilder->setCustomHeaders(['X-Custom-Signer1', 'X-Custom-Signer2']);
+        $authHeaderBuilder->setCustomHeaders(['X-Custom-Signer2', 'X-Custom-Signer1']);
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
         $middleware = new MockHmacAuthMiddleware($authKey, $realm, ['X-Custom-Signer1', 'X-Custom-Signer2'], $authHeader);

@@ -285,6 +285,8 @@ class AuthorizationHeaderBuilder
     {
         $headers = [];
 
+        // The spec requires that headers are sorted by header name.
+        sort($this->headers);
         foreach ($this->headers as $header) {
             if ($this->request->hasHeader($header)) {
                 $headers[] = strtolower($header) . ':' . $this->request->getHeaderLine($header);
