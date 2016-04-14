@@ -2,209 +2,135 @@
 
 namespace Acquia\Hmac;
 
-use Acquia\Hmac\Request\RequestInterface;
+use Acquia\Hmac\Digest\Digest;
+use Acquia\Hmac\Digest\DigestInterface;
+use Psr\Http\Message\RequestInterface;
 
+/**
+ * Signs requests according to the HTTP HMAC spec.
+ */
 class RequestSigner implements RequestSignerInterface
 {
     /**
+     * @var \Acquia\Hmac\KeyInterface
+     *   The key to sign requests with.
+     */
+    protected $key;
+
+    /**
+     * @var string
+     *   The API realm/provider.
+     */
+    protected $realm;
+
+    /**
      * @var \Acquia\Hmac\Digest\DigestInterface
+     *   The message digest to use when signing requests.
      */
     protected $digest;
 
     /**
-     * @var string
-     */
-    protected $provider = 'Acquia';
-
-    /**
-     * @var array
-     */
-    protected $timestampHeaders = array('Date');
-
-    /**
-     * @var array
-     */
-    protected $customHeaders = array();
-
-    /**
+     * Initializes the request signer with a key and realm.
+     *
+     * @param \Acquia\Hmac\KeyInterface $key
+     *   The key to sign requests with.
+     * @param string $realm
+     *   The API realm/provider. Defaults to "Acquia".
      * @param \Acquia\Hmac\Digest\DigestInterface $digest
+     *   The message digest to use when signing requests. Defaults to
+     *   \Acquia\Hmac\Digest\Digest.
      */
-    public function __construct(Digest\DigestInterface $digest = null)
+    public function __construct(KeyInterface $key, $realm = 'Acquia', DigestInterface $digest = null)
     {
-        $this->digest = $digest ?: new Digest\Version1();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequest
-     */
-    public function getSignature(RequestInterface $request)
-    {
-        if (!$request->hasHeader('Authorization')) {
-            throw new Exception\MalformedRequestException('Authorization header required');
-        }
-
-        // Check the provider.
-        $header = $request->getHeader('Authorization');
-        if ($pos = strpos($header, $this->provider . ' ') === false) {
-            throw new Exception\MalformedRequestException('Invalid provider in authorization header');
-        }
-
-        // Split ID and sgnature by an unescaped colon.
-        $offset = strlen($this->provider) + 1;
-        $credentials = substr($header, $offset);
-        $matches = preg_split('@\\\\.(*SKIP)(*FAIL)|:@s', $credentials);
-        if (!isset($matches[1])) {
-            throw new Exception\MalformedRequestException('Unable to parse ID and signature from authorization header');
-        }
-
-        // Ensure the signature is a base64 encoded string.
-        if (!preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $matches[1])) {
-            throw new Exception\MalformedRequestException('Invalid signature in authorization header');
-        }
-
-        $time = $this->getTimestamp($request);
-        $timestamp = strtotime($time);
-        if (!$timestamp) {
-            throw new Exception\MalformedRequestException('Timestamp not valid');
-        }
-
-        return new Signature(stripslashes($matches[0]), $matches[1], $timestamp);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws \InvalidArgumentException
-     * @throws \Acquia\Hmac\Exception\InvalidRequestException
-     */
-    public function signRequest(RequestInterface $request, $secretKey)
-    {
-        return $this->digest->get($this, $request, $secretKey);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws \Acquia\Hmac\Exception\InvalidRequestException
-     */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey)
-    {
-        $signature = $this->signRequest($request, $secretKey);
-        return $this->provider . ' ' . str_replace(':', '\\:', $id) . ':' . $signature;
-    }
-
-    /**
-     * @param string $provider
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function setProvider($provider)
-    {
-        $this->provider = $provider;
-        return $this;
+        $this->key = $key;
+        $this->realm = $realm;
+        $this->digest = $digest ?: new Digest();
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getProvider()
+    public function signRequest(RequestInterface $request, array $customHeaders = [])
     {
-        return $this->provider;
-    }
+        $request = $this->getTimestampedRequest($request);
+        $request = $this->getContentHashedRequest($request);
+        $request = $this->getAuthorizedRequest($request, $customHeaders);
 
-    /**
-     * Appends a timestap header to the stack.
-     *
-     * @param string $header
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function addTimestampHeader($header)
-    {
-        $this->timestampHeaders[] = $header;
-        return $this;
-    }
-
-    /**
-     * @param array $headers
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function setTimestampHeaders(array $headers)
-    {
-        $this->timestampHeaders = $headers;
-        return $this;
-    }
-
-    /**
-     * Append a custom headers to be used in the signature.
-     *
-     * @param string $header
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function addCustomHeader($header)
-    {
-        $this->customHeaders[] = $header;
-        return $this;
-    }
-
-    /**
-     * @param array $headers
-     *
-     * @return \Acquia\Hmac\RequestSigner
-     */
-    public function setCustomHeaders(array $headers)
-    {
-        $this->customHeaders = $headers;
-        return $this;
+        return $request;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getContentType(RequestInterface $request)
+    public function getTimestampedRequest(RequestInterface $request, \DateTime $date = null)
     {
-        if (!$request->hasHeader('Content-Type')) {
-            throw new Exception\MalformedRequestException('Content type header required');
+        if ($request->hasHeader('X-Authorization-Timestamp')) {
+            return clone $request;
         }
 
-        return $request->getHeader('Content-Type');
+        $date = $date ?: new \DateTime('now', new \DateTimeZone('UTC'));
+
+        /** @var RequestInterface $request */
+        $request = $request->withHeader('X-Authorization-Timestamp', $date->getTimestamp());
+
+        return $request;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getTimestamp(RequestInterface $request)
+    public function getContentHashedRequest(RequestInterface $request)
     {
-        foreach ($this->timestampHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                return $request->getHeader($header);
-            }
+        $body = $request->getBody();
+
+        if (!$body->getSize()) {
+            return clone $request;
         }
 
-        if (count($this->timestampHeaders) > 1) {
-            $message = 'At least one of the following headers is required: ' . join(', ', $this->timestampHeaders);
+        $hashedBody = $this->digest->hash((string) $body);
+
+        /** @var RequestInterface $request */
+        $request =  $request->withHeader('X-Authorization-Content-SHA256', $hashedBody);
+
+        return $request;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAuthorizedRequest(RequestInterface $request, array $customHeaders = [])
+    {
+        if ($request->hasHeader('Authorization')) {
+            $authHeader = AuthorizationHeader::createFromRequest($request);
         } else {
-            $message = $this->timestampHeaders[0] . ' header required';
+            $authHeader = $this->buildAuthorizationHeader($request, $customHeaders);
         }
 
-        throw new Exception\MalformedRequestException($message);
+        /** @var RequestInterface $request */
+        $request = $request->withHeader('Authorization', (string) $authHeader);
+
+        return $request;
     }
 
     /**
-     * {@inheritDoc}
+     * Builds an AuthorizationHeader object.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request
+     *   The request being signed.
+     * @param string[] $customHeaders
+     *   A list of custom header names. The values of the headers will be
+     *   extracted from the request.
+     *
+     * @return \Acquia\Hmac\AuthorizationHeader
+     *   The compiled authorizatio header object.
      */
-    public function getCustomHeaders(RequestInterface $request)
+    protected function buildAuthorizationHeader(RequestInterface $request, array $customHeaders = [])
     {
-        $headers = array();
-        foreach ($this->customHeaders as $header) {
-            if ($request->hasHeader($header)) {
-                $headers[$header] = $request->getHeader($header);
-            }
-        }
-        return $headers;
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->key, $this->digest);
+        $authHeaderBuilder->setRealm($this->realm);
+        $authHeaderBuilder->setId($this->key->getId());
+        $authHeaderBuilder->setCustomHeaders($customHeaders);
+
+        return $authHeaderBuilder->getAuthorizationHeader();
     }
 }

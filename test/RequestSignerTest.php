@@ -2,189 +2,150 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Digest\Digest;
+use Acquia\Hmac\Key;
 use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\Test\Mocks\MockRequestSigner;
+use GuzzleHttp\Psr7\Request;
 
+/**
+ * Tests the request signer.
+ */
 class RequestSignerTest extends \PHPUnit_Framework_TestCase
 {
-    public function testSetProvider()
+    /**
+     * @var \Acquia\Hmac\KeyInterface
+     *   A sample key.
+     */
+    protected $authKey;
+
+    /**
+     * @var string
+     *   A sample realm/provider.
+     */
+    protected $realm;
+
+    /**
+     * @var int
+     *   A sample timestamp.
+     */
+    protected $timestamp;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setUp()
     {
-        $signer = new RequestSigner();
-        $signer->setProvider('TestProvider');
-        $this->assertEquals('TestProvider', $signer->getProvider());
-    }
+        $authId     = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
 
-    public function testSetCustomHeaders()
-    {
-        $headers = array('Custom1', 'Custom2');
-
-        $signer = new RequestSigner();
-        $signer->setCustomHeaders(array('Custom1', 'Custom2'));
-
-        $request = new DummyRequest();
-        $request->headers = array(
-            'Custom1' => 'Value1',
-            'Custom2' => 'Value2',
-            'Custom3' => 'Value3',
-        );
-
-        $expected = array(
-            'Custom1' => 'Value1',
-            'Custom2' => 'Value2',
-        );
-
-        $this->assertEquals($expected, $signer->getCustomHeaders($request));
-    }
-
-    public function testAddCustomHeader()
-    {
-        $headers = array('Custom1' => 'Value1');
-
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
-
-        $request = new DummyRequest();
-        $request->headers = $headers;
-
-        $this->assertEquals($headers, $signer->getCustomHeaders($request));
-    }
-
-    public function testGetContentType()
-    {
-        $request = new DummyRequest();
-        $request->headers = array('Content-Type' => 'text/plain');
-
-        $signer = new RequestSigner();
-        $this->assertEquals('text/plain', $signer->getContentType($request));
+        $this->authKey   = new Key($authId, $authSecret);
+        $this->realm     = 'Pipet service';
+        $this->timestamp = 1432075982;
     }
 
     /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * Ensures the correct headers are generated when signing a request.
      */
-    public function testMissingContentType()
-    {
-        $request = new DummyRequest();
-
-        $signer = new RequestSigner();
-        $signer->getContentType($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testMissingAuthorizationHeader()
-    {
-        $signer = new RequestSigner();
-        $signer->getSignature(new DummyRequest());
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testInvalidAuthorizationHeader()
-    {
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'invalid-header';
-
-        $signer = new RequestSigner();
-        $signer->getSignature($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testInvalidProvider()
-    {
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'BadProvider 1:abcd';
-
-        $signer = new RequestSigner();
-        $signer->getSignature($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testMissingTimestampHeader()
-    {
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
-
-        $signer = new RequestSigner();
-        $signer->getSignature($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testMissingMultiTimestampHeader()
-    {
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
-
-        $signer = new RequestSigner();
-        $signer->addTimestampHeader('Date2');
-        $signer->getSignature($request);
-    }
-
-    /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function testInvalidSignature()
-    {
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
-        $request->headers['Date'] = 'bad-timestamp';
-
-        $signer = new RequestSigner();
-        $signer->getSignature($request);
-    }
-
-    public function testSignature()
-    {
-        $date = 'Fri, 19 Mar 1982 00:00:04 GMT';
-
-        $request = new DummyRequest();
-        $request->headers['Authorization'] = 'Acquia 1:abcd';
-        $request->headers['Date1'] = $date;
-
-        $signer = new RequestSigner();
-        $signer->setTimestampHeaders(array('Date1'));
-        $signature = $signer->getSignature($request);
-
-        $this->assertInstanceOf('Acquia\Hmac\Signature', $signature);
-        $this->assertEquals('1', $signature->getId());
-        $this->assertEquals('abcd', $signature->getSignature());
-        $this->assertEquals(strtotime($date), $signature->getTimestamp());
-    }
-
     public function testSignRequest()
     {
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
-
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
-        );
+            'X-Authorization-Timestamp' => $this->timestamp,
+        ];
 
-        $this->assertEquals(DigestVersion1Test::EXPECTED_HASH, $signer->signRequest($request, 'secret-key'));
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
+
+        $digest = new Digest();
+
+        $authHeaderBuilder = new AuthorizationHeaderBuilder($request, $this->authKey, $digest);
+        $authHeaderBuilder->setRealm($this->realm);
+        $authHeaderBuilder->setId($this->authKey->getId());
+        $authHeaderBuilder->setNonce('d1954337-5319-4821-8427-115542e08d10');
+        $authHeader = $authHeaderBuilder->getAuthorizationHeader();
+
+        $signer = new MockRequestSigner($this->authKey, $this->realm, $digest, $authHeader);
+
+        $signedRequest = $signer->signRequest($request);
+
+        $this->assertFalse($signedRequest->hasHeader('X-Authorization-Content-SHA256'));
+        $this->assertTrue($signedRequest->hasHeader('X-Authorization-Timestamp'));
+        $this->assertEquals($this->timestamp, $signedRequest->getHeaderLine('X-Authorization-Timestamp'));
+        $this->assertTrue($signedRequest->hasHeader('Authorization'));
+        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedRequest->getHeaderLine('Authorization'));
+
+        // Ensure that we can get the AuthorizationHeader back from the request.
+        $signedAuthRequest = $signer->getAuthorizedRequest($signedRequest);
+        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedAuthRequest->getHeaderLine('Authorization'));
     }
 
-    public function testgetAuthorization()
+    /**
+     * Ensures the X-Authorization-Timestamp header is unmodified if already set.
+     */
+    public function testAuthorizationTimestampExists()
     {
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        $signer = new RequestSigner($this->authKey, $this->realm);
 
-        $request = new DummyRequest();
-        $request->headers = array(
-            'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Custom1' => 'Value1',
-        );
+        $headers = [
+            'X-Authorization-Timestamp' => $this->timestamp,
+        ];
 
-        $expected = 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH;
-        $this->assertEquals($expected, $signer->getAuthorization($request, '1', 'secret-key'));
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', $headers);
+
+        $timestampedRequest = $signer->getTimestampedRequest($request);
+
+        $this->assertTrue($timestampedRequest->hasHeader('X-Authorization-Timestamp'));
+        $this->assertEquals($this->timestamp, $timestampedRequest->getHeaderLine('X-Authorization-Timestamp'));
+    }
+
+    /**
+     * Ensures the X-Authorization-Timestamp header is set when a \DateTime is provided.
+     */
+    public function testAuthorizationTimestampCustomDateTime()
+    {
+        $signer = new RequestSigner($this->authKey, $this->realm);
+
+        $date = new \DateTime();
+        $date->setTimestamp($this->timestamp);
+
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10');
+
+        $timestampedRequest = $signer->getTimestampedRequest($request, $date);
+
+        $this->assertTrue($timestampedRequest->hasHeader('X-Authorization-Timestamp'));
+        $this->assertEquals($this->timestamp, $timestampedRequest->getHeaderLine('X-Authorization-Timestamp'));
+    }
+
+    /**
+     * Ensures the X-Authorization-Content-SHA256 header is set correctly if there is a request body.
+     */
+    public function testAuthprizationContentSha256()
+    {
+        $signer = new RequestSigner($this->authKey, $this->realm);
+
+        $body = '{"method":"hi.bob","params":["5","4","8"]}';
+        $hashedBody = '6paRNxUA7WawFxJpRp4cEixDjHq3jfIKX072k9slalo=';
+
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10', [], $body);
+
+        $contentHashedRequest = $signer->getContentHashedRequest($request);
+
+        $this->assertTrue($contentHashedRequest->hasHeader('X-Authorization-Content-SHA256'));
+        $this->assertEquals($hashedBody, $contentHashedRequest->getHeaderLine('X-Authorization-Content-SHA256'));
+    }
+
+    /**
+     * Ensures the X-Authorization-Content-SHA256 header is not set if there is no request body.
+     */
+    public function testAuthorizationContentSha256NoBody()
+    {
+        $signer = new RequestSigner($this->authKey, $this->realm);
+
+        $request = new Request('GET', 'https://example.acquiapipet.net/v1.0/task-status/133?limit=10');
+
+        $contentHashedRequest = $signer->getContentHashedRequest($request);
+
+        $this->assertFalse($contentHashedRequest->hasHeader('X-Authorization-Content-SHA256'));
     }
 }

@@ -2,58 +2,43 @@
 
 namespace Acquia\Hmac\Guzzle;
 
-use Acquia\Hmac\RequestSignerInterface;
-use Acquia\Hmac\Request\Guzzle as RequestWrapper;
+use Acquia\Hmac\Exception\MalformedResponseException;
+use Acquia\Hmac\KeyInterface;
+use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\ResponseAuthenticator;
+use Guzzle\Http\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class HmacAuthMiddleware
 {
+    /**
+     * @var \Acquia\Hmac\KeyInterface
+     *  The key with which to sign requests and responses.
+     */
+    protected $key;
+
     /**
      * @var \Acquia\Hmac\RequestSignerInterface
      */
     protected $requestSigner;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $id;
+    protected $customHeaders = [];
 
     /**
-     * @var string
+     * @param \Acquia\Hmac\KeyInterface $key
+     * @param string $realm
+     * @param array $customHeaders
      */
-    protected $secretKey;
-
-    /**
-     * @var string
-     */
-    protected $defaultContentType = 'application/json; charset=utf-8';
-
-    /**
-     * @param \Acquia\Hmac\RequestSignerInterface $requestSigner
-     * @param string $id
-     * @param string $secretKey
-     */
-    public function __construct(RequestSignerInterface $requestSigner, $id, $secretKey)
+    public function __construct(KeyInterface $key, $realm = 'Acquia', array $customHeaders = [])
     {
-        $this->requestSigner = $requestSigner;
-        $this->id            = $id;
-        $this->secretKey     = $secretKey;
-    }
-
-    /**
-     * @var string $contentType
-     */
-    public function setDefaultContentType($contentType)
-    {
-        $this->defaultContentType = $contentType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultContentType()
-    {
-        return $this->defaultContentType;
+        $this->key = $key;
+        $this->customHeaders = $customHeaders;
+        $this->requestSigner = new RequestSigner($key, $realm);
     }
 
     /**
@@ -66,13 +51,26 @@ class HmacAuthMiddleware
     public function __invoke(callable $handler)
     {
         return function ($request, array $options) use ($handler) {
+
             $request = $this->signRequest($request);
-            return $handler($request, $options);
+
+            $promise = function (ResponseInterface $response) use ($request) {
+
+                $authenticator = new ResponseAuthenticator($request, $this->key);
+
+                if (!$authenticator->isAuthentic($response)) {
+                    throw new MalformedResponseException('Could not verify the authenticity of the response.');
+                }
+
+                return $response;
+            };
+
+            return $handler($request, $options)->then($promise);
         };
     }
 
     /**
-     * Signs the request, adds the HMAC hash to the authorization header.
+     * Signs the request with the appropriate headers.
      *
      * @param \Psr\Http\Message\RequestInterface $request
      *
@@ -80,17 +78,6 @@ class HmacAuthMiddleware
      */
     public function signRequest(RequestInterface $request)
     {
-        if (!$request->hasHeader('Date')) {
-            $time = new \DateTime();
-            $time->setTimezone(new \DateTimeZone('GMT'));
-            $request = $request->withHeader('Date', $time->format('D, d M Y H:i:s \G\M\T'));
-        }
-
-        if (!$request->hasHeader('Content-Type')) {
-            $request = $request->withHeader('Content-Type', $this->defaultContentType);
-        }
-
-        $authorization = $this->requestSigner->getAuthorization(new RequestWrapper($request), $this->id, $this->secretKey);
-        return $request->withHeader('Authorization', $authorization);
+        return $this->requestSigner->signRequest($request, $this->customHeaders);
     }
 }

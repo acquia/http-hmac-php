@@ -2,70 +2,63 @@
 
 namespace Acquia\Hmac;
 
-use Acquia\Hmac\Request\RequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 interface RequestSignerInterface
 {
     /**
-     * Generates a signature for the request given the secret key and algorithm.
+     * Sign a request with the appropriate headers.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param string $secretKey
+     * This will clone the request according to the PSR-7 standard with all of
+     * the headers required by the Acquia HTTP HMAC spec.
      *
-     * @return string
+     * @param \Psr\Http\Message\RequestInterface $request
+     *   The request to sign.
+     * @param string[] $customHeaders
+     *   A list of custom header names. The values of the headers will be
+     *   extracted from the request.
+     *
+     * @return \Psr\Http\Message\RequestInterface $request
+     *   The signed request.
      */
-    public function signRequest(RequestInterface $request, $secretKey);
+    public function signRequest(RequestInterface $request, array $customHeaders = []);
 
     /**
-     * Returns the value of the "Authorization" header.
+     * Adds the timestamp to the request.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     * @param string $id
-     * @param string $secretKey
+     * @param \Psr\Http\Message\RequestInterface $request
+     *   The request being signed.
+     * @param \DateTime
+     *   The date to timestamp the request with. Defaults to now.
      *
-     * @return string
+     * @return \Psr\Http\Message\RequestInterface $request
+     *   A cloned request with the X-Authorization-Timestamp header filled out.
      */
-    public function getAuthorization(RequestInterface $request, $id, $secretKey);
+    public function getTimestampedRequest(RequestInterface $request, \DateTime $date);
 
     /**
-     * Gets the signature passed through the HTTP request.
+     * Adds a hashed a hash for the request body.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Acquia\Hmac\KeyInterface $key
+     *   The request for which to generate the hashed Body.
      *
-     * @return \Acquia\Hmac\SignatureInterface
+     * @return \Psr\Http\Message\RequestInterface $request
+     *   A cloned request. If the request has a body, the
+     *   X-Authorization-Content-SHA256 header will be filled out.
      */
-    public function getSignature(RequestInterface $request);
+    public function getContentHashedRequest(RequestInterface $request);
 
     /**
-     * Returns the content type passed through the request.
+     * Adds the constructed Authorization header to the request.
      *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
+     * @param \Psr\Http\Message\RequestInterface $request
+     *   The request being signed.
+     * @param string[] $customHeaders
+     *   A list of custom header names. The values of the headers will be
+     *   extracted from the request.
      *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
+     * @return \Psr\Http\Message\RequestInterface $request
+     *   A cloned request with the Authorization header filled out.
      */
-    public function getContentType(RequestInterface $request);
-
-    /**
-     * Returns timestamp passed through the request.
-     *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function getTimestamp(RequestInterface $request);
-
-    /**
-     * Returns an associative array of custom headers.
-     *
-     * @param \Acquia\Hmac\Request\RequestInterface $request
-     *
-     * @return string
-     *
-     * @throws \Acquia\Hmac\Exception\MalformedRequestException
-     */
-    public function getCustomHeaders(RequestInterface $request);
+    public function getAuthorizedRequest(RequestInterface $request, array $customHeaders = []);
 }

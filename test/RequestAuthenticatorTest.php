@@ -2,104 +2,214 @@
 
 namespace Acquia\Hmac\Test;
 
+use Acquia\Hmac\AuthorizationHeader;
+use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestAuthenticator;
-use Acquia\Hmac\RequestSigner;
+use Acquia\Hmac\Test\Mocks\MockKeyLoader;
+use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
+use GuzzleHttp\Psr7\Request;
 
 class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
-    public function testValidSignature()
+    protected $auth_id;
+    protected $auth_secret;
+    /**
+     * @var array
+     *   A set of sample key-secret pairs for testing.
+     */
+    protected $keys;
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function setUp()
     {
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
-
-        $request = new DummyRequest();
-        $request->headers = array(
-            'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Authorization' => 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH,
-            'Custom1' => 'Value1',
-        );
-
-        $authenticator = new RequestAuthenticator($signer, 0);
-        $key = $authenticator->authenticate($request, new DummyKeyLoader());
-
-        $this->assertInstanceOf('Acquia\Hmac\Test\DummyKey', $key);
-        $this->assertEquals('1', $key->getId());
-        $this->assertEquals('secret-key', $key->getSecret());
+        $this->keys = [
+            'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
+            '615d6517-1cea-4aa3-b48e-96d83c16c4dd' => 'TXkgU2VjcmV0IEtleSBUaGF0IGlzIFZlcnkgU2VjdXJl',
+        ];
     }
 
     /**
+     * Ensures a valid request with a valid signature authenticates correctly.
+     */
+    public function testValidSignature()
+    {
+        $authId = key($this->keys);
+        $authSecret = reset($this->keys);
+        $timestamp = 1432075982;
+
+        $headers = [
+            'Content-Type' => 'text/plain',
+            'X-Authorization-Timestamp' => $timestamp,
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+                . 'id="' . $authId . '",'
+                . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                . 'version="2.0",'
+                . 'headers="",'
+                . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
+        $request = new Request(
+            'GET',
+            'https://example.acquiapipet.net/v1.0/task-status/133?limit=10',
+            $headers
+        );
+
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            null,
+            $timestamp
+        );
+
+        $key = $authenticator->authenticate($request);
+
+        $this->assertInstanceOf(KeyInterface::class, $key);
+        $this->assertEquals($authId, $key->getId());
+        $this->assertEquals($authSecret, $key->getSecret());
+    }
+
+    /**
+     * Ensures an exception is thrown if the signature is invalid.
+     *
      * @expectedException \Acquia\Hmac\Exception\InvalidSignatureException
      */
     public function testInvalidSignature()
     {
-        $signer = new RequestSigner();
-        $signer->addCustomHeader('Custom1');
+        $realm = 'Pipet service';
+        $id = key($this->keys);
+        $nonce = 'd1954337-5319-4821-8427-115542e08d10';
+        $version = '2.0';
+        $headers = [];
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Authorization' => 'Acquia 1:badsignature',
-            'Custom1' => 'Value1',
+            'X-Authorization-Timestamp' => time(),
+            'Authorization' => 'acquia-http-hmac realm="' . $realm . '",'
+                . 'id="' . $id . '",'
+                . 'nonce="' . $nonce . '",'
+                . 'version="' . $version . '",'
+                . 'headers="' . implode(';', $headers) . '",'
+                . 'signature="bRlPr/Z1WQz2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
+        $request = new Request('GET', 'https://example.com/test', $headers);
+
+        $authHeader = new AuthorizationHeader(
+            $realm,
+            $id,
+            $nonce,
+            $version,
+            $headers,
+            'bad-sig'
         );
 
-        $authenticator = new RequestAuthenticator($signer, 0);
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            $authHeader
+        );
+        $authenticator->authenticate($request);
     }
 
     /**
+     * Ensures an exception is thrown if the request has expired.
+     *
      * @expectedException \Acquia\Hmac\Exception\TimestampOutOfRangeException
      */
     public function testExpiredRequest()
     {
-        $signer = new RequestSigner();
+        $authId = key($this->keys);
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Authorization' => 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH,
-        );
+            'X-Authorization-Timestamp' => 1,
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+                . 'id="' . $authId . '",'
+                . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                . 'version="2.0",'
+                . 'headers="",'
+                . 'signature="bRlPr/Z1WQz2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
+        $request = new Request('GET', 'https://example.com/test', $headers);
+        $authHeader = AuthorizationHeader::createFromRequest($request);
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator = new MockRequestAuthenticator(
+            new MockKeyLoader($this->keys),
+            $authHeader
+        );
+        $authenticator->authenticate($request);
     }
 
     /**
+     * Ensures an exception is thrown if the request is from the far future.
+     *
      * @expectedException \Acquia\Hmac\Exception\TimestampOutOfRangeException
      */
     public function testFutureRequest()
     {
-        $signer = new RequestSigner();
-        $time = new \DateTime('+11 minutes');
+        $auth_id = key($this->keys);
 
-        $request = new DummyRequest();
-        $request->headers = array(
+        $time = new \DateTime('+16 minutes');
+        $timestamp = (string) $time->getTimestamp();
+
+        $headers = [
             'Content-Type' => 'text/plain',
-            'Date' => $time->format('D, d M Y H:i:s \G\M\T'),
-            'Authorization' => 'Acquia 1:' . DigestVersion1Test::EXPECTED_HASH,
-        );
+            'X-Authorization-Timestamp' => $timestamp,
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+                . 'id="' . $auth_id . '",'
+                . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                . 'version="2.0",'
+                . 'headers="",'
+                . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), '10 minutes');
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $request = new Request('GET', 'https://example.com/test', $headers);
+
+        $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
+        $authenticator->authenticate($request);
     }
 
     /**
+     * Ensures an exception is thrown if the key cannot be found in the loader.
+     *
      * @expectedException \Acquia\Hmac\Exception\KeyNotFoundException
      */
     public function testKeyNotFound()
     {
-        $signer = new RequestSigner();
-
-        $request = new DummyRequest();
-        $request->headers = array(
+        $headers = [
             'Content-Type' => 'text/plain',
-            'Date' => 'Fri, 19 Mar 1982 00:00:04 GMT',
-            'Authorization' => 'Acquia 2:' . DigestVersion1Test::EXPECTED_HASH,
-        );
+            'X-Authorization-Timestamp' => time(),
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+                . 'id="bad-id",'
+                . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                . 'version="2.0",'
+                . 'headers="",'
+                . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
+        $request = new Request('GET', 'https://example.com/test', $headers);
 
-        $authenticator = new RequestAuthenticator(new RequestSigner(), 0);
-        $authenticator->authenticate($request, new DummyKeyLoader());
+        $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
+        $authenticator->authenticate($request);
+    }
+
+    /**
+     * Ensures an exception is thrown if the request is mising the X-Authorization-Timestamp header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     */
+    public function testMissingAuthenticationTimestampHeader()
+    {
+        $headers = [
+            'Content-Type' => 'text/plain',
+            'Authorization' => 'acquia-http-hmac realm="Pipet service",'
+                . 'id="bad-id",'
+                . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
+                . 'version="2.0",'
+                . 'headers="",'
+                . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
+        ];
+        $request = new Request('GET', 'https://example.com/test', $headers);
+
+        $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
+        $authenticator->authenticate($request);
+
     }
 }
