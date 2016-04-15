@@ -81,9 +81,9 @@ class RequestSigner implements RequestSignerInterface
      */
     public function getContentHashedRequest(RequestInterface $request)
     {
-        $body = $request->getBody();
+        $body = (string) $request->getBody();
 
-        if (!$body->getSize()) {
+        if (!strlen($body)) {
             return clone $request;
         }
 
