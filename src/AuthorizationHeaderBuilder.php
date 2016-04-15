@@ -245,9 +245,9 @@ class AuthorizationHeaderBuilder
 
         $parts[] = $this->request->getHeaderLine('X-Authorization-Timestamp');
 
-        $body = $this->request->getBody();
+        $body = (string) $this->request->getBody();
 
-        if ($body->getSize()) {
+        if (strlen($body)) {
             if ($this->request->hasHeader('Content-Type')) {
                 $parts[] = $this->request->getHeaderLine('Content-Type');
             }
