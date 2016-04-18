@@ -65,6 +65,38 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures an authorization header is created correctly with an incorrectly-cased request method.
+     */
+    public function testCaseInsensitiveRequestMethod()
+    {
+        $authId = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+        $authKey = new Key($authId, $authSecret);
+
+        $nonce   = 'd1954337-5319-4821-8427-115542e08d10';
+
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+            'Content-Type' => 'application/json',
+        ];
+
+
+        $request1 = new Request('GET', 'http://example.com', $headers);
+        $builder1 = new AuthorizationHeaderBuilder($request1, $authKey);
+        $builder1->setId($authId);
+        $builder1->setNonce($nonce);
+        $authHeader1 = $builder1->getAuthorizationHeader();
+
+        $request2 = new Request('gEt', 'http://example.com', $headers);
+        $builder2 = new AuthorizationHeaderBuilder($request2, $authKey);
+        $builder2->setId($authId);
+        $builder2->setNonce($nonce);
+        $authHeader2 = $builder1->getAuthorizationHeader();
+
+        $this->assertEquals((string) $authHeader1, (string) $authHeader2);
+    }
+
+    /**
      * Ensures an exception is thrown if a request does not have an Authorization header.
      *
      * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
