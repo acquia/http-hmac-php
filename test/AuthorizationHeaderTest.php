@@ -87,11 +87,18 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $builder1->setNonce($nonce);
         $authHeader1 = $builder1->getAuthorizationHeader();
 
-        $request2 = new Request('gEt', 'http://example.com', $headers);
+        // Guzzle requests automatically normalize request methods on set, so
+        // we need to manually set the property to an un-normalized method.
+        $request2 = clone $request1;
+        $refObject = new \ReflectionObject($request2);
+        $refProperty = $refObject->getProperty('method');
+        $refProperty->setAccessible(true);
+        $refProperty->setValue($request2, 'gEt');
+
         $builder2 = new AuthorizationHeaderBuilder($request2, $authKey);
         $builder2->setId($authId);
         $builder2->setNonce($nonce);
-        $authHeader2 = $builder1->getAuthorizationHeader();
+        $authHeader2 = $builder2->getAuthorizationHeader();
 
         $this->assertEquals((string) $authHeader1, (string) $authHeader2);
     }
