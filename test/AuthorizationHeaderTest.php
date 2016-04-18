@@ -4,7 +4,6 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
 use Acquia\Hmac\AuthorizationHeaderBuilder;
-use Acquia\Hmac\Exception\MalformedRequestException;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Psr7\Request;
 
