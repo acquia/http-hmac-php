@@ -20,7 +20,7 @@ by adding it as a dependency to your project's composer.json file.
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "~3.0.0-beta"
+        "acquia/http-hmac-php": "~3.0.0"
     }
 }
 ```
@@ -88,7 +88,7 @@ $signedResponse = $signer->signResponse($response);
 ```
 
 To convert a HTTP Foundation request (used in Symfony-powered apps like Silex) to PSR-7, use Symfony's [PSR-7 bridge](http://symfony.com/doc/current/cookbook/psr7.html):
- 
+
 ```php
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\RequestSigner;
@@ -104,7 +104,7 @@ $psr7Request = $psr7Factory->createRequest($request);
 // $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
 $key = $authenticator->authenticate($psr7Request);
 ```
- 
+
 ## Contributing and Development
 
 Submit changes using GitHub's standard [pull request](https://help.github.com/articles/using-pull-requests) workflow.
