@@ -234,7 +234,7 @@ class AuthorizationHeaderBuilder
         }
 
         $parts = [
-            $this->request->getMethod(),
+            strtoupper($this->request->getMethod()),
             $this->request->getUri()->getHost(),
             $this->request->getUri()->getPath(),
             $this->request->getUri()->getQuery(),

@@ -4,7 +4,6 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
 use Acquia\Hmac\AuthorizationHeaderBuilder;
-use Acquia\Hmac\Exception\MalformedRequestException;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Psr7\Request;
 
@@ -62,6 +61,45 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $authHeader = AuthorizationHeader::createFromRequest($request);
 
         $this->assertEquals((string) $authHeader, 'acquia-http-hmac realm="CIStore",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",version="2.0",headers="X-Custom-Signer1;X-Custom-Signer2",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c="');
+    }
+
+    /**
+     * Ensures an authorization header is created correctly with an incorrectly-cased request method.
+     */
+    public function testCaseInsensitiveRequestMethod()
+    {
+        $authId = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
+        $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
+        $authKey = new Key($authId, $authSecret);
+
+        $nonce   = 'd1954337-5319-4821-8427-115542e08d10';
+
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+            'Content-Type' => 'application/json',
+        ];
+
+
+        $request1 = new Request('GET', 'http://example.com', $headers);
+        $builder1 = new AuthorizationHeaderBuilder($request1, $authKey);
+        $builder1->setId($authId);
+        $builder1->setNonce($nonce);
+        $authHeader1 = $builder1->getAuthorizationHeader();
+
+        // Guzzle requests automatically normalize request methods on set, so
+        // we need to manually set the property to an un-normalized method.
+        $request2 = clone $request1;
+        $refObject = new \ReflectionObject($request2);
+        $refProperty = $refObject->getProperty('method');
+        $refProperty->setAccessible(true);
+        $refProperty->setValue($request2, 'gEt');
+
+        $builder2 = new AuthorizationHeaderBuilder($request2, $authKey);
+        $builder2->setId($authId);
+        $builder2->setNonce($nonce);
+        $authHeader2 = $builder2->getAuthorizationHeader();
+
+        $this->assertEquals((string) $authHeader1, (string) $authHeader2);
     }
 
     /**
