@@ -50,7 +50,7 @@ class HmacSecurityProvider implements ServiceProviderInterface
                 $app['security.authentication_listener.' . $name . '.hmac'] = $app['security.authentication_listener.hmac._proto']($name, $options);
             }
 
-            if (!isset($app['security.entry_point.' . $name . '.hamc'])) {
+            if (!isset($app['security.entry_point.' . $name . '.hmac'])) {
                 $app['security.entry_point.' . $name . '.hmac'] = $app['security.entry_point.hmac._proto']($name, $options);
             }
 
