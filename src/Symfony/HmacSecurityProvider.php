@@ -42,11 +42,11 @@ class HmacSecurityProvider implements ServiceProviderInterface
 
         $app['security.authentication_listener.factory.hmac'] = $app->protect(function ($name, $options) use ($app) {
 
-            if (!isset($app['security.authentication_provider.' . $name . '.hamc'])) {
+            if (!isset($app['security.authentication_provider.' . $name . '.hmac'])) {
                 $app['security.authentication_provider.' . $name . '.hmac'] = $app['security.authentication_provider.hmac._proto']($name, $options);
             }
 
-            if (!isset($app['security.authentication_listener.' . $name . '.hamc'])) {
+            if (!isset($app['security.authentication_listener.' . $name . '.hmac'])) {
                 $app['security.authentication_listener.' . $name . '.hmac'] = $app['security.authentication_listener.hmac._proto']($name, $options);
             }
 
