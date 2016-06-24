@@ -4,6 +4,7 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeaderBuilder;
 use Acquia\Hmac\Digest\Digest;
+use Acquia\Hmac\Exception\MalformedResponseException;
 use Acquia\Hmac\Key;
 use Acquia\Hmac\ResponseAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
@@ -71,6 +72,7 @@ class ResponseAuthenticatorTest extends \PHPUnit_Framework_TestCase
      * Ensures an exception is thrown if response is missing a X-Server-Authorization-HMAC-SHA256 header.
      *
      * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
+     * @expectedExceptionMessage Response is missing required X-Server-Authorization-HMAC-SHA256 header.
      */
     public function testMissingServerAuthorizationHeader()
     {
@@ -79,6 +81,11 @@ class ResponseAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
         $authenticator = new ResponseAuthenticator($request, $this->authKey);
 
-        $authenticator->isAuthentic($response);
+        try {
+            $authenticator->isAuthentic($response);
+        } catch (MalformedResponseException $e) {
+            $this->assertSame($response, $e->getResponse());
+            throw $e;
+        }
     }
 }

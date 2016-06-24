@@ -46,7 +46,7 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
     public static function createFromRequest(RequestInterface $request)
     {
         if (!$request->hasHeader('Authorization')) {
-            throw new MalformedRequestException('Authorization header is required.');
+            throw new MalformedRequestException('Authorization header is required.', null, 0, $request);
         }
 
         $header = $request->getHeaderLine('Authorization');
@@ -59,7 +59,12 @@ class AuthorizationHeader implements AuthorizationHeaderInterface
         $headers_match = preg_match('/.*headers="(.*?)"/', $header, $headers_matches);
 
         if (!$id_match || !$realm_match || !$nonce_match || !$version_match || !$signature_match) {
-            throw new MalformedRequestException('Authorization header requires a realm, id, version, nonce and a signature.');
+            throw new MalformedRequestException(
+                'Authorization header requires a realm, id, version, nonce and a signature.',
+                null,
+                0,
+                $request
+            );
         }
 
         $customHeaders = !empty($headers_matches[1]) ? explode('%3B', $headers_matches[1]) : [];

@@ -179,12 +179,24 @@ class AuthorizationHeaderBuilder
     public function getAuthorizationHeader()
     {
         if (empty($this->realm) || empty($this->id) || empty($this->nonce) || empty($this->version)) {
-            throw new MalformedRequestException('One or more required authorization header fields (ID, nonce, realm, version) are missing.');
+            throw new MalformedRequestException(
+                'One or more required authorization header fields (ID, nonce, realm, version) are missing.',
+                null,
+                0,
+                $this->request
+            );
         }
 
         $signature = !empty($this->signature) ? $this->signature : $this->generateSignature();
 
-        return new AuthorizationHeader($this->realm, $this->id, $this->nonce, $this->version, $this->headers, $signature);
+        return new AuthorizationHeader(
+            $this->realm,
+            $this->id,
+            $this->nonce,
+            $this->version,
+            $this->headers,
+            $signature
+        );
     }
 
     /**
@@ -230,7 +242,12 @@ class AuthorizationHeaderBuilder
     protected function generateSignature()
     {
         if (!$this->request->hasHeader('X-Authorization-Timestamp')) {
-            throw new MalformedRequestException('X-Authorization-Timestamp header missing from request.');
+            throw new MalformedRequestException(
+                'X-Authorization-Timestamp header missing from request.',
+                null,
+                0,
+                $this->request
+            );
         }
 
         $parts = [
