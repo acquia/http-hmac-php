@@ -193,14 +193,12 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures an exception is thrown if the request is missing the X-Authorization-Timestamp header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * @expectedExceptionMessage Request is missing X-Authorization-Timestamp.
      */
     public function testMissingAuthenticationTimestampHeader()
     {
-        $this->setExpectedException(
-            '\Acquia\Hmac\Exception\MalformedRequestException',
-            'Request is missing X-Authorization-Timestamp.'
-        );
-
         $headers = [
             'Content-Type' => 'text/plain',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'

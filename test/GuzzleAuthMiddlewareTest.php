@@ -96,14 +96,12 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures the middleware throws an exception if the response is missing the right header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
+     * @expectedExceptionMessage Response is missing required X-Server-Authorization-HMAC-SHA256 header.
      */
     public function testMissingRequiredResponseHeader()
     {
-        $this->setExpectedException(
-            '\Acquia\Hmac\Exception\MalformedResponseException',
-            'Response is missing required X-Server-Authorization-HMAC-SHA256 header.'
-        );
-
         $stack = new HandlerStack();
         $stack->setHandler(new MockHandler([new Response(200)]));
         $stack->push(new HmacAuthMiddleware($this->authKey));

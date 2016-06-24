@@ -70,14 +70,12 @@ class ResponseAuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures an exception is thrown if response is missing a X-Server-Authorization-HMAC-SHA256 header.
+     *
+     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
+     * @expectedExceptionMessage Response is missing required X-Server-Authorization-HMAC-SHA256 header.
      */
     public function testMissingServerAuthorizationHeader()
     {
-        $this->setExpectedException(
-            '\Acquia\Hmac\Exception\MalformedResponseException',
-            'Response is missing required X-Server-Authorization-HMAC-SHA256 header.'
-        );
-
         $request = new Request('GET', 'http://example.com');
         $response = new Response();
 
