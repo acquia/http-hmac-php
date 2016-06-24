@@ -3,6 +3,7 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
+use Acquia\Hmac\Exception\MalformedRequestException;
 use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockKeyLoader;
@@ -191,12 +192,15 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures an exception is thrown if the request is mising the X-Authorization-Timestamp header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * Ensures an exception is thrown if the request is missing the X-Authorization-Timestamp header.
      */
     public function testMissingAuthenticationTimestampHeader()
     {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedRequestException',
+            'Request is missing X-Authorization-Timestamp.'
+        );
+
         $headers = [
             'Content-Type' => 'text/plain',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
@@ -209,7 +213,12 @@ class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
         $request = new Request('GET', 'https://example.com/test', $headers);
 
         $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
-        $authenticator->authenticate($request);
 
+        try {
+            $authenticator->authenticate($request);
+        } catch (MalformedRequestException $e) {
+            $this->assertSame($request, $e->getRequest());
+            throw $e;
+        }
     }
 }

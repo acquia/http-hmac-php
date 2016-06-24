@@ -4,6 +4,7 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
 use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Exception\MalformedRequestException;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Psr7\Request;
 
@@ -23,7 +24,9 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
+        // @codingStandardsIgnoreStart
         $this->header = 'acquia-http-hmac headers="X-Custom-Signer1;X-Custom-Signer2",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",realm="CIStore",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c=",version="2.0"';
+        // @codingStandardsIgnoreEnd
     }
 
     /**
@@ -60,7 +63,12 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
 
         $authHeader = AuthorizationHeader::createFromRequest($request);
 
-        $this->assertEquals((string) $authHeader, 'acquia-http-hmac realm="CIStore",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",version="2.0",headers="X-Custom-Signer1;X-Custom-Signer2",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c="');
+        $this->assertEquals(
+            (string) $authHeader,
+            // @codingStandardsIgnoreStart
+            'acquia-http-hmac realm="CIStore",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",version="2.0",headers="X-Custom-Signer1;X-Custom-Signer2",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c="'
+            // @codingStandardsIgnoreEnd
+        );
     }
 
     /**
@@ -104,34 +112,54 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures an exception is thrown if a request does not have an Authorization header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
     public function testCreateFromRequestNoAuthorizationHeader()
     {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedRequestException',
+            'Authorization header is required.'
+        );
+
         $request = new Request('GET', 'http://example.com');
 
-        AuthorizationHeader::createFromRequest($request);
+        try {
+            AuthorizationHeader::createFromRequest($request);
+        } catch (MalformedRequestException $e) {
+            $this->assertSame($request, $e->getRequest());
+            throw $e;
+        }
     }
 
     /**
      * Ensures an exception is thrown when a required field is missing.
      *
+     * @param $field
+     *   The authorization header field.
+     *
      * @dataProvider requiredFieldsProvider
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
      */
     public function testParseAuthorizationHeaderRequiredFields($field)
     {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedRequestException',
+            'Authorization header requires a realm, id, version, nonce and a signature.'
+        );
+
         $headers = [
             'Authorization' => preg_replace('/' . $field . '=/', '', $this->header),
         ];
         $request = new Request('GET', 'http://example.com', $headers);
 
-        AuthorizationHeader::createFromRequest($request);
+        try {
+            AuthorizationHeader::createFromRequest($request);
+        } catch (MalformedRequestException $e) {
+            $this->assertSame($request, $e->getRequest());
+            throw $e;
+        }
     }
 
     /**
-     * Provides a list of required authorization haeder fields.
+     * Provides a list of required authorization header fields.
      */
     public function requiredFieldsProvider()
     {
@@ -145,9 +173,15 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * Ensures an exception is thrown when a required field is missing.
      */
-    public function testAuthorizationHeaderBuilderRequiresFields() {
+    public function testAuthorizationHeaderBuilderRequiresFields()
+    {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedRequestException',
+            'One or more required authorization header fields (ID, nonce, realm, version) are missing.'
+        );
+
         $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
         $headers = [
             'X-Authorization-Timestamp' => '1432075982',
@@ -157,13 +191,25 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $builder = new AuthorizationHeaderBuilder($request, $key);
         $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
         $builder->setVersion('2.0');
-        $header = $builder->getAuthorizationHeader();
+
+        try {
+            $builder->getAuthorizationHeader();
+        } catch (MalformedRequestException $e) {
+            $this->assertSame($request, $e->getRequest());
+            throw $e;
+        }
     }
 
     /**
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
+     * Ensures an exception is thrown when the required X-Authorization-Timestamp field is missing.
      */
-    public function testAuthorizationHeaderBuilderRequiresTimestamp() {
+    public function testAuthorizationHeaderBuilderRequiresTimestamp()
+    {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedRequestException',
+            'X-Authorization-Timestamp header missing from request.'
+        );
+
         $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
         $headers = [
             'Content-Type' => 'application/json',
@@ -173,10 +219,17 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $builder->setId($key->getId());
         $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
         $builder->setVersion('2.0');
-        $header = $builder->getAuthorizationHeader();
+
+        try {
+            $builder->getAuthorizationHeader();
+        } catch (MalformedRequestException $e) {
+            $this->assertSame($request, $e->getRequest());
+            throw $e;
+        }
     }
 
-    public function testAuthorizationHeaderBuilder() {
+    public function testAuthorizationHeaderBuilder()
+    {
         $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
         $headers = [
             'X-Authorization-Timestamp' => '1432075982',

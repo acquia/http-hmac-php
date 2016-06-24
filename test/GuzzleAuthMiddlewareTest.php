@@ -3,6 +3,7 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeaderBuilder;
+use Acquia\Hmac\Exception\MalformedResponseException;
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\Key;
 use Acquia\Hmac\Test\Mocks\MockHmacAuthMiddleware;
@@ -74,7 +75,12 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
         $authHeaderBuilder->setCustomHeaders(['X-Custom-Signer2', 'X-Custom-Signer1']);
         $authHeader = $authHeaderBuilder->getAuthorizationHeader();
 
-        $middleware = new MockHmacAuthMiddleware($authKey, $realm, ['X-Custom-Signer1', 'X-Custom-Signer2'], $authHeader);
+        $middleware = new MockHmacAuthMiddleware(
+            $authKey,
+            $realm,
+            ['X-Custom-Signer1', 'X-Custom-Signer2'],
+            $authHeader
+        );
 
         $request = $middleware->signRequest($request);
 
@@ -90,11 +96,14 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Ensures the middleware throws an exception if the response is missing the right header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
      */
     public function testMissingRequiredResponseHeader()
     {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedResponseException',
+            'Response is missing required X-Server-Authorization-HMAC-SHA256 header.'
+        );
+
         $stack = new HandlerStack();
         $stack->setHandler(new MockHandler([new Response(200)]));
         $stack->push(new HmacAuthMiddleware($this->authKey));
@@ -103,16 +112,24 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
             'handler' => $stack,
         ]);
 
-        $client->get('http://example.com');
+        try {
+            $client->get('http://example.com');
+        } catch (MalformedResponseException $e) {
+            $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $e->getResponse());
+            throw $e;
+        }
     }
 
     /**
      * Ensures the middleware throws an exception if the response can't be authenticated.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
      */
     public function testInauthenticResponse()
     {
+        $this->setExpectedException(
+            '\Acquia\Hmac\Exception\MalformedResponseException',
+            'Could not verify the authenticity of the response.'
+        );
+
         $headers = [
             'X-Server-Authorization-HMAC-SHA256' => 'bad-signature',
         ];
@@ -128,9 +145,14 @@ class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
             'handler' => $stack,
         ]);
 
-        $client->get('http://example.com');
+        try {
+            $client->get('http://example.com');
+        } catch (MalformedResponseException $e) {
+            $this->assertInstanceOf('\Psr\Http\Message\ResponseInterface', $e->getResponse());
+            throw $e;
+        }
     }
-    
+
     /**
      * Ensures the HTTP HMAC middleware registers correctly.
      */
