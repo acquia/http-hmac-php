@@ -35,9 +35,6 @@ for more detailed installation and usage instructions.
 ```php
 
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
-use Acquia\Hmac\RequestSigner;
-use Acquia\Hmac\AuthorizationHeaderBuilder;
-use Acquia\Hmac\Digest\Digest;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -87,22 +84,103 @@ $signer = new ResponseSigner($key, $request)
 $signedResponse = $signer->signResponse($response);
 ```
 
-To convert a HTTP Foundation request (used in Symfony-powered apps like Silex) to PSR-7, use Symfony's [PSR-7 bridge](http://symfony.com/doc/current/cookbook/psr7.html):
+### Authenticate using Silex's [SecurityServiceProvider](http://silex.sensiolabs.org/doc/providers/security.html)
+
+In order to use the provided Silex security provider, you will need to include the following optional libraries in your project's `composer.json`:
+
+```json
+{
+    "require": {
+        "symfony/psr-http-message-bridge": "~0.1",
+        "symfony/security": "~3.0",
+        "zendframework/zend-diactoros": "~1.3.5"
+    }
+}
+```
+
+Sample implementation:
 
 ```php
-use Acquia\Hmac\RequestAuthenticator;
-use Acquia\Hmac\RequestSigner;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory
+use Acquia\Hmac\HmacSecurityProvider;
+use Silex\Application;
+use Silex\Provider\SecurityServiceProvider;
+
+$app = new Application();
 
 // $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
-$authenticator = new RequestAuthenticator($keyLoader);
+$app->register(new SecurityServiceProvider());
+$app->register(new HmacSecurityProvider($keyLoader));
 
-// $request is an HTTP Foundation request
-$psr7Factory = new DiactorosFactory();
-$psr7Request = $psr7Factory->createRequest($request);
+$app['security.firewalls'] = [
+    'hmac-auth' => array(
+        'pattern' => '^/api/',
+        'hmac' => true,
+    ),
+];
 
-// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
-$key = $authenticator->authenticate($psr7Request);
+$app->boot();
+```
+
+### Authenticate using Symfony's Security component
+
+In order to use the provided Symfony integration, you will need to include the following optional libraries in your project's `composer.json`
+
+```json
+{
+    "require": {
+        "symfony/psr-http-message-bridge": "~0.1",
+        "symfony/security": "~3.0",
+        "zendframework/zend-diactoros": "~1.3.5"
+    }
+}
+```
+
+Sammple implementation:
+
+```yaml
+# app/config/services.yml
+services:
+    hmac.security.authentication.provider:
+        class: Acquia\Hmac\Symfony\HmacAuthenticationProvider
+        arguments:
+            - '@hmac.request.authenticator' # Service should implement \Acquia\Hmac\RequstAuthenticatorInterface
+        public: false
+
+    hmac.security.authentication.listener:
+        class: Acquia\Hmac\Symfony\HmacAuthenticationListener
+        arguments: ['@security.token_storage', '@security.authentication.manager']
+        public: false
+
+# app/config/security.yml
+security:
+    # ...
+
+    firewalls:
+        hmac_auth:
+            pattern:   ^/api/
+            stateless: true
+            wsse:      true
+```
+
+```php
+// src/AppBundle/AppBundle.php
+namespace AppBundle;
+
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+class AppBundle extends Bundle
+{
+    public function build(ContainerBuilder $container)
+    {
+        parent::build($container);
+
+        // $hmacFactory should implement \Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface
+        // @see http://symfony.com/doc/current/cookbook/security/custom_authentication_provider.html#the-factory
+        $extension = $container->getExtension('security');
+        $extension->addSecurityListenerFactory($hmacFactory);
+    }
+}
 ```
 
 ## Contributing and Development
