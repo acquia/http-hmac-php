@@ -43,7 +43,10 @@ class ResponseAuthenticator
     public function isAuthentic(ResponseInterface $response)
     {
         if (!$response->hasHeader('X-Server-Authorization-HMAC-SHA256')) {
-            throw new MalformedResponseException('Response is missing required X-Server-Authorization-HMAC-SHA256 header.');
+            throw new MalformedResponseException(
+                'Response is missing required X-Server-Authorization-HMAC-SHA256 header.',
+                $response
+            );
         }
 
         $responseSigner = new ResponseSigner($this->key, $this->request);
