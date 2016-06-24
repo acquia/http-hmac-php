@@ -100,7 +100,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
     protected function compareTimestamp(RequestInterface $request, $expiry)
     {
         if (!$request->hasHeader('X-Authorization-Timestamp')) {
-            throw new MalformedRequestException('Request is missing X-Authorization-Timestamp.', $request);
+            throw new MalformedRequestException('Request is missing X-Authorization-Timestamp.', null, 0, $request);
         }
 
         $timestamp = (int) $request->getHeaderLine('X-Authorization-Timestamp');

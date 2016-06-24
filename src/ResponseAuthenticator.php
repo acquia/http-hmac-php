@@ -45,12 +45,16 @@ class ResponseAuthenticator
         if (!$response->hasHeader('X-Server-Authorization-HMAC-SHA256')) {
             throw new MalformedResponseException(
                 'Response is missing required X-Server-Authorization-HMAC-SHA256 header.',
+                null,
+                0,
                 $response
             );
         }
 
         $responseSigner = new ResponseSigner($this->key, $this->request);
-        $compareResponse = $responseSigner->signResponse($response->withoutHeader('X-Server-Authorization-HMAC-SHA256'));
+        $compareResponse = $responseSigner->signResponse(
+            $response->withoutHeader('X-Server-Authorization-HMAC-SHA256')
+        );
 
         $responseSignature = $response->getHeaderLine('X-Server-Authorization-HMAC-SHA256');
         $compareSignature =  $compareResponse->getHeaderLine('X-Server-Authorization-HMAC-SHA256');

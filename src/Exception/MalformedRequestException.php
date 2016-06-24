@@ -20,21 +20,21 @@ class MalformedRequestException extends InvalidRequestException
      *
      * @param string $message
      *   The exception message.
-     * @param \Psr\Http\Message\RequestInterface|null $request
-     *   The request.
+     * @param \Exception|null $previous
+     *   The previous exception.
      * @param int $code
      *   The exception code.
-     * @param \Exception|NULL $previous
-     *   The previous exception.
+     * @param \Psr\Http\Message\RequestInterface|null $request
+     *   The request.
      */
-    public function __construct($message = "", RequestInterface $request = null, $code = 0, \Exception $previous = null)
+    public function __construct($message = "", \Exception $previous = null, $code = 0, RequestInterface $request = null)
     {
         parent::__construct($message, $code, $previous);
         $this->request = $request;
     }
 
     /**
-     * Returns the response.
+     * Returns the request.
      *
      * @return RequestInterface
      */
@@ -44,7 +44,7 @@ class MalformedRequestException extends InvalidRequestException
     }
 
     /**
-     * Sets the response.
+     * Sets the request.
      *
      * @param RequestInterface $request
      */
