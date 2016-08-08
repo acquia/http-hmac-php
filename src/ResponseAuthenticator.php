@@ -59,6 +59,6 @@ class ResponseAuthenticator
         $responseSignature = $response->getHeaderLine('X-Server-Authorization-HMAC-SHA256');
         $compareSignature =  $compareResponse->getHeaderLine('X-Server-Authorization-HMAC-SHA256');
 
-        return $responseSignature === $compareSignature;
+        return hash_equals($compareSignature, $responseSignature);
     }
 }
