@@ -71,7 +71,7 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
         $compareSignature = $compareAuthHeader->getSignature();
 
 
-        if (!hash_equals($signature, $compareSignature)) {
+        if (!hash_equals($compareSignature, $signature)) {
             throw new InvalidSignatureException('Signature not valid');
         }
 
