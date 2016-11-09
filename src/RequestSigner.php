@@ -71,7 +71,7 @@ class RequestSigner implements RequestSignerInterface
         $date = $date ?: new \DateTime('now', new \DateTimeZone('UTC'));
 
         /** @var RequestInterface $request */
-        $request = $request->withHeader('X-Authorization-Timestamp', $date->getTimestamp());
+        $request = $request->withHeader('X-Authorization-Timestamp', (string) $date->getTimestamp());
 
         return $request;
     }
