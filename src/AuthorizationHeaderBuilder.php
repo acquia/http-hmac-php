@@ -250,9 +250,16 @@ class AuthorizationHeaderBuilder
             );
         }
 
+        $host = $this->request->getUri()->getHost();
+        $port = $this->request->getUri()->getPort();
+
+        if ($port) {
+            $host .= ':' . $port;
+        }
+
         $parts = [
             strtoupper($this->request->getMethod()),
-            $this->request->getUri()->getHost(),
+            $host,
             $this->request->getUri()->getPath(),
             $this->request->getUri()->getQuery(),
             $this->serializeAuthorizationParameters(),
