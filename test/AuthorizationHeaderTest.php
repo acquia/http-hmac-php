@@ -241,4 +241,25 @@ class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
         $header = $builder->getAuthorizationHeader();
         $this->assertEquals($header->getSignature(), 'test');
     }
+
+    /**
+     * Ensures an authorization header is created correctly with a non-standard port used in request.
+     */
+    public function testNonStandardPortInRequest()
+    {
+        $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'bXlzZWNyZXRzZWNyZXR0aGluZ3Rva2VlcA==');
+        $headers = [
+            'X-Authorization-Timestamp' => '1432075982',
+            'Content-Type' => 'application/json',
+        ];
+        $request = new Request('POST', 'http://example.com:8080?test=true', $headers, 'body text');
+        $builder = new AuthorizationHeaderBuilder($request, $key);
+        $builder->setId($key->getId());
+        $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
+        $builder->setVersion('2.0');
+
+        $header = $builder->getAuthorizationHeader();
+        $this->assertEquals($header->getId(), $key->getId());
+        $this->assertEquals($header->getSignature(), 'vIJoGnHstwQ+SaBboP4/DlUAqTGscSbCZav7ufh8KqM=');
+    }
 }
