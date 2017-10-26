@@ -24,7 +24,7 @@ class Digest implements DigestInterface
     {
         // The Acquia HMAC spec requires that we use MIME Base64 encoded
         // secrets, but PHP requires them to be decoded before signing.
-        $digest = hash_hmac($this->algorithm, $message, base64_decode($secretKey), true);
+        $digest = hash_hmac($this->algorithm, $message, base64_decode($secretKey, true), true);
 
         return base64_encode($digest);
     }
