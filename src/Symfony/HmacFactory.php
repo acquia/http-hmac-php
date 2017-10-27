@@ -8,8 +8,16 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 
+/**
+ * Class HmacFactory
+ *
+ * Provides implementation of authentication provider and listener for Symfony.
+ */
 class HmacFactory implements SecurityFactoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function create(ContainerBuilder $container, $id, $config, $userProvider, $defaultEntryPoint)
     {
         $providerId = 'security.authentication.provider.hmac.' . $id;
@@ -21,16 +29,25 @@ class HmacFactory implements SecurityFactoryInterface
         return array($providerId, $listenerId, $defaultEntryPoint);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getPosition()
     {
         return 'pre_auth';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getKey()
     {
         return 'hmac_auth';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function addConfiguration(NodeDefinition $node)
     {
     }
