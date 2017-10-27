@@ -137,17 +137,35 @@ In order to use the provided Symfony integration, you will need to include the f
 Sammple implementation:
 
 ```yaml
+# app/config/parameters.yml
+parameters:
+   hmac_keys: {"key": "secret"}
+
 # app/config/services.yml
 services:
+    hmac.keyloader:
+        class: Acquia\Hmac\KeyLoader
+        arguments:
+            $keys: '%hmac_keys%'
+
+    hmac.request.authenticator:
+        class: Acquia\Hmac\RequestAuthenticator
+        arguments:
+         - '@hmac.keyloader'
+        public: false
+
+    hmac.entry-point:
+        class: Acquia\Hmac\Symfony\HmacAuthenticationEntryPoint
+
     hmac.security.authentication.provider:
         class: Acquia\Hmac\Symfony\HmacAuthenticationProvider
         arguments:
-            - '@hmac.request.authenticator' # Service should implement \Acquia\Hmac\RequstAuthenticatorInterface
+            - '@hmac.request.authenticator'
         public: false
 
     hmac.security.authentication.listener:
         class: Acquia\Hmac\Symfony\HmacAuthenticationListener
-        arguments: ['@security.token_storage', '@security.authentication.manager']
+        arguments: ['@security.token_storage', '@security.authentication.manager', '@hmac.entry-point']
         public: false
 
 # app/config/security.yml
@@ -165,6 +183,7 @@ security:
 // src/AppBundle/AppBundle.php
 namespace AppBundle;
 
+use Acquia\Hmac\Symfony\HmacFactory;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -173,11 +192,8 @@ class AppBundle extends Bundle
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
-
-        // $hmacFactory should implement \Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface
-        // @see http://symfony.com/doc/current/cookbook/security/custom_authentication_provider.html#the-factory
         $extension = $container->getExtension('security');
-        $extension->addSecurityListenerFactory($hmacFactory);
+        $extension->addSecurityListenerFactory(new HmacFactory());
     }
 }
 ```

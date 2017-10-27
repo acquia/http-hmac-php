@@ -66,13 +66,13 @@ class HmacSecurityProvider implements ServiceProviderInterface
             return new HmacResponseListener();
         });
 
-        $app['security.authentication_provider.hmac._proto'] = $app->protect(function($name, $options) use ($app, $keyLoader) {
+        $app['security.authentication_provider.hmac._proto'] = $app->protect(function ($name, $options) use ($app, $keyLoader) {
             return $app->share(function () use ($keyLoader) {
                 return new HmacAuthenticationProvider(new RequestAuthenticator($keyLoader));
             });
         });
 
-        $app['security.authentication_listener.hmac._proto'] = $app->protect(function($name, $options) use ($app) {
+        $app['security.authentication_listener.hmac._proto'] = $app->protect(function ($name, $options) use ($app) {
             return $app->share(function () use ($app, $name) {
                 return new HmacAuthenticationListener(
                     $app['security.token_storage'],
@@ -82,7 +82,7 @@ class HmacSecurityProvider implements ServiceProviderInterface
             });
         });
 
-        $app['security.entry_point.hmac._proto'] = $app->protect(function($name, $options) use ($app) {
+        $app['security.entry_point.hmac._proto'] = $app->protect(function ($name, $options) use ($app) {
             return new HmacAuthenticationEntryPoint();
         });
     }
