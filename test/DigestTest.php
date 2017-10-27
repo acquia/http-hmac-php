@@ -54,4 +54,17 @@ class DigestTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($hash, $digest->hash($this->message));
     }
+
+    /**
+     * Ensures the message does not sign correctly if the secret contains invalid characters.
+     */
+    public function testSignFailsWithMalformedSecret()
+    {
+        $digest = new Digest();
+
+        $invalid_secret = $this->authSecret . '%%%';
+        $hash = 'vcOqnVc4i0YB5ILPTt92mE4zsBHC0cMHq6YpM5Gw8rI=';
+
+        $this->assertNotEquals($hash, $digest->sign($this->message, $invalid_secret));
+    }
 }
