@@ -47,8 +47,8 @@ $options = [
   ],
 ];
 
-// A key consists of your UUID and a secret.
-$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'secret');
+// A key consists of your UUID and a MIME base64 encoded shared secret.
+$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
 
 // Provide your key, realm and optional signed headers.
 $middleware = new HmacAuthMiddleware($key, 'CIStore', array_keys($options['headers']));
@@ -148,22 +148,22 @@ services:
         class: Acquia\Hmac\KeyLoader
         arguments:
             $keys: '%hmac_keys%'
-    
+
     hmac.request.authenticator:
         class: Acquia\Hmac\RequestAuthenticator
         arguments:
          - '@hmac.keyloader'
         public: false
-    
+
     hmac.entry-point:
         class: Acquia\Hmac\Symfony\HmacAuthenticationEntryPoint
-    
+
     hmac.security.authentication.provider:
         class: Acquia\Hmac\Symfony\HmacAuthenticationProvider
         arguments:
             - '@hmac.request.authenticator'
         public: false
-    
+
     hmac.security.authentication.listener:
         class: Acquia\Hmac\Symfony\HmacAuthenticationListener
         arguments: ['@security.token_storage', '@security.authentication.manager', '@hmac.entry-point']
