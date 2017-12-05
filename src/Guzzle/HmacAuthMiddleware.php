@@ -56,7 +56,7 @@ class HmacAuthMiddleware
 
             $promise = function (ResponseInterface $response) use ($request) {
 
-                if($response->getStatusCode() != 401 ){
+                if ($response->getStatusCode() != 401) {
 
                     $authenticator = new ResponseAuthenticator($request, $this->key);
 
