@@ -56,15 +56,18 @@ class HmacAuthMiddleware
 
             $promise = function (ResponseInterface $response) use ($request) {
 
-                $authenticator = new ResponseAuthenticator($request, $this->key);
+                if ($response->getStatusCode() != 401) {
 
-                if (!$authenticator->isAuthentic($response)) {
-                    throw new MalformedResponseException(
-                        'Could not verify the authenticity of the response.',
-                        null,
-                        0,
-                        $response
-                    );
+                    $authenticator = new ResponseAuthenticator($request, $this->key);
+
+                    if (!$authenticator->isAuthentic($response)) {
+                        throw new MalformedResponseException(
+                            'Could not verify the authenticity of the response.',
+                            null,
+                            0,
+                            $response
+                        );
+                    }
                 }
 
                 return $response;
