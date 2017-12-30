@@ -176,7 +176,7 @@ security:
         hmac_auth:
             pattern:   ^/api/
             stateless: true
-            wsse:      true
+            hmac_auth: true
 ```
 
 ```php
