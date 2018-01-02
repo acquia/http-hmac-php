@@ -134,7 +134,7 @@ In order to use the provided Symfony integration, you will need to include the f
 }
 ```
 
-Sammple implementation:
+Sample implementation:
 
 ```yaml
 # app/config/parameters.yml
@@ -202,6 +202,60 @@ class AppBundle extends Bundle
     }
 }
 ```
+
+PHPUnit testing a controller behind HMAC HTTP authentification in Symfony :
+
+1. Add the service declaration:
+
+
+```yaml
+# app/config/parameters_test.yml
+
+services:
+    test.client.hmac:
+        class: Acquia\Hmac\Symfony\Tests\HmacClient
+        arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
+
+```
+
+```php
+// src/AppBundle/Tests/HmacTestCase.php
+
+namespace MyApp\Bundle\AppBundle\Tests;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Client;
+use Acquia\Hmac\Key;
+
+class HmacTestCase extends WebTestCase
+{
+    /**
+     * @var Client
+     */
+    private $client;
+
+    protected static function createClient(array $options = array(), array $server = array())
+    {
+        $kernel = static::bootKernel($options);
+
+        $client = $kernel->getContainer()->get('test.client.hmac');
+        $client->setServerParameters($server);
+
+        return $client;
+    }
+
+    protected function setUp()
+    {
+        $this->client = static::createClient();
+
+        //set the key from the consumer
+        $this->client->setKey(new Key("my-key", "my-not-really-secret"));
+
+    }
+```
+
+
 
 ## Contributing and Development
 
