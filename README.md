@@ -153,7 +153,12 @@ services:
         arguments:
          - '@hmac.keyloader'
         public: false
-
+        
+    hmac.response.signer:
+        class: Acquia\Hmac\Symfony\HmacResponseListener
+        tags:
+          - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+          
     hmac.entry-point:
         class: Acquia\Hmac\Symfony\HmacAuthenticationEntryPoint
 
