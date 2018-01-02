@@ -47,7 +47,7 @@ $options = [
 ];
 
 // A key consists of your UUID and a MIME base64 encoded shared secret.
-$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
+$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'secret');
 
 // Provide your key, realm and optional signed headers.
 $middleware = new HmacAuthMiddleware($key, 'CIStore', array_keys($options['headers']));
