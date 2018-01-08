@@ -26,7 +26,8 @@ class ResponseSignerTest extends \PHPUnit_Framework_TestCase
         $realm = 'Pipet service';
         $nonce = 'd1954337-5319-4821-8427-115542e08d10';
         $timestamp = 1432075982;
-        $signature = 'LusIUHmqt9NOALrQ4N4MtXZEFE03MjcDjziK+vVqhvQ=';
+        $signature = 'dAE9Kizn1PCOrc45H/X41RdFMCwpED18k9iJjrHFqUU=';
+        $body = 'Test body string';
 
         $authKey = new Key($authId, $authSecret);
 
@@ -44,12 +45,13 @@ class ResponseSignerTest extends \PHPUnit_Framework_TestCase
         $requestSigner = new MockRequestSigner($authKey, $realm, new Digest(), $authHeader);
         $signedRequest = $requestSigner->signRequest($request);
 
-        $response = new Response();
+        $response = new Response(200, [], $body);
         
         $responseSigner = new ResponseSigner($authKey, $signedRequest);
         $signedResponse = $responseSigner->signResponse($response);
 
         $this->assertTrue($signedResponse->hasHeader('X-Server-Authorization-HMAC-SHA256'));
         $this->assertEquals($signature, $signedResponse->getHeaderLine('X-Server-Authorization-HMAC-SHA256'));
+        $this->assertEquals($body, $response->getBody()->getContents());
     }
 }
