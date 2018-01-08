@@ -60,6 +60,8 @@ class ResponseSigner
             (string) $response->getBody(),
         ];
 
+        $response->getBody()->rewind();
+
         $message = implode("\n", $parts);
 
         $signature = $this->digest->sign($message, $this->key->getSecret());
