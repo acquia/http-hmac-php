@@ -16,7 +16,7 @@ Use [Composer](http://getcomposer.org) and add it as a dependency to your projec
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "~3.2.0"
+        "acquia/http-hmac-php": "~3.3.0"
     }
 }
 ```
