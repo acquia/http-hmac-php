@@ -7,25 +7,21 @@
 [![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 [![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 
-HMAC Request Signer is a PHP library that implements the version 2.0 of the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec/tree/2.0)
-to sign and verify RESTful Web API requests. It integrates with popular libraries such as
-Symfony and Guzzle and can be used on both the server and client.
+This library implements version 2.0 of the [HTTP HMAC Spec](https://github.com/acquia/http-hmac-spec/tree/2.0) to sign and verify RESTful Web API requests. It integrates with popular frameworks and libraries, like Symfony and Guzzle, and can be used on both the server and client.
 
 ## Installation
 
-HMAC Request Signer can be installed with [Composer](http://getcomposer.org)
-by adding it as a dependency to your project's composer.json file.
+Use [Composer](http://getcomposer.org) and add it as a dependency to your project's composer.json file:
 
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "~3.1.0"
+        "acquia/http-hmac-php": "~3.2.0"
     }
 }
 ```
 
-Please refer to [Composer's documentation](https://github.com/composer/composer/blob/master/doc/00-intro.md#introduction)
-for more detailed installation and usage instructions.
+Please refer to [Composer's documentation](https://github.com/composer/composer/blob/master/doc/00-intro.md#introduction) for more detailed installation and usage instructions.
 
 ## Usage
 
