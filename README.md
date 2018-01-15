@@ -46,8 +46,9 @@ $options = [
   ],
 ];
 
-// A key consists of your UUID and a MIME base64 encoded shared secret.
-$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', 'secret');
+// A key consists of your UUID and a Base64-encoded shared secret.
+ // Note: the API provider may have already encoded the secret. In this case, it should not be re-encoded.
+$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
 
 // Provide your key, realm and optional signed headers.
 $middleware = new HmacAuthMiddleware($key, 'CIStore', array_keys($options['headers']));
@@ -203,10 +204,9 @@ class AppBundle extends Bundle
 }
 ```
 
-PHPUnit testing a controller behind HMAC HTTP authentification in Symfony :
+PHPUnit testing a controller behind HMAC HTTP authentification in Symfony:
 
 1. Add the service declaration:
-
 
 ```yaml
 # app/config/parameters_test.yml
@@ -249,13 +249,9 @@ class HmacTestCase extends WebTestCase
     {
         $this->client = static::createClient();
 
-        //set the key from the consumer
-        $this->client->setKey(new Key("my-key", "my-not-really-secret"));
-
+        $this->client->setKey(new Key('my-key', 'my-not-really-secret'));
     }
 ```
-
-
 
 ## Contributing and Development
 
