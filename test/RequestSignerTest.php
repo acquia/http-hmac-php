@@ -12,7 +12,7 @@ use GuzzleHttp\Psr7\Request;
 /**
  * Tests the request signer.
  */
-class RequestSignerTest extends \PHPUnit_Framework_TestCase
+class RequestSignerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Acquia\Hmac\KeyInterface

@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 /**
  * Tests the Symfony authentication provider.
  */
-class HmacAuthenticationProviderTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationProviderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures the authentication provider creates a signed token if auth passes.

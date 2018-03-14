@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Tests the Symfony authentication token.
  */
-class HmacTokenTest extends \PHPUnit_Framework_TestCase
+class HmacTokenTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures the getters work as expected.

@@ -10,7 +10,7 @@ use Acquia\Hmac\Test\Mocks\MockKeyLoader;
 use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
 use GuzzleHttp\Psr7\Request;
 
-class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
+class RequestAuthenticatorTest extends \PHPUnit\Framework\TestCase
 {
     protected $auth_id;
     protected $auth_secret;

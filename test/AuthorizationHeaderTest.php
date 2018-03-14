@@ -11,7 +11,7 @@ use GuzzleHttp\Psr7\Request;
 /**
  * Tests the AuthorizationHeader class.
  */
-class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
+class AuthorizationHeaderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var string

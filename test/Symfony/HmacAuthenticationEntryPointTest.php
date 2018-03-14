@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 /**
  * Tests the entry point for Symfony-based authentication.
  */
-class HmacAuthenticationEntryPointTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationEntryPointTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures the entry point response is set correctly.

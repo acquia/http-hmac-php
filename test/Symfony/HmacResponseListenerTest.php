@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Tests the response listener for Symfony-based authentication.
  */
-class HmacResponseListenerTest extends \PHPUnit_Framework_TestCase
+class HmacResponseListenerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures the response listener listens to the correct events.

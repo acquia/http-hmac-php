@@ -17,7 +17,7 @@ use GuzzleHttp\Psr7\Response;
 /**
  * Tests the HTTP HMAC Guzzle middleware.
  */
-class GuzzleAuthMiddlewareTest extends \PHPUnit_Framework_TestCase
+class GuzzleAuthMiddlewareTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Acquia\Hmac\KeyInterface

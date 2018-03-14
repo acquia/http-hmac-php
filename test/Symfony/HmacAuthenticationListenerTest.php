@@ -18,7 +18,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 /**
  * Tests the authentication listener for Symfony-based authentication.
  */
-class HmacAuthenticationListenerTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationListenerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures a request fails to authenticate without an Authorization header.

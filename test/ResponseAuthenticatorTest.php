@@ -14,7 +14,7 @@ use GuzzleHttp\Psr7\Response;
 /**
  * Tests the response authenticator.
  */
-class ResponseAuthenticatorTest extends \PHPUnit_Framework_TestCase
+class ResponseAuthenticatorTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \Acquia\Hmac\KeyInterface

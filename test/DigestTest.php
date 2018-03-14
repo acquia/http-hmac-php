@@ -8,7 +8,7 @@ use Acquia\Hmac\Digest\Digest;
 /**
  * Tests the HTTP HMAC digest
  */
-class DigestTest extends \PHPUnit_Framework_TestCase
+class DigestTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var string

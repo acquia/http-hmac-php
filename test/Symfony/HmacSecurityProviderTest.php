@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Tests the Silex service provider that adds HTTP HMAC as a firewall option.
  */
-class HmacSecurityProviderTest extends \PHPUnit_Framework_TestCase
+class HmacSecurityProviderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Ensures the service provider only loads if SecurityServiceProvider is present.
