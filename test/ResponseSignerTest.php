@@ -10,11 +10,12 @@ use Acquia\Hmac\ResponseSigner;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the response signer.
  */
-class ResponseSignerTest extends \PHPUnit_Framework_TestCase
+class ResponseSignerTest extends TestCase
 {
     /**
      * Ensures the correct headers are added when the response is signed.
@@ -46,7 +47,7 @@ class ResponseSignerTest extends \PHPUnit_Framework_TestCase
         $signedRequest = $requestSigner->signRequest($request);
 
         $response = new Response(200, [], $body);
-        
+
         $responseSigner = new ResponseSigner($authKey, $signedRequest);
         $signedResponse = $responseSigner->signResponse($response);
 

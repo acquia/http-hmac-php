@@ -9,11 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the response listener for Symfony-based authentication.
  */
-class HmacResponseListenerTest extends \PHPUnit_Framework_TestCase
+class HmacResponseListenerTest extends TestCase
 {
     /**
      * Ensures the response listener listens to the correct events.

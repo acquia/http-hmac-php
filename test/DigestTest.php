@@ -4,11 +4,12 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Digest\Digest;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the HTTP HMAC digest
  */
-class DigestTest extends \PHPUnit_Framework_TestCase
+class DigestTest extends TestCase
 {
     /**
      * @var string

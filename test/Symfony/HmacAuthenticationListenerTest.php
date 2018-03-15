@@ -14,11 +14,12 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterfac
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the authentication listener for Symfony-based authentication.
  */
-class HmacAuthenticationListenerTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationListenerTest extends TestCase
 {
     /**
      * Ensures a request fails to authenticate without an Authorization header.

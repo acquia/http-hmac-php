@@ -9,8 +9,9 @@ use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockKeyLoader;
 use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
 use GuzzleHttp\Psr7\Request;
+use PHPUnit\Framework\TestCase;
 
-class RequestAuthenticatorTest extends \PHPUnit_Framework_TestCase
+class RequestAuthenticatorTest extends TestCase
 {
     protected $auth_id;
     protected $auth_secret;
