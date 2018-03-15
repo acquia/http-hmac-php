@@ -3,11 +3,12 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Base64KeyLoader;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the key for authenticating and signing requests.
  */
-class Base64KeyLoaderTest extends \PHPUnit\Framework\TestCase
+class Base64KeyLoaderTest extends TestCase
 {
     /**
      * Ensures the key loader correctly encodes secrets.

@@ -4,11 +4,12 @@ namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\Key;
 use Acquia\Hmac\KeyLoader;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the key for authenticating and signing requests.
  */
-class KeyTest extends \PHPUnit\Framework\TestCase
+class KeyTest extends TestCase
 {
     /**
      * Ensures the getters work as expected.

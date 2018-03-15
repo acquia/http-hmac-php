@@ -10,11 +10,12 @@ use Acquia\Hmac\ResponseSigner;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the response signer.
  */
-class ResponseSignerTest extends \PHPUnit\Framework\TestCase
+class ResponseSignerTest extends TestCase
 {
     /**
      * Ensures the correct headers are added when the response is signed.
