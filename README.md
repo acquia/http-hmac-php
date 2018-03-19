@@ -200,7 +200,7 @@ class AppBundle extends Bundle
 }
 ```
 
-PHPUnit testing a controller behind HMAC HTTP authentification in Symfony:
+PHPUnit testing a controller using HMAC HTTP authentication in Symfony:
 
 1. Add the service declaration:
 

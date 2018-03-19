@@ -11,14 +11,13 @@ use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 
 class HmacClient extends Client
 {
-
     /**
      * @var Key
      */
     protected $key;
 
     /**
-     * Set Key for HMAC Auth
+     * Set the private key for HTTP HMAC authentication.
      *
      * @param Key $key
      * @return Key
@@ -32,7 +31,7 @@ class HmacClient extends Client
     }
 
     /**
-     * Sign the request with HMAC HTTP and verify the response signature
+     * Sign the request with HTTP HMAC and verify the response signature.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -40,39 +39,30 @@ class HmacClient extends Client
      */
     protected function doRequest($request)
     {
-
         if(!$this->key instanceof Key) {
-            throw new \Exception("Key not provided");
+            throw new \Exception('HTTP HMAC key has not been provided.');
         }
 
         $psr7Factory = new DiactorosFactory();
         $httpFoundationFactory = new HttpFoundationFactory();
 
-        //convert the symfony request to PSR7 request
         $psrRequest = $psr7Factory->createRequest($request);
 
-        //sign the request
         $hmacSigner = new RequestSigner($this->key);
         $signedRequest = $hmacSigner->signRequest($psrRequest);
 
-        //convert back the signed PSR7 request to the symfony request
         $symfonyRequest = $httpFoundationFactory->createRequest($signedRequest);
 
-        //send the request to the kernel and get the response
         $response = parent::doRequest($symfonyRequest);
 
-        //convert the symfony response to psr7 response
         $psrResponse = $psr7Factory->createResponse($response);
 
-        //init the authenticator and verify if the psr7 response signature is valid
         $authenticator = new ResponseAuthenticator($signedRequest, $this->key);
 
         if(!$authenticator->isAuthentic($psrResponse)) {
-            throw new \Exception("The response cannot be authenticated !");
+            throw new \Exception('The response cannot be authenticated.');
         }
 
-        //return the symfony response
         return $response;
     }
-
 }
