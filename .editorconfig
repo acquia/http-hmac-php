@@ -4,10 +4,14 @@ root = true
 ; Unix-style newlines
 [*]
 end_of_line = LF
-
-[*.php]
+insert_final_newline = true
+trim_trailing_whitespace = true
 charset = utf-8
 indent_style = space
 indent_size = 4
-insert_final_newline = true
-trim_trailing_whitespace = true
+
+[*.{xml,yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab

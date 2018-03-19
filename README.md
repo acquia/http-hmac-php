@@ -214,8 +214,16 @@ class HmacTestCase extends WebTestCase
 
 ## Contributing and Development
 
-Submit changes using GitHub's standard [pull request](https://help.github.com/articles/using-pull-requests) workflow.
+[GNU Make](https://www.gnu.org/software/make/) and [Composer](https://getcomposer.org) are used to manage development dependencies and testing:
 
+```sh
+# Install depdendencies
+make install
+
+# Run test suite
+make test
+```
+ 
 All code should adhere to the following standards:
 
 * [PSR-1](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md)
@@ -223,13 +231,4 @@ All code should adhere to the following standards:
 * [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md)
 * [PSR-7](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-7-http-message.md)
 
-Use [PHP_CodeSniffer](https://github.com/squizlabs/php_codesniffer) to validate coding style and automatically fix problems according to the PSR-2 standard:
-```
-$ vendor/bin/phpcs --standard=PSR2 --runtime-set ignore_warnings_on_exit true --colors src/.
-$ vendor/bin/phpcs --standard=PSR2 --runtime-set ignore_warnings_on_exit true --colors test/.
-$ vendor/bin/phpcbf --standard=PSR2 src/.
-$ vendor/bin/phpcbf --standard=PSR2 test/.
-```
-
-Refer to [PHP Project Starter's documentation](https://github.com/cpliakas/php-project-starter#using-apache-ant)
-for the Apache Ant targets supported by this project.
+Submit changes using GitHub's standard [pull request](https://help.github.com/articles/using-pull-requests) workflow.
