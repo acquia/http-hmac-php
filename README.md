@@ -209,7 +209,7 @@ PHPUnit testing a controller behind HMAC HTTP authentification in Symfony:
 
 services:
     test.client.hmac:
-        class: Acquia\Hmac\Symfony\Tests\HmacClient
+        class: Acquia\Hmac\Test\Mocks\Symfony\HmacClientlient
         arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
 
 ```

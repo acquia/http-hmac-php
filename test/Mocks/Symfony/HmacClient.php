@@ -1,6 +1,6 @@
 <?php
 
-namespace Acquia\Hmac\Symfony\Tests;
+namespace Acquia\Hmac\Test\Mocks\Symfony;
 
 use Acquia\Hmac\Key;
 use Acquia\Hmac\RequestSigner;
