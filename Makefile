@@ -13,7 +13,7 @@ test: install
 	./vendor/bin/phpcpd src/ test/
 	./vendor/bin/phploc src/
 
-coverage:
+coverage: install
 	./vendor/bin/phpunit --coverage-clover=dist/tests.clover
 
 update:
