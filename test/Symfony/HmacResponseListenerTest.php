@@ -29,9 +29,9 @@ class HmacResponseListenerTest extends TestCase
      */
     public function testSubRequestsAreIgnored()
     {
-        $kernel   = $this->getMock(HttpKernelInterface::class);
-        $request  = $this->getMock(Request::class);
-        $response = $this->getMock(Response::class);
+        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $request  = $this->createMock(Request::class);
+        $response = $this->createMock(Response::class);
 
         $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST, $response);
         $listener = new HmacResponseListener();
@@ -46,8 +46,8 @@ class HmacResponseListenerTest extends TestCase
      */
     public function testNonHmacRequestsAreIgnored()
     {
-        $kernel   = $this->getMock(HttpKernelInterface::class);
-        $response = $this->getMock(Response::class);
+        $kernel   = $this->createMock(HttpKernelInterface::class);
+        $response = $this->createMock(Response::class);
 
         $request  = new Request();
         $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
@@ -63,7 +63,7 @@ class HmacResponseListenerTest extends TestCase
      */
     public function testHmacResponsesAreSigned()
     {
-        $kernel = $this->getMock(HttpKernelInterface::class);
+        $kernel = $this->createMock(HttpKernelInterface::class);
 
         $authId     = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';

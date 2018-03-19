@@ -24,7 +24,7 @@ class HmacAuthenticationProviderTest extends TestCase
         $authId     = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
 
-        $authenticator = $this->getMock(RequestAuthenticatorInterface::class);
+        $authenticator = $this->createMock(RequestAuthenticatorInterface::class);
 
         $request = Request::create('http://example.com');
         $key     = new Key($authId, $authSecret);
@@ -53,7 +53,7 @@ class HmacAuthenticationProviderTest extends TestCase
      */
     public function testAuthenticationFailed()
     {
-        $authenticator = $this->getMock(RequestAuthenticatorInterface::class);
+        $authenticator = $this->createMock(RequestAuthenticatorInterface::class);
 
         $authenticator->expects($this->any())
             ->method('authenticate')
@@ -71,8 +71,8 @@ class HmacAuthenticationProviderTest extends TestCase
      */
     public function testSupportsHmacTokens()
     {
-        $request       = $this->getMock(Request::class);
-        $authenticator = $this->getMock(RequestAuthenticatorInterface::class);
+        $request       = $this->createMock(Request::class);
+        $authenticator = $this->createMock(RequestAuthenticatorInterface::class);
 
         $provider  = new HmacAuthenticationProvider($authenticator);
         $hmacToken = new HmacToken($request);
