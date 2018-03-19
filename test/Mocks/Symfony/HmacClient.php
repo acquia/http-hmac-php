@@ -49,7 +49,7 @@ class HmacClient extends Client
      */
     protected function doRequest($request)
     {
-        if(!$this->key instanceof Key) {
+        if (!$this->key instanceof Key) {
             throw new \Exception('HTTP HMAC key has not been provided.');
         }
 
@@ -67,7 +67,7 @@ class HmacClient extends Client
 
         $authenticator = new ResponseAuthenticator($signedRequest, $this->key);
 
-        if(!$authenticator->isAuthentic($psrResponse)) {
+        if (!$authenticator->isAuthentic($psrResponse)) {
             throw new \Exception('The response cannot be authenticated.');
         }
 
