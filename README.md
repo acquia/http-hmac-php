@@ -42,7 +42,8 @@ $options = [
   ],
 ];
 
-// A key consists of your UUID and a MIME base64 encoded shared secret.
+// A key consists of your UUID and a Base64-encoded shared secret.
+ // Note: the API provider may have already encoded the secret. In this case, it should not be re-encoded.
 $key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
 
 // Provide your key, realm and optional signed headers.
@@ -130,7 +131,7 @@ In order to use the provided Symfony integration, you will need to include the f
 }
 ```
 
-Sammple implementation:
+Sample implementation:
 
 ```yaml
 # app/config/parameters.yml
@@ -149,7 +150,12 @@ services:
         arguments:
          - '@hmac.keyloader'
         public: false
-
+        
+    hmac.response.signer:
+        class: Acquia\Hmac\Symfony\HmacResponseListener
+        tags:
+          - { name: kernel.event_listener, event: kernel.response, method: onKernelResponse }
+          
     hmac.entry-point:
         class: Acquia\Hmac\Symfony\HmacAuthenticationEntryPoint
 
@@ -172,7 +178,7 @@ security:
         hmac_auth:
             pattern:   ^/api/
             stateless: true
-            wsse:      true
+            hmac_auth: true
 ```
 
 ```php
@@ -192,6 +198,55 @@ class AppBundle extends Bundle
         $extension->addSecurityListenerFactory(new HmacFactory());
     }
 }
+```
+
+PHPUnit testing a controller using HMAC HTTP authentication in Symfony:
+
+1. Add the service declaration:
+
+```yaml
+# app/config/parameters_test.yml
+
+services:
+    test.client.hmac:
+        class: Acquia\Hmac\Test\Mocks\Symfony\HmacClientlient
+        arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
+
+```
+
+```php
+// src/AppBundle/Tests/HmacTestCase.php
+
+namespace MyApp\Bundle\AppBundle\Tests;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Client;
+use Acquia\Hmac\Key;
+
+class HmacTestCase extends WebTestCase
+{
+    /**
+     * @var Client
+     */
+    private $client;
+
+    protected static function createClient(array $options = array(), array $server = array())
+    {
+        $kernel = static::bootKernel($options);
+
+        $client = $kernel->getContainer()->get('test.client.hmac');
+        $client->setServerParameters($server);
+
+        return $client;
+    }
+
+    protected function setUp()
+    {
+        $this->client = static::createClient();
+
+        $this->client->setKey(new Key('my-key', 'my-not-really-secret'));
+    }
 ```
 
 ## Contributing and Development
