@@ -8,6 +8,7 @@ use Acquia\Hmac\ResponseAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * A mock Symfony client for testing HTTP HMAC request signing and response authentication.
@@ -41,16 +42,13 @@ class HmacClient extends Client
      * @param \Symfony\Component\HttpFoundation\Request $request
      *   The Symfony request.
      *
-     * @throws \Exception
-     *   If the key has not been provided, or the respnonse cannot be authenticated.
-     *
      * @return \Symfony\Component\HttpFoundation\Response
-     *   An authenticated Symfony response.
+     *   An Symfony response indicating the result of making the signed request.
      */
     protected function doRequest($request)
     {
         if (!$this->key instanceof Key) {
-            throw new \Exception('HTTP HMAC key has not been provided.');
+            return new Response('The HTTP HMAC key has not been provided.', 400);
         }
 
         $psr7Factory = new DiactorosFactory();
@@ -68,7 +66,7 @@ class HmacClient extends Client
         $authenticator = new ResponseAuthenticator($signedRequest, $this->key);
 
         if (!$authenticator->isAuthentic($psrResponse)) {
-            throw new \Exception('The response cannot be authenticated.');
+            return new Response('The response cannot be authenticated.', 400);
         }
 
         return $response;
