@@ -5,11 +5,12 @@ namespace Acquia\Hmac\Test\Symfony;
 use Acquia\Hmac\Symfony\HmacAuthenticationEntryPoint;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the entry point for Symfony-based authentication.
  */
-class HmacAuthenticationEntryPointTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationEntryPointTest extends TestCase
 {
     /**
      * Ensures the entry point response is set correctly.

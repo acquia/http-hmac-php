@@ -13,8 +13,9 @@ use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
-class AcquiaSpecTest extends \PHPUnit_Framework_TestCase
+class AcquiaSpecTest extends TestCase
 {
     /**
      * @var array

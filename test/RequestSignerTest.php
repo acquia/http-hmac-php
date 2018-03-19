@@ -8,11 +8,12 @@ use Acquia\Hmac\Key;
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the request signer.
  */
-class RequestSignerTest extends \PHPUnit_Framework_TestCase
+class RequestSignerTest extends TestCase
 {
     /**
      * @var \Acquia\Hmac\KeyInterface

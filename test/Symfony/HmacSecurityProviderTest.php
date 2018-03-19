@@ -11,11 +11,12 @@ use Acquia\Hmac\Symfony\HmacSecurityProvider;
 use Silex\Application;
 use Silex\Provider\SecurityServiceProvider;
 use Symfony\Component\HttpKernel\KernelEvents;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the Silex service provider that adds HTTP HMAC as a firewall option.
  */
-class HmacSecurityProviderTest extends \PHPUnit_Framework_TestCase
+class HmacSecurityProviderTest extends TestCase
 {
     /**
      * Ensures the service provider only loads if SecurityServiceProvider is present.

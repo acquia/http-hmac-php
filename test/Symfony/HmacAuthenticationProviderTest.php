@@ -9,11 +9,12 @@ use Acquia\Hmac\Symfony\HmacAuthenticationProvider;
 use Acquia\Hmac\Symfony\HmacToken;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the Symfony authentication provider.
  */
-class HmacAuthenticationProviderTest extends \PHPUnit_Framework_TestCase
+class HmacAuthenticationProviderTest extends TestCase
 {
     /**
      * Ensures the authentication provider creates a signed token if auth passes.

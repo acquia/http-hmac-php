@@ -7,11 +7,12 @@ use Acquia\Hmac\AuthorizationHeaderBuilder;
 use Acquia\Hmac\Exception\MalformedRequestException;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Psr7\Request;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the AuthorizationHeader class.
  */
-class AuthorizationHeaderTest extends \PHPUnit_Framework_TestCase
+class AuthorizationHeaderTest extends TestCase
 {
     /**
      * @var string

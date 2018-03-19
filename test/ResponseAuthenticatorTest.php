@@ -10,11 +10,12 @@ use Acquia\Hmac\ResponseAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockRequestSigner;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the response authenticator.
  */
-class ResponseAuthenticatorTest extends \PHPUnit_Framework_TestCase
+class ResponseAuthenticatorTest extends TestCase
 {
     /**
      * @var \Acquia\Hmac\KeyInterface
