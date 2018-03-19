@@ -80,43 +80,6 @@ $signer = new ResponseSigner($key, $request)
 $signedResponse = $signer->signResponse($response);
 ```
 
-### Authenticate using Silex's [SecurityServiceProvider](http://silex.sensiolabs.org/doc/providers/security.html)
-
-In order to use the provided Silex security provider, you will need to include the following optional libraries in your project's `composer.json`:
-
-```json
-{
-    "require": {
-        "symfony/psr-http-message-bridge": "~0.1",
-        "symfony/security": "~3.0",
-        "zendframework/zend-diactoros": "~1.3.5"
-    }
-}
-```
-
-Sample implementation:
-
-```php
-use Acquia\Hmac\HmacSecurityProvider;
-use Silex\Application;
-use Silex\Provider\SecurityServiceProvider;
-
-$app = new Application();
-
-// $keyLoader implements \Acquia\Hmac\KeyLoaderInterface
-$app->register(new SecurityServiceProvider());
-$app->register(new HmacSecurityProvider($keyLoader));
-
-$app['security.firewalls'] = [
-    'hmac-auth' => array(
-        'pattern' => '^/api/',
-        'hmac' => true,
-    ),
-];
-
-$app->boot();
-```
-
 ### Authenticate using Symfony's Security component
 
 In order to use the provided Symfony integration, you will need to include the following optional libraries in your project's `composer.json`
