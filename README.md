@@ -16,7 +16,7 @@ Use [Composer](http://getcomposer.org) and add it as a dependency to your projec
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "~3.3.0"
+        "acquia/http-hmac-php": "^4.0"
     }
 }
 ```
@@ -28,26 +28,32 @@ Please refer to [Composer's documentation](https://github.com/composer/composer/
 ### Sign an API request sent via Guzzle
 
 ```php
-
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 
-// Optionally, you can provide signed headers to generate the digest. The header keys need to be provided to the middleware below.
-$options = [
-  'headers' => [
+// Create the HTTP HMAC key.
+// A key consists of and ID and a Base64-encoded shared secret.
+// Note: the API provider may have already encoded the secret. In this case, it should not be re-encoded.
+$key_id = 'e7fe97fa-a0c8-4a42-ab8e-2c26d52df059';
+$key_secret = base64_encode('secret');
+$key = new Key($key_id, $key_secret);
+
+// Optionally, you can provide additional headers when generating the signature.
+// The header keys need to be provided to the middleware below.
+$headers = [
     'X-Custom-1' => 'value1',
     'X-Custom-2' => 'value2',
-  ],
 ];
 
-// A key consists of your UUID and a Base64-encoded shared secret.
- // Note: the API provider may have already encoded the secret. In this case, it should not be re-encoded.
-$key = new Key('e7fe97fa-a0c8-4a42-ab8e-2c26d52df059', base64_encode('secret'));
+// Specify the API's realm.
+// Consult the API documentation for this value.
+$realm = 'Acquia';
 
-// Provide your key, realm and optional signed headers.
-$middleware = new HmacAuthMiddleware($key, 'CIStore', array_keys($options['headers']));
+// Create a Guzzle middleware to handle authentication during all requests.
+// Provide your key, realm and the names of any additional custom headers.
+$middleware = new HmacAuthMiddleware($key, $realm, array_keys($headers)));
 
 // Register the middleware.
 $stack = HandlerStack::create();
@@ -59,8 +65,16 @@ $client = new Client([
 ]);
 
 // Request.
-$result = $client->get('https://service.acquia.io/api/v1/widget', $options);
-var_dump($result);
+try {
+    $result = $client->get('https://service.acquia.io/api/v1/widget', [
+        'headers' => $headers,
+    ]);
+} catch (ClientException $e) {
+    print $e->getMessage();
+    $response = $e->getResponse();
+}
+  
+print $response->getBody();
 ```
 
 ### Authenticate the request using PSR-7-compatible requests
