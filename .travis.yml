@@ -1,4 +1,8 @@
-dist: trusty
+#
+# acquia/http-hmac-php project Travis configuration
+#
+# @see https://docs.travis-ci.com/user/customizing-the-build/
+#
 
 language: php
 
@@ -10,7 +14,7 @@ php:
 
 before_script:
   - travis_retry composer self-update
-  - travis_retry composer install --no-interaction --prefer-dist
+  - travis_retry make install
 
-after_script:
-  - vendor/bin/ocular code-coverage:upload --format=php-clover build/logs/clover.xml
+script:
+  - make test

@@ -1,5 +1,15 @@
-/build
-/composer.lock
-/vendor
+#
+# acquia/http-hmac-php project gitignore file
+#
+# @see https://git-scm.com/docs/gitignore
+#
 
-/nbproject
+# Ignore build artifacts
+/dist/
+
+# Ignore Composer dependencies
+/vendor/
+composer.lock
+
+# Ignore local PHPUnit configuration
+/phpunit.xml

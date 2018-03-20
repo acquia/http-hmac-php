@@ -26,10 +26,10 @@ class HmacAuthenticationListenerTest extends TestCase
      */
     public function testRequiredAuthorizationHeader()
     {
-        $kernel = $this->getMock(HttpKernelInterface::class);
-        $storage = $this->getMock(TokenStorageInterface::class);
-        $manager = $this->getMock(AuthenticationManagerInterface::class);
-        $entry = $this->getMock(AuthenticationEntryPointInterface::class, ['start']);
+        $kernel = $this->createMock(HttpKernelInterface::class);
+        $storage = $this->createMock(TokenStorageInterface::class);
+        $manager = $this->createMock(AuthenticationManagerInterface::class);
+        $entry = $this->createMock(AuthenticationEntryPointInterface::class, ['start']);
 
         $entryResponse = new Response('Authentication failed', 401);
         $entry->expects($this->any())
@@ -55,10 +55,10 @@ class HmacAuthenticationListenerTest extends TestCase
         $authId = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
 
-        $kernel  = $this->getMock(HttpKernelInterface::class);
-        $storage = $this->getMock(TokenStorageInterface::class);
-        $manager = $this->getMock(AuthenticationManagerInterface::class);
-        $entry  = $this->getMock(AuthenticationEntryPointInterface::class);
+        $kernel  = $this->createMock(HttpKernelInterface::class);
+        $storage = $this->createMock(TokenStorageInterface::class);
+        $manager = $this->createMock(AuthenticationManagerInterface::class);
+        $entry  = $this->createMock(AuthenticationEntryPointInterface::class);
 
         $request   = new Request();
         $response  = new Response();
@@ -93,10 +93,10 @@ class HmacAuthenticationListenerTest extends TestCase
      */
     public function testFailedAuthentication()
     {
-        $kernel  = $this->getMock(HttpKernelInterface::class);
-        $storage = $this->getMock(TokenStorageInterface::class);
-        $manager = $this->getMock(AuthenticationManagerInterface::class);
-        $entry   = $this->getMock(AuthenticationEntryPointInterface::class);
+        $kernel  = $this->createMock(HttpKernelInterface::class);
+        $storage = $this->createMock(TokenStorageInterface::class);
+        $manager = $this->createMock(AuthenticationManagerInterface::class);
+        $entry   = $this->createMock(AuthenticationEntryPointInterface::class);
 
         $request       = new Request();
         $entryResponse = new Response('Authentication failed', 401);

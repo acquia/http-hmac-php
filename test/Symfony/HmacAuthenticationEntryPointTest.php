@@ -19,7 +19,7 @@ class HmacAuthenticationEntryPointTest extends TestCase
     {
         $responseMessage = 'This is a test message.';
 
-        $request = $this->getMock(Request::class);
+        $request = $this->createMock(Request::class);
         $authException = new AuthenticationException($responseMessage);
 
         $entryPoint = new HmacAuthenticationEntryPoint();

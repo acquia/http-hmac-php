@@ -17,8 +17,8 @@ class HmacTokenTest extends TestCase
      */
     public function testGetters()
     {
-        $request = $this->getMock(Request::class);
-        $key = $this->getMock(KeyInterface::class);
+        $request = $this->createMock(Request::class);
+        $key = $this->createMock(KeyInterface::class);
 
         $token = new HmacToken($request, $key);
 
