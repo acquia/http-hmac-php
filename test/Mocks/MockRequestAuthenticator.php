@@ -3,8 +3,6 @@
 namespace Acquia\Hmac\Test\Mocks;
 
 use Acquia\Hmac\AuthorizationHeaderInterface;
-use Acquia\Hmac\Digest\Digest;
-use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\KeyLoaderInterface;
 use Acquia\Hmac\RequestAuthenticator;
 

@@ -2,7 +2,6 @@
 
 namespace Acquia\Hmac\Test;
 
-use Acquia\Hmac\AuthorizationHeader;
 use Acquia\Hmac\AuthorizationHeaderBuilder;
 use Acquia\Hmac\Digest\Digest;
 use Acquia\Hmac\Key;

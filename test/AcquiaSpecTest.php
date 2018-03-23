@@ -5,8 +5,6 @@ namespace Acquia\Hmac\Test;
 use Acquia\Hmac\AuthorizationHeaderBuilder;
 use Acquia\Hmac\Digest\Digest;
 use Acquia\Hmac\Key;
-use Acquia\Hmac\RequestAuthenticator;
-use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\ResponseSigner;
 use Acquia\Hmac\Test\Mocks\MockKeyLoader;
 use Acquia\Hmac\Test\Mocks\MockRequestAuthenticator;
@@ -90,7 +88,7 @@ class AcquiaSpecTest extends TestCase
 
         // Prove that the authenticator can authenticate the request.
         $keyLoader = new MockKeyLoader([
-                $input['id'] => $input['secret'],
+            $input['id'] => $input['secret'],
         ] + $this->keys);
         $authenticator = new MockRequestAuthenticator($keyLoader, null, $input['timestamp']);
         $compareKey = $authenticator->authenticate($signedRequest);
