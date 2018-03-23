@@ -6,8 +6,6 @@ use Acquia\Hmac\Exception\MalformedResponseException;
 use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\ResponseAuthenticator;
-use Guzzle\Http\Exception\BadResponseException;
-use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -51,11 +49,9 @@ class HmacAuthMiddleware
     public function __invoke(callable $handler)
     {
         return function ($request, array $options) use ($handler) {
-
             $request = $this->signRequest($request);
 
             $promise = function (ResponseInterface $response) use ($request) {
-
                 if ($response->getStatusCode() != 401) {
                     $authenticator = new ResponseAuthenticator($request, $this->key);
 

@@ -37,7 +37,6 @@ class RequestAuthenticator implements RequestAuthenticatorInterface
      */
     public function authenticate(RequestInterface $request)
     {
-
         $authHeader = AuthorizationHeader::createFromRequest($request);
         $signature = $authHeader->getSignature();
 

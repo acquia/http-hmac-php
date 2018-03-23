@@ -2,7 +2,6 @@
 
 namespace Acquia\Hmac\Test;
 
-use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\Digest\Digest;
 use PHPUnit\Framework\TestCase;
 

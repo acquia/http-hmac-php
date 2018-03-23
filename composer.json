@@ -29,7 +29,7 @@
         "phpmd/phpmd": "^2.0",
         "phpunit/phpunit": "~5.7",
         "sebastian/phpcpd": "^2.0",
-        "squizlabs/php_codesniffer": "^2.3",
+        "friendsofphp/php-cs-fixer": "^2.11",
         "symfony/psr-http-message-bridge": "^1.0",
         "symfony/security": "^3.0 | ^4.0",
         "symfony/security-bundle": "^3.0 | ^4.0",

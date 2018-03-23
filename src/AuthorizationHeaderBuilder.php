@@ -128,7 +128,7 @@ class AuthorizationHeaderBuilder
      * Set the spec version.
      *
      * This is optional: if not called, the version will be "2.0".
-    *
+     *
      * @param string $version
      *   The spec version.
      */

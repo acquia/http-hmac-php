@@ -5,7 +5,6 @@ namespace Acquia\Hmac\Symfony;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 
 /**
@@ -26,7 +25,7 @@ class HmacFactory implements SecurityFactoryInterface
         $listenerId = 'security.authentication.listener.hmac.' . $id;
         $container->setDefinition($listenerId, new ChildDefinition('hmac.security.authentication.listener'));
 
-        return array($providerId, $listenerId, $defaultEntryPoint);
+        return [$providerId, $listenerId, $defaultEntryPoint];
     }
 
     /**

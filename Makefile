@@ -1,4 +1,4 @@
-.PHONY: install clean test coverage update
+.PHONY: install clean test coverage update format
 
 install:
 	composer install --no-interaction
@@ -8,7 +8,7 @@ clean:
 
 test: install
 	./vendor/bin/phpunit
-	./vendor/bin/phpcs --standard=PSR2 --runtime-set ignore_warnings_on_exit 1 src/ test/
+	./vendor/bin/php-cs-fixer fix --dry-run -v
 	./vendor/bin/phpmd  src/,test/ text ./phpmd.xml
 	./vendor/bin/phpcpd src/ test/
 	./vendor/bin/phploc src/
@@ -18,3 +18,6 @@ coverage: install
 
 update:
 	composer update --no-interaction
+
+format: install
+	./vendor/bin/php-cs-fixer fix -v
