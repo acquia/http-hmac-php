@@ -28,6 +28,9 @@ Please refer to [Composer's documentation](https://github.com/composer/composer/
 ### Sign an API request sent via Guzzle
 
 ```php
+
+require_once 'vendor/autoload.php';
+
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\Key;
 use GuzzleHttp\Client;
@@ -53,7 +56,7 @@ $realm = 'Acquia';
 
 // Create a Guzzle middleware to handle authentication during all requests.
 // Provide your key, realm and the names of any additional custom headers.
-$middleware = new HmacAuthMiddleware($key, $realm, array_keys($headers)));
+$middleware = new HmacAuthMiddleware($key, $realm, array_keys($headers));
 
 // Register the middleware.
 $stack = HandlerStack::create();
