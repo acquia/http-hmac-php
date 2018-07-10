@@ -93,7 +93,7 @@ $authenticator = new RequestAuthenticator($keyLoader);
 // An exception will be thrown if it cannot authenticate.
 $key = $authenticator->authenticate($request);
 
-$signer = new ResponseSigner($key, $request)
+$signer = new ResponseSigner($key, $request);
 $signedResponse = $signer->signResponse($response);
 ```
 
