@@ -40,12 +40,10 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function authenticate(TokenInterface $token)
     {
-        if (class_exists(DiactorosFactory::class))
-        {
+        if (class_exists(DiactorosFactory::class)) {
             $httpMessageFactory = new DiactorosFactory();
         }
-        else
-        {
+        else {
             $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
         }
 
