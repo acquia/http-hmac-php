@@ -34,8 +34,7 @@ class HmacResponseListener implements EventSubscriberInterface
         if ($request->attributes->has('hmac.key')) {
             if (class_exists(DiactorosFactory::class)) {
                 $httpMessageFactory = new DiactorosFactory();
-            }
-            else {
+            } else {
                 $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
             }
 
