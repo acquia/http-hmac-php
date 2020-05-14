@@ -3,12 +3,7 @@
 namespace Acquia\Hmac\Symfony;
 
 use Acquia\Hmac\RequestAuthenticatorInterface;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -40,13 +35,8 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
      */
     public function authenticate(TokenInterface $token)
     {
-        if (class_exists(DiactorosFactory::class)) {
-            $httpMessageFactory = new DiactorosFactory();
-        } else {
-            $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-        }
-
-        $psr7Request = $httpMessageFactory->createRequest($token->getRequest());
+        $psr7Factory = new DiactorosFactory();
+        $psr7Request = $psr7Factory->createRequest($token->getRequest());
 
         try {
             $key = $this->authenticator->authenticate($psr7Request);
