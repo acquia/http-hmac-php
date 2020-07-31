@@ -47,7 +47,7 @@ class HmacClient extends Client
      */
     protected function doRequest($request)
     {
-        if (!$this->key instanceof Key) {
+        if (!$this->key instanceof KeyInterface) {
             return new Response('The HTTP HMAC key has not been provided.', 400);
         }
 
