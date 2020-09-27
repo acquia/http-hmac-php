@@ -5,10 +5,7 @@ namespace Acquia\Hmac\Test\Mocks\Symfony;
 use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestSigner;
 use Acquia\Hmac\ResponseAuthenticator;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
@@ -55,7 +52,8 @@ class HmacClient extends Client
             return new Response('The HTTP HMAC key has not been provided.', 400);
         }
 
-        $psr7Factory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
+        $psr17Factory = new Psr17Factory();
+        $psr7Factory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
         $httpFoundationFactory = new HttpFoundationFactory();
 
         $psrRequest = $psr7Factory->createRequest($request);
