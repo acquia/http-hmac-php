@@ -26,7 +26,7 @@ class GuzzleAuthMiddlewareTest extends TestCase
      */
     protected $authKey;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $authId = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
@@ -97,9 +97,6 @@ class GuzzleAuthMiddlewareTest extends TestCase
 
     /**
      * Ensures the middleware throws an exception if the response is missing the right header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
-     * @expectedExceptionMessage Response is missing required X-Server-Authorization-HMAC-SHA256 header.
      */
     public function testMissingRequiredResponseHeader()
     {
@@ -110,6 +107,9 @@ class GuzzleAuthMiddlewareTest extends TestCase
         $client = new Client([
             'handler' => $stack,
         ]);
+
+        $this->expectException(MalformedResponseException::class);
+        $this->expectExceptionMessage('Response is missing required X-Server-Authorization-HMAC-SHA256 header.');
 
         try {
             $client->get('http://example.com');
@@ -124,11 +124,6 @@ class GuzzleAuthMiddlewareTest extends TestCase
      */
     public function testInauthenticResponse()
     {
-        $this->setExpectedException(
-            '\Acquia\Hmac\Exception\MalformedResponseException',
-            'Could not verify the authenticity of the response.'
-        );
-
         $headers = [
             'X-Server-Authorization-HMAC-SHA256' => 'bad-signature',
         ];
@@ -143,6 +138,9 @@ class GuzzleAuthMiddlewareTest extends TestCase
         $client = new Client([
             'handler' => $stack,
         ]);
+
+        $this->expectException(MalformedResponseException::class);
+        $this->expectExceptionMessage('Could not verify the authenticity of the response.');
 
         try {
             $client->get('http://example.com');

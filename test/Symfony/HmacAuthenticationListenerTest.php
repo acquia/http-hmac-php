@@ -8,7 +8,7 @@ use Acquia\Hmac\Symfony\HmacAuthenticationListener;
 use Acquia\Hmac\Symfony\HmacToken;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -37,10 +37,10 @@ class HmacAuthenticationListenerTest extends TestCase
             ->will($this->returnValue($entryResponse));
 
         $request  = new Request();
-        $event    = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
+        $event    = new RequestEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
         $listener = new HmacAuthenticationListener($storage, $manager, $entry);
 
-        $listener->handle($event);
+        $listener($event);
 
         $this->assertTrue($event->hasResponse());
         $this->assertEquals($entryResponse->getStatusCode(), $event->getResponse()->getStatusCode());
@@ -71,11 +71,11 @@ class HmacAuthenticationListenerTest extends TestCase
             ->method('authenticate')
             ->will($this->returnValue($authToken));
 
-        $event    = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
+        $event    = new RequestEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
         $listener = new HmacAuthenticationListener($storage, $manager, $entry);
 
         $event->setResponse($response);
-        $listener->handle($event);
+        $listener($event);
 
         $handledRequest = $event->getRequest();
 
@@ -111,10 +111,10 @@ class HmacAuthenticationListenerTest extends TestCase
             ->method('start')
             ->will($this->returnValue($entryResponse));
 
-        $event    = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
+        $event    = new RequestEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
         $listener = new HmacAuthenticationListener($storage, $manager, $entry);
 
-        $listener->handle($event);
+        $listener($event);
 
         $this->assertTrue($event->hasResponse());
         $this->assertEquals($entryResponse->getStatusCode(), $event->getResponse()->getStatusCode());

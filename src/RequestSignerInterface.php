@@ -39,8 +39,8 @@ interface RequestSignerInterface
     /**
      * Adds a hashed a hash for the request body.
      *
-     * @param \Acquia\Hmac\KeyInterface $key
-     *   The request for which to generate the hashed Body.
+     * @param \Psr\Http\Message\RequestInterface $request
+     *   The request being signed.
      *
      * @return \Psr\Http\Message\RequestInterface $request
      *   A cloned request. If the request has a body, the

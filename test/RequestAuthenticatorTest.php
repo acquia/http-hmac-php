@@ -3,7 +3,10 @@
 namespace Acquia\Hmac\Test;
 
 use Acquia\Hmac\AuthorizationHeader;
+use Acquia\Hmac\Exception\InvalidSignatureException;
+use Acquia\Hmac\Exception\KeyNotFoundException;
 use Acquia\Hmac\Exception\MalformedRequestException;
+use Acquia\Hmac\Exception\TimestampOutOfRangeException;
 use Acquia\Hmac\KeyInterface;
 use Acquia\Hmac\RequestAuthenticator;
 use Acquia\Hmac\Test\Mocks\MockKeyLoader;
@@ -24,7 +27,7 @@ class RequestAuthenticatorTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->keys = [
             'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
@@ -72,8 +75,6 @@ class RequestAuthenticatorTest extends TestCase
 
     /**
      * Ensures an exception is thrown if the signature is invalid.
-     *
-     * @expectedException \Acquia\Hmac\Exception\InvalidSignatureException
      */
     public function testInvalidSignature()
     {
@@ -104,6 +105,8 @@ class RequestAuthenticatorTest extends TestCase
             'bad-sig'
         );
 
+        $this->expectException(InvalidSignatureException::class);
+
         $authenticator = new MockRequestAuthenticator(
             new MockKeyLoader($this->keys),
             $authHeader
@@ -113,8 +116,6 @@ class RequestAuthenticatorTest extends TestCase
 
     /**
      * Ensures an exception is thrown if the request has expired.
-     *
-     * @expectedException \Acquia\Hmac\Exception\TimestampOutOfRangeException
      */
     public function testExpiredRequest()
     {
@@ -133,6 +134,8 @@ class RequestAuthenticatorTest extends TestCase
         $request = new Request('GET', 'https://example.com/test', $headers);
         $authHeader = AuthorizationHeader::createFromRequest($request);
 
+        $this->expectException(TimestampOutOfRangeException::class);
+
         $authenticator = new MockRequestAuthenticator(
             new MockKeyLoader($this->keys),
             $authHeader
@@ -142,8 +145,6 @@ class RequestAuthenticatorTest extends TestCase
 
     /**
      * Ensures an exception is thrown if the request is from the far future.
-     *
-     * @expectedException \Acquia\Hmac\Exception\TimestampOutOfRangeException
      */
     public function testFutureRequest()
     {
@@ -165,14 +166,14 @@ class RequestAuthenticatorTest extends TestCase
 
         $request = new Request('GET', 'https://example.com/test', $headers);
 
+        $this->expectException(TimestampOutOfRangeException::class);
+
         $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
         $authenticator->authenticate($request);
     }
 
     /**
      * Ensures an exception is thrown if the key cannot be found in the loader.
-     *
-     * @expectedException \Acquia\Hmac\Exception\KeyNotFoundException
      */
     public function testKeyNotFound()
     {
@@ -188,15 +189,14 @@ class RequestAuthenticatorTest extends TestCase
         ];
         $request = new Request('GET', 'https://example.com/test', $headers);
 
+        $this->expectException(KeyNotFoundException::class);
+
         $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
         $authenticator->authenticate($request);
     }
 
     /**
      * Ensures an exception is thrown if the request is missing the X-Authorization-Timestamp header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     * @expectedExceptionMessage Request is missing X-Authorization-Timestamp.
      */
     public function testMissingAuthenticationTimestampHeader()
     {
@@ -210,6 +210,9 @@ class RequestAuthenticatorTest extends TestCase
                 . 'signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="',
         ];
         $request = new Request('GET', 'https://example.com/test', $headers);
+
+        $this->expectException(MalformedRequestException::class);
+        $this->expectExceptionMessage('Request is missing X-Authorization-Timestamp.');
 
         $authenticator = new RequestAuthenticator(new MockKeyLoader($this->keys));
 

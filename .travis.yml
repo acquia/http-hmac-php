@@ -7,19 +7,51 @@
 language: php
 
 php:
+  - 7.4
   - 7.3
   - 7.2
-  - 7.1
-  - 7.0
-  - 5.6
+
+env:
+  - DIACTOROS_VERSION=2.4
+  - DIACTOROS_VERSION=2.3
+  - DIACTOROS_VERSION=2.2
+  - DIACTOROS_VERSION=2.1
+  - DIACTOROS_VERSION=2.0
+  - DIACTOROS_VERSION=1.9
+  - DIACTOROS_VERSION=1.8
+  - PSR_MESSAGE_BRIDGE_VERSION=2.0
+  - PSR_MESSAGE_BRIDGE_VERSION=1.2
+  - PSR_MESSAGE_BRIDGE_VERSION=1.1
+  - SYMFONY_VERSION=5.1
+  - SYMFONY_VERSION=5.0
+  - SYMFONY_VERSION=4.0
+  - SYMFONY_VERSION=4.4
+  - SYMFONY_VERSION=4.3
+  - SYMFONY_VERSION=4.2
+  - SYMFONY_VERSION=4.1
+  - SYMFONY_VERSION=4.0
+  - SYMFONY_VERSION=3.4
+  - SYMFONY_VERSION=3.3
+  - SYMFONY_VERSION=3.2
+  - SYMFONY_VERSION=3.1
+  - SYMFONY_VERSION=3.0
 
 before_install:
   - travis_retry composer self-update
   - phpenv config-rm xdebug.ini
   - echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
 
-before_script:
+install:
+  - composer require "laminas/laminas-diactoros:${DIACTOROS_VERSION}" --no-update
+  - composer require "symfony/psr-http-message-bridge:${PSR_MESSAGE_BRIDGE_VERSION}" --no-update
+  - composer require "symfony/security-bundle:${SYMFONY_VERSION}" --no-update
   - travis_retry make install
 
 script:
   - make test
+
+jobs:
+  include:
+    - stage: coverage
+      script: make coverage
+      env: DIACTOROS_VERSION=2.4 PSR_MESSAGE_BRIDGE_VERSION=2.0 SYMFONY_VERSION=5.1

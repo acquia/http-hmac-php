@@ -27,6 +27,6 @@ class HmacAuthenticationEntryPointTest extends TestCase
         $response = $entryPoint->start($request, $authException);
 
         $this->assertEquals(401, $response->getStatusCode());
-        $this->assertContains($responseMessage, (string) $response);
+        $this->assertStringContainsString($responseMessage, (string) $response);
     }
 }

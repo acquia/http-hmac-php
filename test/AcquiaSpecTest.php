@@ -24,7 +24,7 @@ class AcquiaSpecTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->keys = [
             'efdde334-fe7b-11e4-a322-1697f925ec7b' => 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=',
@@ -76,11 +76,11 @@ class AcquiaSpecTest extends TestCase
 
         $signedAuthHeader = $signedRequest->getHeaderLine('Authorization');
 
-        $this->assertContains('id="' . $input['id'] . '"', $signedAuthHeader);
-        $this->assertContains('nonce="' . $input['nonce'] . '"', $signedAuthHeader);
-        $this->assertContains('realm="' . rawurlencode($input['realm']) . '"', $signedAuthHeader);
-        $this->assertContains('signature="' . $expectations['message_signature'] . '"', $signedAuthHeader);
-        $this->assertContains('version="2.0"', $signedAuthHeader);
+        $this->assertStringContainsString('id="' . $input['id'] . '"', $signedAuthHeader);
+        $this->assertStringContainsString('nonce="' . $input['nonce'] . '"', $signedAuthHeader);
+        $this->assertStringContainsString('realm="' . rawurlencode($input['realm']) . '"', $signedAuthHeader);
+        $this->assertStringContainsString('signature="' . $expectations['message_signature'] . '"', $signedAuthHeader);
+        $this->assertStringContainsString('version="2.0"', $signedAuthHeader);
 
         // Prove that the digest generates the correct signature.
         $signedMessage = $digest->sign($expectations['signable_message'], $input['secret']);

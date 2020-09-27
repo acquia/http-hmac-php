@@ -13,6 +13,7 @@ composer.lock
 
 # Ignore local PHPUnit configuration
 /phpunit.xml
+/.phpunit.result.cache
 
 # Ignore PHP-CS-Fixer files
 /.php_cs
