@@ -7,7 +7,6 @@ use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequestFactory;
 use Laminas\Diactoros\StreamFactory;
 use Laminas\Diactoros\UploadedFileFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -32,12 +31,7 @@ class HmacResponseListener implements EventSubscriberInterface
         $response = $event->getResponse();
 
         if ($request->attributes->has('hmac.key')) {
-            if (class_exists(DiactorosFactory::class)) {
-                $httpMessageFactory = new DiactorosFactory();
-            } else {
-                $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-            }
-
+            $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
             $foundationFactory = new HttpFoundationFactory();
 
             $psr7Request = $httpMessageFactory->createRequest($request);

@@ -9,7 +9,6 @@ clean:
 test: install format
 	./vendor/bin/phpunit
 	./vendor/bin/phpmd  src/,test/ text ./phpmd.xml
-	./vendor/bin/phpcpd src/ test/
 	./vendor/bin/phploc src/
 
 coverage: install
