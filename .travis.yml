@@ -39,4 +39,4 @@ jobs:
   include:
     - stage: coverage
       script: make coverage
-      env: DIACTOROS_VERSION=2.4 PSR_MESSAGE_BRIDGE_VERSION=2.0 SYMFONY_VERSION=5.1
+      env: PSR_MESSAGE_BRIDGE_VERSION=2.0 SYMFONY_VERSION=5.1
