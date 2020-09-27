@@ -9,7 +9,6 @@ clean:
 test: install format
 	./vendor/bin/phpunit
 	./vendor/bin/phpmd  src/,test/ text ./phpmd.xml
-	./vendor/bin/phploc src/
 
 coverage: install
 	phpdbg ./vendor/bin/phpunit --coverage-clover dist/tests.clover
