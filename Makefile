@@ -11,7 +11,7 @@ test: install format
 	./vendor/bin/phpmd  src/,test/ text ./phpmd.xml
 
 coverage: install
-	phpdbg ./vendor/bin/phpunit --coverage-clover dist/tests.clover
+	phpdbg -qrr ./vendor/bin/phpunit --coverage-clover dist/tests.clover
 	./vendor/bin/coveralls -v --coverage_clover='./dist/tests.clover'
 
 update:
