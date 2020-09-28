@@ -12,7 +12,7 @@ test: install format
 
 coverage: install
 	phpdbg -qrr ./vendor/bin/phpunit --coverage-clover dist/tests.clover
-	./vendor/bin/php-coveralls -v --coverage_clover='./dist/tests.clover' --json_path='./dist/'
+	./vendor/bin/php-coveralls -v --coverage_clover='./dist/tests.clover' --json_path='./dist/coveralls-upload.json'
 
 update:
 	composer update --no-interaction
