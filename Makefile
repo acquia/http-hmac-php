@@ -6,8 +6,9 @@ install:
 clean:
 	rm -rf vendor/ dist/ composer.lock .php_cs.cache .phpunit.result.cache
 
-test: install format
+test: install
 	./vendor/bin/phpunit
+	./vendor/bin/php-cs-fixer fix --dry-run -v
 	./vendor/bin/phpmd  src/,test/ text ./phpmd.xml
 
 coverage: install
