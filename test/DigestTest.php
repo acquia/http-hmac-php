@@ -25,7 +25,7 @@ class DigestTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->authSecret = 'TXkgU2VjcmV0IEtleSBUaGF0IGlzIFZlcnkgU2VjdXJl';
         $this->message    = 'The quick brown fox jumps over the lazy dog.';

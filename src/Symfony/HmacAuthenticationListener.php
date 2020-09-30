@@ -2,17 +2,16 @@
 
 namespace Acquia\Hmac\Symfony;
 
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 
 /**
  * Handles an authentication event.
  */
-class HmacAuthenticationListener implements ListenerInterface
+class HmacAuthenticationListener
 {
     /**
      * @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface
@@ -50,9 +49,12 @@ class HmacAuthenticationListener implements ListenerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the incoming request.
+     *
+     * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
+     *   The event corresponding to the request.
      */
-    public function handle(GetResponseEvent $event)
+    public function __invoke(RequestEvent $event)
     {
         $request = $event->getRequest();
 

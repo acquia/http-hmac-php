@@ -36,7 +36,7 @@ class RequestSignerTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $authId     = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
@@ -74,11 +74,11 @@ class RequestSignerTest extends TestCase
         $this->assertTrue($signedRequest->hasHeader('X-Authorization-Timestamp'));
         $this->assertEquals($this->timestamp, $signedRequest->getHeaderLine('X-Authorization-Timestamp'));
         $this->assertTrue($signedRequest->hasHeader('Authorization'));
-        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedRequest->getHeaderLine('Authorization'));
+        $this->assertStringContainsString('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedRequest->getHeaderLine('Authorization'));
 
         // Ensure that we can get the AuthorizationHeader back from the request.
         $signedAuthRequest = $signer->getAuthorizedRequest($signedRequest);
-        $this->assertContains('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedAuthRequest->getHeaderLine('Authorization'));
+        $this->assertStringContainsString('signature="MRlPr/Z1WQY2sMthcaEqETRMw4gPYXlPcTpaLWS2gcc="', $signedAuthRequest->getHeaderLine('Authorization'));
     }
 
     /**

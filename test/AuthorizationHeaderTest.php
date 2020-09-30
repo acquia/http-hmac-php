@@ -23,7 +23,7 @@ class AuthorizationHeaderTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         // @codingStandardsIgnoreStart
         $this->header = 'acquia-http-hmac headers="X-Custom-Signer1;X-Custom-Signer2",id="e7fe97fa-a0c8-4a42-ab8e-2c26d52df059",nonce="a9938d07-d9f0-480c-b007-f1e956bcd027",realm="CIStore",signature="0duvqeMauat7pTULg3EgcSmBjrorrcRkGKxRDtZEa1c=",version="2.0"';
@@ -113,13 +113,13 @@ class AuthorizationHeaderTest extends TestCase
 
     /**
      * Ensures an exception is thrown if a request does not have an Authorization header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     * @expectedExceptionMessage Authorization header is required.
      */
     public function testCreateFromRequestNoAuthorizationHeader()
     {
         $request = new Request('GET', 'http://example.com');
+
+        $this->expectException(MalformedRequestException::class);
+        $this->expectExceptionMessage('Authorization header is required.');
 
         try {
             AuthorizationHeader::createFromRequest($request);
@@ -136,9 +136,6 @@ class AuthorizationHeaderTest extends TestCase
      *   The authorization header field.
      *
      * @dataProvider requiredFieldsProvider
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     * @expectedExceptionMessage Authorization header requires a realm, id, version, nonce and a signature.
      */
     public function testParseAuthorizationHeaderRequiredFields($field)
     {
@@ -146,6 +143,9 @@ class AuthorizationHeaderTest extends TestCase
             'Authorization' => preg_replace('/' . $field . '=/', '', $this->header),
         ];
         $request = new Request('GET', 'http://example.com', $headers);
+
+        $this->expectException(MalformedRequestException::class);
+        $this->expectExceptionMessage('Authorization header requires a realm, id, version, nonce and a signature.');
 
         try {
             AuthorizationHeader::createFromRequest($request);
@@ -171,9 +171,6 @@ class AuthorizationHeaderTest extends TestCase
 
     /**
      * Ensures an exception is thrown when a required field is missing.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     * @expectedExceptionMessage One or more required authorization header fields (ID, nonce, realm, version) are missing.
      */
     public function testAuthorizationHeaderBuilderRequiresFields()
     {
@@ -187,6 +184,9 @@ class AuthorizationHeaderTest extends TestCase
         $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
         $builder->setVersion('2.0');
 
+        $this->expectException(MalformedRequestException::class);
+        $this->expectExceptionMessage('One or more required authorization header fields (ID, nonce, realm, version) are missing.');
+
         try {
             $builder->getAuthorizationHeader();
         } catch (MalformedRequestException $e) {
@@ -197,9 +197,6 @@ class AuthorizationHeaderTest extends TestCase
 
     /**
      * Ensures an exception is thrown when the required X-Authorization-Timestamp field is missing.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedRequestException
-     * @expectedExceptionMessage X-Authorization-Timestamp header missing from request.
      */
     public function testAuthorizationHeaderBuilderRequiresTimestamp()
     {
@@ -212,6 +209,9 @@ class AuthorizationHeaderTest extends TestCase
         $builder->setId($key->getId());
         $builder->setNonce('a9938d07-d9f0-480c-b007-f1e956bcd027');
         $builder->setVersion('2.0');
+
+        $this->expectException(MalformedRequestException::class);
+        $this->expectExceptionMessage('X-Authorization-Timestamp header missing from request.');
 
         try {
             $builder->getAuthorizationHeader();

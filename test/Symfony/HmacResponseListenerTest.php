@@ -6,7 +6,7 @@ use Acquia\Hmac\Key;
 use Acquia\Hmac\Symfony\HmacResponseListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +33,7 @@ class HmacResponseListenerTest extends TestCase
         $request  = $this->createMock(Request::class);
         $response = $this->createMock(Response::class);
 
-        $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST, $response);
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST, $response);
         $listener = new HmacResponseListener();
 
         $listener->onKernelResponse($event);
@@ -50,7 +50,7 @@ class HmacResponseListenerTest extends TestCase
         $response = $this->createMock(Response::class);
 
         $request  = new Request();
-        $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
         $listener = new HmacResponseListener();
 
         $listener->onKernelResponse($event);
@@ -77,7 +77,7 @@ class HmacResponseListenerTest extends TestCase
         $request->attributes->set('hmac.key', new Key($authId, $authSecret));
 
         $response = new Response();
-        $event    = new FilterResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+        $event    = new ResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
         $listener = new HmacResponseListener();
 
         $listener->onKernelResponse($event);

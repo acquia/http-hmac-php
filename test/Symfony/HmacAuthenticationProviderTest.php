@@ -10,6 +10,7 @@ use Acquia\Hmac\Symfony\HmacToken;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 /**
  * Tests the Symfony authentication provider.
@@ -47,9 +48,6 @@ class HmacAuthenticationProviderTest extends TestCase
 
     /**
      * Ensures the authentication provider throws an exception if auth fails.
-     *
-     * @expectedException \Symfony\Component\Security\Core\Exception\AuthenticationException
-     * @expectedExceptionMessage Authentication failed.
      */
     public function testAuthenticationFailed()
     {
@@ -58,6 +56,9 @@ class HmacAuthenticationProviderTest extends TestCase
         $authenticator->expects($this->any())
             ->method('authenticate')
             ->will($this->throwException(new \Exception('Authentication failed.')));
+
+        $this->expectException(AuthenticationException::class);
+        $this->expectExceptionMessage('Authentication failed.');
 
         $request  = Request::create('http://example.com');
         $token    = new HmacToken($request);

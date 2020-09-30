@@ -26,7 +26,7 @@ class ResponseAuthenticatorTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $authId     = 'efdde334-fe7b-11e4-a322-1697f925ec7b';
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
@@ -71,9 +71,6 @@ class ResponseAuthenticatorTest extends TestCase
 
     /**
      * Ensures an exception is thrown if response is missing a X-Server-Authorization-HMAC-SHA256 header.
-     *
-     * @expectedException \Acquia\Hmac\Exception\MalformedResponseException
-     * @expectedExceptionMessage Response is missing required X-Server-Authorization-HMAC-SHA256 header.
      */
     public function testMissingServerAuthorizationHeader()
     {
@@ -81,6 +78,9 @@ class ResponseAuthenticatorTest extends TestCase
         $response = new Response();
 
         $authenticator = new ResponseAuthenticator($request, $this->authKey);
+
+        $this->expectException(MalformedResponseException::class);
+        $this->expectExceptionMessage('Response is missing required X-Server-Authorization-HMAC-SHA256 header.');
 
         try {
             $authenticator->isAuthentic($response);

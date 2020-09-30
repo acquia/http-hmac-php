@@ -3,14 +3,10 @@
 namespace Acquia\Hmac\Symfony;
 
 use Acquia\Hmac\ResponseSigner;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -20,9 +16,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class HmacResponseListener implements EventSubscriberInterface
 {
     /**
-     * @param FilterResponseEvent $event
+     * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
      */
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         if (!$event->isMasterRequest()) {
             return;
@@ -32,12 +28,8 @@ class HmacResponseListener implements EventSubscriberInterface
         $response = $event->getResponse();
 
         if ($request->attributes->has('hmac.key')) {
-            if (class_exists(DiactorosFactory::class)) {
-                $httpMessageFactory = new DiactorosFactory();
-            } else {
-                $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-            }
-
+            $psr17Factory = new Psr17Factory();
+            $httpMessageFactory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
             $foundationFactory = new HttpFoundationFactory();
 
             $psr7Request = $httpMessageFactory->createRequest($request);
