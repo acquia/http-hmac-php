@@ -259,7 +259,7 @@ class AuthorizationHeaderBuilder
 
         $body = (string) $this->request->getBody();
 
-        if (strlen($body)) {
+        if (strlen($body) && 0 !== strpos($this->request->getHeaderLine('Content-Type'), 'multipart/form-data')) {
             if ($this->request->hasHeader('Content-Type')) {
                 $parts[] = $this->request->getHeaderLine('Content-Type');
             }
