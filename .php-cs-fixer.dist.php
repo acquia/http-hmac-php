@@ -27,7 +27,7 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude('tests/Fixtures')
     ->in(__DIR__)
     ->append([
-        __DIR__.'/dev-tools/doc.php',
+        __DIR__ . '/dev-tools/doc.php',
         // __DIR__.'/php-cs-fixer', disabled, as we want to be able to run bootstrap file even on lower PHP version, to show nice message
         __FILE__,
     ])
