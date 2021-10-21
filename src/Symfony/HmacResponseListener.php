@@ -20,7 +20,8 @@ class HmacResponseListener implements EventSubscriberInterface
      */
     public function onKernelResponse(ResponseEvent $event)
     {
-        if (!$event->isMasterRequest()) {
+        $mainRequest = method_exists($event->isMainRequest()) ? $event->isMainRequest() : $event->isMasterRequest();
+        if (!$mainRequest) {
             return;
         }
 
