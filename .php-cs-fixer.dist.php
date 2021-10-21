@@ -53,7 +53,7 @@ $config
         'no_whitespace_before_comma_in_array' => true,
         'no_whitespace_in_blank_line' => true,
         'php_unit_namespaced' => true,
-        'psr_auto_loading' => true,
+        'psr_autoloading' => true,
         'short_scalar_cast' => true,
         'trailing_comma_in_multiline' => true,
     ])
