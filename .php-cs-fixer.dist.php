@@ -53,9 +53,9 @@ $config
         'no_whitespace_before_comma_in_array' => true,
         'no_whitespace_in_blank_line' => true,
         'php_unit_namespaced' => true,
-        'psr4' => true,
+        'psr_auto_loading' => true,
         'short_scalar_cast' => true,
-        'trailing_comma_in_multiline_array' => true,
+        'trailing_comma_in_multiline' => true,
     ])
     ->setFinder($finder)
 ;
