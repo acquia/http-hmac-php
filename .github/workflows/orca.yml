@@ -63,7 +63,7 @@ jobs:
           make test
 
       - name: coverage
-        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == "2.1" &&  matrix.SYMFONY_VERSION  == "5.3" }}
+        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == '2.1' &&  matrix.SYMFONY_VERSION  == '5.3' }}
         run: |
           make coverage
 
