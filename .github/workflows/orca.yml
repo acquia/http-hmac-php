@@ -51,8 +51,8 @@ jobs:
 
       - name: Install
         run: |
-          composer require "symfony/psr-http-message-bridge:${PSR_MESSAGE_BRIDGE_VERSION}" --no-update
-          composer require "symfony/security-bundle:${SYMFONY_VERSION}" --no-update
+          composer require "symfony/psr-http-message-bridge:${{matrix.PSR_MESSAGE_BRIDGE_VERSION}}" --no-update
+          composer require "symfony/security-bundle:${{matrix.SYMFONY_VERSION}}" --no-update
           make install
 
       - name: Script
