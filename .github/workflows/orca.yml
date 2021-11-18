@@ -48,7 +48,6 @@ jobs:
       - name: Before install
         run: |
           composer self-update
-          phpenv config-rm xdebug.ini
 
       - name: Install
         run: |
