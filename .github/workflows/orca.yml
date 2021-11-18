@@ -1,0 +1,76 @@
+name: ORCA CI
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+    strategy:
+      matrix:
+        include:
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version : "8.0"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version: "7.4"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version: "7.3"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "4.4"
+            php-version: "7.4"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "4.4"
+            php-version: "7.4"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: xdebug
+
+      - name: Before install
+        run: |
+          travis_retry composer self-update
+          phpenv config-rm xdebug.ini
+          echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+
+      - name: Install
+        run: |
+          composer require "symfony/psr-http-message-bridge:${PSR_MESSAGE_BRIDGE_VERSION}" --no-update
+          composer require "symfony/security-bundle:${SYMFONY_VERSION}" --no-update
+          travis_retry make install
+
+      - name: Script
+        run: |
+          make test
+
+      - name: coverage
+        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == "2.1" &&  matrix.SYMFONY_VERSION  == "5.3" }}
+        run: |
+          make coverage
+
+
+
+
+
+
+
+
