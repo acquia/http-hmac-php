@@ -11,6 +11,9 @@ jobs:
       PSR_MESSAGE_BRIDGE_VERSION: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION }}
       SYMFONY_VERSION: ${{ matrix.SYMFONY_VERSION }}
       SYMFONY_DEPRECATIONS_HELPER: ${{ matrix.SYMFONY_DEPRECATIONS_HELPER }}
+      COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      GITHUB_EVENT_NAME: ${{ github.event_name }}
     strategy:
       matrix:
         include:
@@ -62,3 +65,8 @@ jobs:
       - name: Script
         run: |
           make test
+
+      - name: coverage
+        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == '2.1' &&  matrix.SYMFONY_VERSION  == '5.3' }}
+        run: |
+          make coverage
