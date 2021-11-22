@@ -43,12 +43,11 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          coverage: xdebug2
+          coverage: none
 
       - name: Before install
         run: |
           composer self-update
-          phpenv config-rm xdebug.ini
 
       - name: Install
         run: |
@@ -60,7 +59,3 @@ jobs:
         run: |
           make test
 
-      - name: coverage
-        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == '2.1' &&  matrix.SYMFONY_VERSION  == '5.3' }}
-        run: |
-          make coverage
