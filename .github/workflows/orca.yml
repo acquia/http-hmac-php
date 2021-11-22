@@ -7,6 +7,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PSR_MESSAGE_BRIDGE_VERSION: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION }}
+      SYMFONY_VERSION: ${{ matrix.SYMFONY_VERSION }}
+      SYMFONY_DEPRECATIONS_HELPER: ${{ matrix.SYMFONY_DEPRECATIONS_HELPER }}
     strategy:
       matrix:
         include:
@@ -59,3 +63,7 @@ jobs:
         run: |
           make test
 
+      - name: coverage
+        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == '2.1' &&  matrix.SYMFONY_VERSION  == '5.3' }}
+        run: |
+          make coverage
