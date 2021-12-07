@@ -1,0 +1,64 @@
+name: ORCA CI
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PSR_MESSAGE_BRIDGE_VERSION: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION }}
+      SYMFONY_VERSION: ${{ matrix.SYMFONY_VERSION }}
+      SYMFONY_DEPRECATIONS_HELPER: ${{ matrix.SYMFONY_DEPRECATIONS_HELPER }}
+      COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      GITHUB_EVENT_NAME: ${{ github.event_name }}
+    strategy:
+      matrix:
+        include:
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version : "8.0"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version: "7.4"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "5.3"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version: "7.3"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "4.4"
+            php-version: "7.4"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
+            SYMFONY_VERSION: "4.4"
+            php-version: "7.4"
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Before install
+        run: composer self-update
+
+      - name: Install
+        run: |
+          composer require "symfony/psr-http-message-bridge:${{matrix.PSR_MESSAGE_BRIDGE_VERSION}}" --no-update
+          composer require "symfony/security-bundle:${{matrix.SYMFONY_VERSION}}" --no-update
+          make install
+
+      - name: Script
+        run: make test
+
+      - name: coverage
+        if: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION  == '2.1' &&  matrix.SYMFONY_VERSION  == '5.3' && matrix.php-version != '8.0'}}
+        run: make coverage
