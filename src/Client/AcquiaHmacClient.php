@@ -194,7 +194,7 @@ abstract class AcquiaHmacClient extends GuzzleClient {
             $this->clientCredentials = new HmacAuthMiddleware(
                 new Key($credentials['api_key'], $credentials['api_secret']),
                 $this->getRealm(),
-                $this->getServiceApiHeader() ? [$this->getServiceApiHeader()]: null
+                $this->getServiceApiHeader() ? [$this->getServiceApiHeader()]: []
             );
         }
         return $this;
