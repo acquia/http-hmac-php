@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Signs responses according to the HTTP HMAC spec.
  */
-class ResponseSigner
+class ResponseSigner implements ResponseSignerInterface
 {
     /**
      * @var \Acquia\Hmac\KeyInterface
