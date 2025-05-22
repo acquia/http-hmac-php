@@ -36,11 +36,11 @@ class RequestSigner implements RequestSignerInterface
      *   The key to sign requests with.
      * @param string $realm
      *   The API realm/provider. Defaults to "Acquia".
-     * @param \Acquia\Hmac\Digest\DigestInterface $digest
+     * @param \Acquia\Hmac\Digest\DigestInterface|null $digest
      *   The message digest to use when signing requests. Defaults to
      *   \Acquia\Hmac\Digest\Digest.
      */
-    public function __construct(KeyInterface $key, $realm = 'Acquia', DigestInterface $digest = null)
+    public function __construct(KeyInterface $key, $realm = 'Acquia', ?DigestInterface $digest = null)
     {
         $this->key = $key;
         $this->realm = $realm;
