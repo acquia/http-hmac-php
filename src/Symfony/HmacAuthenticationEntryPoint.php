@@ -15,7 +15,7 @@ class HmacAuthenticationEntryPoint implements AuthenticationEntryPointInterface
     /**
      * {@inheritDoc}
      */
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null): Response
     {
         $response = new Response();
         $response->setStatusCode(401, $authException ? $authException->getMessage() : null);
