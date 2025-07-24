@@ -17,6 +17,11 @@ jobs:
     strategy:
       matrix:
         include:
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.3"
+            SYMFONY_VERSION: "5.4"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version : "8.1"
+
           - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
             SYMFONY_VERSION: "5.3"
             SYMFONY_DEPRECATIONS_HELPER: "weak"
