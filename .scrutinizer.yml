@@ -10,3 +10,5 @@ build:
   environment:
     php:
       version: 8.1
+tools:
+  php_code_sniffer: false
