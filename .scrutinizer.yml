@@ -1,6 +1,10 @@
 build:
   dependencies:
     before:
+      - |
+        if [[ "$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" == "8.1" ]]; then
+          composer global require "squizlabs/php_codesniffer:^3.6"
+        fi
       - sudo apt-get update
       - sudo DEBIAN_FRONTEND=noninteractive apt-get install -y openssl libssl-dev
   environment:
