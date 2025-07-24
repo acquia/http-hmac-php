@@ -1,0 +1,8 @@
+build:
+  dependencies:
+    before:
+      - sudo apt-get update
+      - sudo apt-get install -y openssl libssl-dev
+  environment:
+    php:
+      version: 8.1
