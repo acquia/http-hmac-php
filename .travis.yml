@@ -9,6 +9,7 @@ language: php
 matrix:
   fast_finish: true
   include:
+    - { php: 8.1, env: PSR_MESSAGE_BRIDGE_VERSION=2.3 SYMFONY_VERSION=5.4 SYMFONY_DEPRECATIONS_HELPER=weak, name: "PHP 8.1, Symfony 5.4" }
     - { php: 8.0, env: PSR_MESSAGE_BRIDGE_VERSION=2.1 SYMFONY_VERSION=5.3 SYMFONY_DEPRECATIONS_HELPER=weak, name: "PHP 8.0, Symfony 5.3" }
     - { php: 7.4, env: PSR_MESSAGE_BRIDGE_VERSION=2.1 SYMFONY_VERSION=5.3 SYMFONY_DEPRECATIONS_HELPER=weak, name: "PHP 7.4, Symfony 5.3" }
     - { php: 7.3, env: PSR_MESSAGE_BRIDGE_VERSION=2.1 SYMFONY_VERSION=5.3 SYMFONY_DEPRECATIONS_HELPER=weak, name: "PHP 7.3, Symfony 5.3" }
