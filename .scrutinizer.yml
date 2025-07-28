@@ -15,8 +15,9 @@ build:
   commands:
     - ~/.composer/vendor/bin/phpcs --report=checkstyle src/ > phpcs-result.xml || true
 
-  uploads:
-    - phpcs-result.xml
+  artifacts:
+    paths:
+      - phpcs-result.xml
 
 tools:
   php_code_sniffer: false
