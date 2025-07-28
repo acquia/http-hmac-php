@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PSR_MESSAGE_BRIDGE_VERSION: ${{ matrix.PSR_MESSAGE_BRIDGE_VERSION }}
+      GUZZLE_VERSION: ${{ matrix.GUZZLE_VERSION }}
       SYMFONY_VERSION: ${{ matrix.SYMFONY_VERSION }}
       SYMFONY_DEPRECATIONS_HELPER: ${{ matrix.SYMFONY_DEPRECATIONS_HELPER }}
       COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
