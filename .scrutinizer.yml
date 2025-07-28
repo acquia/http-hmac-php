@@ -1,4 +1,8 @@
 build:
+  environment:
+    php:
+      version: 8.1
+
   dependencies:
     before:
       - |
@@ -7,13 +11,12 @@ build:
         fi
       - sudo apt-get update
       - sudo DEBIAN_FRONTEND=noninteractive apt-get install -y openssl libssl-dev
-  script:
+
+  commands:
     - ~/.composer/vendor/bin/phpcs --report=checkstyle src/ > phpcs-result.xml || true
-  artifacts:
-    paths:
-      - phpcs-result.xml
-  environment:
-    php:
-      version: 8.1
+
+  uploads:
+    - phpcs-result.xml
+
 tools:
   php_code_sniffer: false
