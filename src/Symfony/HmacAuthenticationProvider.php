@@ -34,7 +34,7 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function authenticate(TokenInterface $token)
+    public function authenticate(TokenInterface $token): TokenInterface
     {
         $psr17Factory = new Psr17Factory();
         $httpMessageFactory = new PsrHttpFactory($psr17Factory, $psr17Factory, $psr17Factory, $psr17Factory);
@@ -52,7 +52,7 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function supports(TokenInterface $token)
+    public function supports(TokenInterface $token): bool
     {
         return $token instanceof HmacToken;
     }
