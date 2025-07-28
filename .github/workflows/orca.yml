@@ -28,6 +28,12 @@ jobs:
             GUZZLE_VERSION: "^7.0"
             SYMFONY_VERSION: "5.4"
             SYMFONY_DEPRECATIONS_HELPER: "weak"
+            php-version : "8.0"
+
+          - PSR_MESSAGE_BRIDGE_VERSION: "2.3"
+            GUZZLE_VERSION: "^7.0"
+            SYMFONY_VERSION: "5.4"
+            SYMFONY_DEPRECATIONS_HELPER: "weak"
             php-version : "7.4"
 
           - PSR_MESSAGE_BRIDGE_VERSION: "2.1"
