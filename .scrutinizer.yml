@@ -14,7 +14,7 @@ build:
           - sudo apt-get update
           - sudo DEBIAN_FRONTEND=noninteractive apt-get install -y openssl libssl-dev
 
-      commands:
+      tests:
         - ~/.composer/vendor/bin/phpcs --report=checkstyle src/ > phpcs-result.xml || true
         - cat phpcs-result.xml
 
