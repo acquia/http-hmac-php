@@ -29,9 +29,9 @@ class MalformedResponseException extends InvalidRequestException
      */
     public function __construct(
         $message = "",
-        \Exception $previous = null,
+        ?\Exception $previous = null,
         $code = 0,
-        ResponseInterface $response = null
+        ?ResponseInterface $response = null
     ) {
         parent::__construct($message, $code, $previous);
         $this->response = $response;

@@ -36,11 +36,11 @@ class ResponseSigner implements ResponseSignerInterface
      *   The key with which to sign the response.
      * @param \Psr\Http\Message\RequestInterface $request
      *   The original response corresponding to the response being signed.
-     * @param \Acquia\Hmac\Digest\Digest $digest
+     * @param \Acquia\Hmac\Digest\DigestInterface|null $digest
      *   The digest with which to sign the response. Defaults to
      *   \Acquia\Hmac\Digest\Digest.
      */
-    public function __construct(KeyInterface $key, RequestInterface $request, DigestInterface $digest = null)
+    public function __construct(KeyInterface $key, RequestInterface $request, ?DigestInterface $digest = null)
     {
         $this->key = $key;
         $this->request = $request;

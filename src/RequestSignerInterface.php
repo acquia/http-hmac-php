@@ -28,7 +28,7 @@ interface RequestSignerInterface
      *
      * @param \Psr\Http\Message\RequestInterface $request
      *   The request being signed.
-     * @param \DateTime
+     * @param \DateTime|null $date
      *   The date to timestamp the request with. Defaults to now.
      *
      * @return \Psr\Http\Message\RequestInterface $request
