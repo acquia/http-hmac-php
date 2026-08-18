@@ -54,6 +54,8 @@ class HmacToken extends AbstractToken
 
     /**
      * {@inheritDoc}
+     *
+     * @return mixed
      */
     public function getCredentials()
     {

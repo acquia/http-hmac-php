@@ -51,7 +51,7 @@ class AcquiaSpecTest extends TestCase
         $digest = new Digest();
 
         $headers = [
-            'X-Authorization-Timestamp' => $input['timestamp'],
+            'X-Authorization-Timestamp' => (string) $input['timestamp'],
             'Content-Type' => $input['content_type'],
         ];
         foreach ($input['headers'] as $header => $value) {

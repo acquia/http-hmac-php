@@ -42,7 +42,7 @@ class RequestAuthenticatorTest extends TestCase
     {
         $authId = key($this->keys);
         $authSecret = reset($this->keys);
-        $timestamp = 1432075982;
+        $timestamp = '1432075982';
 
         $headers = [
             'Content-Type' => 'text/plain',
@@ -86,7 +86,7 @@ class RequestAuthenticatorTest extends TestCase
 
         $headers = [
             'Content-Type' => 'text/plain',
-            'X-Authorization-Timestamp' => time(),
+            'X-Authorization-Timestamp' => (string) time(),
             'Authorization' => 'acquia-http-hmac realm="' . $realm . '",'
                 . 'id="' . $id . '",'
                 . 'nonce="' . $nonce . '",'
@@ -123,7 +123,7 @@ class RequestAuthenticatorTest extends TestCase
 
         $headers = [
             'Content-Type' => 'text/plain',
-            'X-Authorization-Timestamp' => 1,
+            'X-Authorization-Timestamp' => '1',
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
                 . 'id="' . $authId . '",'
                 . 'nonce="d1954337-5319-4821-8427-115542e08d10",'
@@ -179,7 +179,7 @@ class RequestAuthenticatorTest extends TestCase
     {
         $headers = [
             'Content-Type' => 'text/plain',
-            'X-Authorization-Timestamp' => time(),
+            'X-Authorization-Timestamp' => (string) time(),
             'Authorization' => 'acquia-http-hmac realm="Pipet service",'
                 . 'id="bad-id",'
                 . 'nonce="d1954337-5319-4821-8427-115542e08d10",'

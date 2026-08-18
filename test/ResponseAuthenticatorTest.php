@@ -41,7 +41,7 @@ class ResponseAuthenticatorTest extends TestCase
     {
         $realm = 'Pipet service';
         $nonce = 'd1954337-5319-4821-8427-115542e08d10';
-        $timestamp = 1432075982;
+        $timestamp = '1432075982';
         $signature = 'LusIUHmqt9NOALrQ4N4MtXZEFE03MjcDjziK+vVqhvQ=';
 
         $requestHeaders = [

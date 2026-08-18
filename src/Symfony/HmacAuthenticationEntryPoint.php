@@ -14,6 +14,8 @@ class HmacAuthenticationEntryPoint implements AuthenticationEntryPointInterface
 {
     /**
      * {@inheritDoc}
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function start(Request $request, ?AuthenticationException $authException = null)
     {
