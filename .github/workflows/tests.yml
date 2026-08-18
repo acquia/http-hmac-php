@@ -22,8 +22,10 @@ jobs:
           # Current PHP version.
           - php-version: "8.4"
             experimental: false
-          # Next PHP version -- reported, but not blocking while the test
-          # tooling catches up.
+          # Next PHP version. This slot is always non-blocking by design: it
+          # gives early warning about the upcoming release without failing the
+          # build over tooling that has not caught up yet. When 8.5 becomes
+          # current, promote it and open a new experimental slot for 8.6.
           - php-version: "8.5"
             experimental: true
 

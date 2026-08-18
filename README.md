@@ -1,6 +1,6 @@
 # HTTP HMAC Signer for PHP
 
-[![Tests](https://github.com/acquia/http-hmac-php/actions/workflows/tests.yml/badge.svg)](https://github.com/acquia/http-hmac-php/actions/workflows/tests.yml)
+[![Tests](https://github.com/acquia/http-hmac-php/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/acquia/http-hmac-php/actions/workflows/tests.yml)
 [![Total Downloads](https://poser.pugx.org/acquia/http-hmac-php/downloads)](https://packagist.org/packages/acquia/http-hmac-php)
 [![Latest Stable Version](https://poser.pugx.org/acquia/http-hmac-php/v/stable.svg)](https://packagist.org/packages/acquia/http-hmac-php)
 [![License](https://poser.pugx.org/acquia/http-hmac-php/license.svg)](https://packagist.org/packages/acquia/http-hmac-php)
