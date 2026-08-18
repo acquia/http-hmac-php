@@ -18,4 +18,5 @@ composer.lock
 # Ignore PHP-CS-Fixer files
 /.php_cs
 /.php_cs.cache
+/.php-cs-fixer.cache
 /cs_fixer_tmp_*
