@@ -33,6 +33,8 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @return \Symfony\Component\Security\Core\Authentication\Token\TokenInterface
      */
     public function authenticate(TokenInterface $token)
     {
@@ -51,6 +53,8 @@ class HmacAuthenticationProvider implements AuthenticationProviderInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @return bool
      */
     public function supports(TokenInterface $token)
     {

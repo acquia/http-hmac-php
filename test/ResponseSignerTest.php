@@ -25,7 +25,7 @@ class ResponseSignerTest extends TestCase
         $authSecret = 'W5PeGMxSItNerkNFqQMfYiJvH14WzVJMy54CPoTAYoI=';
         $realm = 'Pipet service';
         $nonce = 'd1954337-5319-4821-8427-115542e08d10';
-        $timestamp = 1432075982;
+        $timestamp = '1432075982';
         $signature = 'dAE9Kizn1PCOrc45H/X41RdFMCwpED18k9iJjrHFqUU=';
         $body = 'Test body string';
 

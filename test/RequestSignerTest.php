@@ -43,7 +43,7 @@ class RequestSignerTest extends TestCase
 
         $this->authKey   = new Key($authId, $authSecret);
         $this->realm     = 'Pipet service';
-        $this->timestamp = 1432075982;
+        $this->timestamp = '1432075982';
     }
 
     /**

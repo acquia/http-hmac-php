@@ -8,7 +8,7 @@ use Acquia\Hmac\RequestAuthenticatorInterface;
 use Acquia\Hmac\Symfony\HmacAuthenticationProvider;
 use Acquia\Hmac\Symfony\HmacToken;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
@@ -77,9 +77,9 @@ class HmacAuthenticationProviderTest extends TestCase
 
         $provider  = new HmacAuthenticationProvider($authenticator);
         $hmacToken = new HmacToken($request);
-        $anonToken = new AnonymousToken('foo', 'foo');
+        $otherToken = $this->createMock(TokenInterface::class);
 
         $this->assertTrue($provider->supports($hmacToken));
-        $this->assertFalse($provider->supports($anonToken));
+        $this->assertFalse($provider->supports($otherToken));
     }
 }
