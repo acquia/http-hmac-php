@@ -62,7 +62,7 @@ class RequestSigner implements RequestSignerInterface
     /**
      * {@inheritDoc}
      */
-    public function getTimestampedRequest(RequestInterface $request, \DateTime $date = null)
+    public function getTimestampedRequest(RequestInterface $request, ?\DateTime $date = null)
     {
         if ($request->hasHeader('X-Authorization-Timestamp')) {
             return clone $request;

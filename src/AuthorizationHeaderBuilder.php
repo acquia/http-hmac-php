@@ -73,11 +73,11 @@ class AuthorizationHeaderBuilder
      *   The request for which to generate the authorization header.
      * @param \Acquia\Hmac\KeyInterface $key
      *   The key with which to sign the authorization header.
-     * @param \Acquia\Hmac\Digest\DigestInterface $digest
+     * @param \Acquia\Hmac\Digest\DigestInterface|null $digest
      *   The message digest to use when signing requests. Defaults to
      *   \Acquia\Hmac\Digest\Digest.
      */
-    public function __construct(RequestInterface $request, KeyInterface $key, DigestInterface $digest = null)
+    public function __construct(RequestInterface $request, KeyInterface $key, ?DigestInterface $digest = null)
     {
         $this->request = $request;
         $this->key     = $key;

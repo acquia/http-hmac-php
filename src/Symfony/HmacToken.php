@@ -33,7 +33,7 @@ class HmacToken extends AbstractToken
      * @param \Symfony\Component\Security\Core\Role\RoleInterface[]|string[] $roles
      *   An array of roles.
      */
-    public function __construct(Request $request, KeyInterface $key = null, array $roles = [])
+    public function __construct(Request $request, ?KeyInterface $key = null, array $roles = [])
     {
         parent::__construct($roles);
 

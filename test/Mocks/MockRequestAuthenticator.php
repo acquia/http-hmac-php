@@ -33,7 +33,7 @@ class MockRequestAuthenticator extends RequestAuthenticator
      * @param int $timestamp
      *   An optional custom timestamp by which to compare requests.
      */
-    public function __construct(KeyLoaderInterface $keyLoader, AuthorizationHeaderInterface $authHeader = null, $timestamp = null)
+    public function __construct(KeyLoaderInterface $keyLoader, ?AuthorizationHeaderInterface $authHeader = null, $timestamp = null)
     {
         parent::__construct($keyLoader);
 
